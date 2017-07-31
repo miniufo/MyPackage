@@ -1,0 +1,375 @@
+/**
+ * @(#)DataDescriptor.java	1.0 07/02/01
+ *
+ * Copyright 2007 MiniUFO, All rights reserved.
+ * MiniUFO Studio. Use is subject to license terms.
+ */
+package miniufo.descriptor;
+
+import miniufo.basic.ArrayUtil;
+import miniufo.diagnosis.MDate;
+import miniufo.util.Region2D;
+import miniufo.util.Region3D;
+
+
+/**
+ * used to describe the data of all kinds of weather data
+ *
+ * @version 1.0, 02/01/2007
+ * @author  MiniUFO
+ * @since   MDK1.0
+ */
+public abstract class DataDescriptor{
+	//
+	protected TemporalCoordinate tdef=null;
+	protected  SpatialCoordinate zdef=null;
+	protected  SpatialCoordinate ydef=null;
+	protected  SpatialCoordinate xdef=null;
+	
+	protected int vcount;
+	
+	protected boolean zrev   =false;
+	protected boolean yrev   =false;
+	protected boolean hasData=false;
+	
+	protected static boolean print  =true;
+	
+	protected float[] dtdef=null;	// unit: s, length is usually 1
+	protected float[] dzdef=null;	// unit: hPa
+	protected float[] dydef=null;	// unit: degree
+	protected float[] dxdef=null;	// unit: degree
+	
+	protected  long[] times=null;	// MDate to long, length = tcount+1
+	protected   Var[] vdef =null;
+	
+	protected String dsetPath  =null;	// path of dset
+	protected String descPath  =null;	// path of descriptor
+	protected String title     =null;	// title
+	protected String tincrement=null;	// for writing ctl
+	
+	protected DataType dataType=DataType.OTHERS;
+	
+	public enum DataType{ANNUAL,SEASONAL,MONTHLY,DAILY,DAILY4,HOURLY,OTHERS}
+	
+	
+	/*** getor and setor ***/
+	public int getTNum(MDate md){ return getTNum(md.getLongTime());}
+	
+	public int getTNum(long tt){ return ArrayUtil.getIdxIncre(times,tt);}
+	
+	public int getZNum(float lev){
+		if(zdef.isIncre) return ArrayUtil.getIdxIncre(zdef.getSamples(),lev);
+		else return ArrayUtil.getIdxDecre(zdef.getSamples(),lev);
+	}
+	
+	public int getYNum(float lat){ return ArrayUtil.getIdxIncre(ydef.getSamples(),lat);}
+	
+	public int getXNum(float lon){ return ArrayUtil.getIdxIncre(xdef.getSamples(),lon);}
+	
+	public int getTLENum(MDate md){ return getTLENum(md.getLongTime());}
+	
+	public int getTLENum(long tt){ return ArrayUtil.getLEIdxIncre(times,tt);}
+	
+	public int getZLENum(float lev){
+		if(zdef.isIncre) return ArrayUtil.getLEIdxIncre(zdef.getSamples(),lev);
+		else return ArrayUtil.getLEIdxDecre(zdef.getSamples(),lev);
+	}
+	
+	public int getYLENum(float lat){ return ArrayUtil.getLEIdxIncre(ydef.getSamples(),lat);}
+	
+	public int getXLENum(float lon){ return ArrayUtil.getLEIdxIncre(xdef.getSamples(),lon);}
+	
+	public int getXNumPeriodicX(float lon,float dlon){
+		if(dlon==0) return getXNum(lon);
+		
+		float lmin=xdef.getMin();
+		float lmax=xdef.getMax();
+		float lrep=lmax+dlon;	// physically, lrep equals to lmin
+		float wide=lrep-lmin;
+		
+		// set lon into [lmin, lrep)
+		while(lon>=lrep) lon-=wide;
+		while(lon< lmin) lon+=wide;
+		
+		
+		if(lon>lmax){
+			// process the range (lmax, lrep)
+			if(lon<=lmax+dlon/2f) return xdef.length()-1;
+			else return 0;
+			
+		}else{
+			// process the range [lmin, lmax]
+			return getXNum(lon);
+		}
+	}
+	
+	public int getXLENumPeriodicX(float lon,float dlon){
+		if(dlon==0) return getXNum(lon);
+		
+		float lmin=xdef.getMin();
+		float lmax=xdef.getMax();
+		float lrep=lmax+dlon;	// physically, lrep equals to lmin
+		float wide=lrep-lmin;
+		
+		// set lon into [lmin, lrep)
+		while(lon>=lrep) lon-=wide;
+		while(lon< lmin) lon+=wide;
+		
+		if(lon>lmax) return xdef.length()-1;	// process the range (lmax, lrep)
+		else return getXLENum(lon);				// process the range [lmin, lmax]
+	}
+	
+	public int getTCount(){ return tdef.length();}
+	
+	public int getZCount(){ return zdef.length();}
+	
+	public int getYCount(){ return ydef.length();}
+	
+	public int getXCount(){ return xdef.length();}
+	
+	public int getVCount(){ return vcount ;}
+	
+	public int getVarZcount(String vname){
+		for(int i=0,I=vdef.length;i<I;i++)
+			if(vname.equals(vdef[i].getName())) return vdef[i].getZCount();
+		
+		throw new IllegalArgumentException("cannot find "+vname+" in "+descPath);
+	}
+	
+	public boolean  isZRev(){ return zrev;}
+	
+	public boolean  isYRev(){ return yrev;}
+	
+	public boolean tLinear(){ return tdef.islinear;}
+	
+	public boolean zLinear(){ return zdef.islinear;}
+	
+	public boolean yLinear(){ return ydef.islinear;}
+	
+	public boolean xLinear(){ return xdef.islinear;}
+	
+	public boolean hasData(){ return hasData;}
+	
+	public boolean isPeriodicX(){
+		if(!xdef.islinear) return false;
+		
+		float[] lons=xdef.getSamples();
+		
+		float dlon=xdef.getIncrements()[0];
+		float lon0=lons[lons.length-1]+dlon-360;
+		
+		if(Math.abs((lon0-lons[0])/dlon)>1e-4) return false;
+		
+		return true;
+	}
+	
+	public  long[] getTimes(){return times;}
+	
+	public float[] getDTDef(){return dtdef;}
+	
+	public float[] getDZDef(){return dzdef;}
+	
+	public float[] getDYDef(){return dydef;}
+	
+	public float[] getDXDef(){return dxdef;}
+	
+	public   Var[] getVDef(){ return vdef ;}
+	
+	public String getTitle(){ return title;}
+	
+	public String  getDSet(){ return dsetPath;}
+	
+	public String  getPath(){ return descPath;}
+	
+	public String getTIncrement(){ return tincrement;}
+	
+	public String getVarUnit(String vname){
+		for(int i=0;i<vdef.length;i++)
+		if(vname.equalsIgnoreCase(vdef[i].getName())) return vdef[i].unit;
+		
+		throw new IllegalArgumentException("cannot find "+vname+" in "+descPath);
+	}
+	
+	public String getVarComment(String vname){
+		for(int i=0;i<vdef.length;i++)
+		if(vname.equalsIgnoreCase(vdef[i].getName())) return vdef[i].comment;
+		
+		throw new IllegalArgumentException("cannot find "+vname+" in "+descPath);
+	}
+	
+	public String getVarCommentAndUnit(String vname){
+		for(int i=0;i<vdef.length;i++)
+		if(vname.equalsIgnoreCase(vdef[i].getName())) return vdef[i].comment+" ("+vdef[i].unit+")";
+		
+		throw new IllegalArgumentException("cannot find "+vname+" in "+descPath);
+	}
+	
+	public TemporalCoordinate getTDef(){ return tdef;}
+	
+	public  SpatialCoordinate getZDef(){ return zdef;}
+	
+	public  SpatialCoordinate getYDef(){ return ydef;}
+	
+	public  SpatialCoordinate getXDef(){ return xdef;}
+	
+	public DataType getDataType(){ return dataType;}
+	
+	public abstract float getUndef(String vname);
+	
+	
+	/**
+     * process the data, to radian and to Pa
+     */
+	protected void postProcess(){
+		if(zdef.length()>1) dzdef=zdef.getIncrements();
+		if(ydef.length()>1) dydef=ydef.getIncrements();
+		if(xdef.length()>1) dxdef=xdef.getIncrements();
+		
+		int tcount=tdef.length();
+		times=new long[tcount+1];	MDate[] tdf=tdef.getSamples();
+		
+		for(int i=0;i<tcount;i++) times[i]=tdf[i].getLongTime();
+		times[tcount]=tdf[tcount-1].add(tincrement).getLongTime();
+		
+		     if("1yr".equalsIgnoreCase(tincrement)) dataType=DataType.ANNUAL  ;
+		else if("3mo".equalsIgnoreCase(tincrement)) dataType=DataType.SEASONAL;
+		else if("1mo".equalsIgnoreCase(tincrement)) dataType=DataType.MONTHLY ;
+		else if("1dy".equalsIgnoreCase(tincrement)) dataType=DataType.DAILY   ;
+		else if("6hr".equalsIgnoreCase(tincrement)) dataType=DataType.DAILY4  ;
+		else if("1hr".equalsIgnoreCase(tincrement)) dataType=DataType.HOURLY  ;
+	}
+	
+	/**
+     * whether the dimension of the descriptor is the same with the given one
+     */
+	public boolean isLikes(DataDescriptor dd){
+		if(tdef.length()!=dd.tdef.length()) return false;
+		if(zdef.length()!=dd.zdef.length()) return false;
+		if(ydef.length()!=dd.ydef.length()) return false;
+		if(xdef.length()!=dd.xdef.length()) return false;
+		
+		return true;
+	}
+	
+	/**
+     * whether the area of the descriptor is the same with the given one
+     */
+	public boolean isAreaLike(DataDescriptor dd){
+		if(tdef.length()!=dd.tdef.length()) return false;
+		if(ydef.length()!=dd.ydef.length()) return false;
+		if(xdef.length()!=dd.xdef.length()) return false;
+		
+		return true;
+	}
+	
+	
+	/**
+     * used to print out
+     */
+	public String toString(){
+		StringBuilder sb=new StringBuilder();
+		
+		sb.append(  "  title:  ");	sb.append(title);
+		sb.append("\n   path:  ");	sb.append(descPath);
+		sb.append("\n   dset:  ");	sb.append(dsetPath);
+		
+		/*** print tdef ***/
+		sb.append("\n\n   tdef:  ");
+		
+        sb.append("{\n\tStart time : ");
+        sb.append(tdef.getSamples()[0]);
+ 		
+ 		sb.append("\n\t End  time : ");
+ 		sb.append(tdef.getSamples()[tdef.length()-1]);
+ 		
+ 		sb.append("\n\t time count: ");
+ 		sb.append(tdef.length());
+ 		
+ 		sb.append(" }");
+		
+		/*** print zdef ***/
+		sb.append("\n\n   zdef:  ");
+		
+        sb.append("{ ");
+        sb.append(zdef.getSamples()[0]);
+ 		
+        for(int i=1,I=zdef.length();i<I;i++){
+            sb.append(", ");
+            sb.append(zdef.getSamples()[i]);
+        }
+ 		
+        sb.append(" }");
+        
+		/*** print ydef ***/
+		sb.append("\n\n   ydef:  ");
+		
+        sb.append("{ ");
+        sb.append(ydef.getSamples()[0]);
+ 		
+        for(int i=1,I=ydef.length();i<I;i++){
+            sb.append(", ");
+            sb.append(ydef.getSamples()[i]);
+        }
+ 		
+        sb.append(" }");
+        
+		/*** print xdef ***/
+		sb.append("\n\n   xdef:  ");
+		
+        sb.append("{ ");
+        sb.append(xdef.getSamples()[0]);
+ 		
+        for(int i=1,I=xdef.length();i<I;i++){
+            sb.append(", ");
+            sb.append(xdef.getSamples()[i]);
+        }
+ 		
+        sb.append(" }");
+		
+		sb.append("\n\n   vdef:  ");	sb.append(vcount);
+		
+		for(int i=0;i<vcount;i++){ sb.append("\n");	sb.append(vdef[i].toString());}
+		
+		return sb.toString();
+	}
+	
+	/**
+     * convert to a 2D region
+     */
+	public Region2D toRegion2D(){
+		float[] lons=ArrayUtil.getExtrema(xdef.getSamples());
+		float[] lats=ArrayUtil.getExtrema(ydef.getSamples());
+		
+		return new Region2D(lons[0],lats[0],lons[1],lats[1]);
+	}
+	
+	/**
+     * convert to a 3D region
+     */
+	public Region3D toRegion3D(){
+		float[] lons=ArrayUtil.getExtrema(xdef.getSamples());
+		float[] lats=ArrayUtil.getExtrema(ydef.getSamples());
+		float[] levs=ArrayUtil.getExtrema(zdef.getSamples());
+		
+		return new Region3D(lons[0],lats[0],levs[0],lons[1],lats[1],levs[1]);
+	}
+	
+	
+	/** test
+	public static void main(String[] args){
+		System.out.println(DiagnosisFactory.DF1.getDataDescriptor().getXNumPeriodicX(-360f));System.exit(0);
+		
+		System.out.println(DiagnosisFactory.DF10.getDataDescriptor().isPeriodicX());
+		System.out.println(DiagnosisFactory.DF5.getDataDescriptor().isPeriodicX());
+		System.out.println(DiagnosisFactory.DF2P5.getDataDescriptor().isPeriodicX());
+		System.out.println(DiagnosisFactory.DF2.getDataDescriptor().isPeriodicX());
+		System.out.println(DiagnosisFactory.DF1P5.getDataDescriptor().isPeriodicX());
+		System.out.println(DiagnosisFactory.DF1.getDataDescriptor().isPeriodicX());
+		System.out.println(DiagnosisFactory.DFHalf.getDataDescriptor().isPeriodicX());
+		System.out.println(DiagnosisFactory.DFQuater.getDataDescriptor().isPeriodicX());
+		System.out.println(DiagnosisFactory.DFThird.getDataDescriptor().isPeriodicX());
+		System.out.println(DiagnosisFactory.DFT42.getDataDescriptor().isPeriodicX());
+		System.out.println(DiagnosisFactory.DFT106.getDataDescriptor().isPeriodicX());
+		System.out.println(DiagnosisFactory.DFT170.getDataDescriptor().isPeriodicX());
+	}*/
+}

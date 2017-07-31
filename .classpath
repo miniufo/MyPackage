@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path=""/>
+	<classpathentry kind="lib" path="D:/Java/src/ApacheMath/commons-math3-3.6.jar" sourcepath="D:/Java/src/ApacheMath/commons-math3-3.3-src.zip"/>
+	<classpathentry kind="lib" path="D:/Java/src/JMatIO/jmatio.jar"/>
+	<classpathentry kind="lib" path="D:/Java/src/NetCDF/netcdfAll-4.5.jar"/>
+	<classpathentry kind="lib" path="D:/Java/src/JBLAS/jblas-1.2.3.jar" sourcepath="D:/Java/src/JBLAS/mikiobraun-jblas-jblas-1.2.3-26-g735744e.zip"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="D:/Java/src/JOGL/gluegen-rt.jar"/>
+	<classpathentry kind="lib" path="D:/Java/src/JOGL/jogl-all.jar"/>
+	<classpathentry kind="lib" path="D:/Java/src/JOGL/jogl-all-noawt-natives-windows-amd64.jar"/>
+	<classpathentry kind="lib" path="D:/Java/src/JOGL/jogl-all-natives-windows-amd64.jar"/>
+	<classpathentry kind="lib" path="D:/Java/src/EJML/ejml-cdense-0.31.jar" sourcepath="D:/Java/src/EJML/ejml-v0.31-src.zip"/>
+	<classpathentry kind="lib" path="D:/Java/src/EJML/ejml-core-0.31.jar" sourcepath="D:/Java/src/EJML/ejml-v0.31-src.zip"/>
+	<classpathentry kind="lib" path="D:/Java/src/EJML/ejml-ddense-0.31.jar" sourcepath="D:/Java/src/EJML/ejml-v0.31-src.zip"/>
+	<classpathentry kind="lib" path="D:/Java/src/EJML/ejml-dsparse-0.31.jar" sourcepath="D:/Java/src/EJML/ejml-v0.31-src.zip"/>
+	<classpathentry kind="lib" path="D:/Java/src/EJML/ejml-experimental-0.31.jar" sourcepath="D:/Java/src/EJML/ejml-v0.31-src.zip"/>
+	<classpathentry kind="lib" path="D:/Java/src/EJML/ejml-fdense-0.31.jar" sourcepath="D:/Java/src/EJML/ejml-v0.31-src.zip"/>
+	<classpathentry kind="lib" path="D:/Java/src/EJML/ejml-simple-0.31.jar" sourcepath="D:/Java/src/EJML/ejml-v0.31-src.zip"/>
+	<classpathentry kind="lib" path="D:/Java/src/EJML/ejml-zdense-0.31.jar" sourcepath="D:/Java/src/EJML/ejml-v0.31-src.zip"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
