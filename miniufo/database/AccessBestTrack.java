@@ -73,8 +73,7 @@ public final class AccessBestTrack{
 		case JTWC: return getTyphoonsFromJTWC(path,cond);
 		case NHC : return getTyphoonsFromNHC(path,cond);
 		case GUAM: return getTyphoonsFromGUAM(path,cond);
-		default:
-			throw new IllegalArgumentException("unsupported data set");
+		default  : throw new IllegalArgumentException("unsupported data set");
 		}
 	}
 	
@@ -82,7 +81,7 @@ public final class AccessBestTrack{
 		System.out.println("Getting records from CMA ("+path+")");
 		
 		// to get all records from database
-		List<Typhoon> all=new ArrayList<Typhoon>();
+		List<Typhoon> all=new ArrayList<>();
 		
 		try(BufferedReader br=new BufferedReader(new FileReader(new File(path)))){
 			int cc=0;
