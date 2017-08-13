@@ -204,7 +204,7 @@ public abstract class Keffective{
 		int z=tracer.getZCount();
 		
 		Variable dqdye=new Variable("dqdye",areas);
-		dqdye.setCommentAndUnit("derivative of q wrt equivalent latitude: dq/dye ("+tracer.getUnit()+" m^-1)");
+		dqdye.setCommentAndUnit("derivative of q wrt equivalent Y: dq/dye ("+tracer.getUnit()+" m^-1)");
 		
 		if(areas.isTFirst()){
 			for(int l=0;l<t;l++)
