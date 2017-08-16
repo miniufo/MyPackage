@@ -210,8 +210,8 @@ public final class CoordinateTransformation{
      * @return	result in cylindrical coordinates
      */
 	public Variable transToCylindrical(Variable v){
-		if(!ssm.isGlobal())
-			throw new IllegalArgumentException("require a global model");
+		//if(!ssm.isGlobal())
+		//	throw new IllegalArgumentException("require a global model");
 		
 		if(!ssm.isAreaLike(v))
 			throw new IllegalArgumentException("require a variable covering the global");
