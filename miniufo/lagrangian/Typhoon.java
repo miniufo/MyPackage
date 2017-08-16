@@ -386,7 +386,10 @@ public final class Typhoon extends Particle{
 		for(int l=0,L=records.size();l<L;l++){
 			Record r=records.get(l);
 			
-			sb.append(String.format("%5.1f  %4.1f  %14d",r.getLon(),r.getLat(),r.getTime()));
+			sb.append(String.format(
+				"%5.1f  %4.1f %6.3f  %5.3f  %14d",
+				r.getLon(),r.getLat(),r.getDataValue(0),r.getDataValue(1),r.getTime()
+			));
 			
 			if(len==5)      sb.append(String.format(" %7.3f  %4.0f  %s\n",wnds[l],pres[l],type[l]));
 			else if(len==4) sb.append(String.format(" %7.3f  %4.0f\n",wnds[l],pres[l]));
