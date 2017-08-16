@@ -244,11 +244,10 @@ public final class Typhoon extends Particle{
      * @param	insertNum	 number of records that inserted between two time slices
      */
 	public Typhoon interpolateAlongT(int insertNum){
-		if(insertNum<1)
-		throw new IllegalArgumentException("insert number should be larger than 0");
+		if(insertNum<1) return this;
 		
 		if(records.size()<2)
-		throw new IllegalArgumentException("no enough records for insertion");
+		throw new IllegalArgumentException("no enough records (2 at least) for insertion");
 		
 		MDate str=new MDate(records.get(0).getTime());
 		
