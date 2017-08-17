@@ -8,8 +8,13 @@ package miniufo.io;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 
 /**
@@ -85,6 +90,24 @@ public final class IOUtil{
 			else return completePath.substring(0,idx)+"\\";
 			
 		}else return completePath.substring(0,idx)+"/";
+	}
+	
+	
+	public static void replaceContent(String fname,String oldContent,String newContent){
+		String content=null;
+		
+		try(Stream<String> s=Files.lines(Paths.get(fname))){
+			Optional<String> op=s.reduce((a,b)->a+"\n"+b);
+			
+			if(op.isPresent()) content=op.get()+"\n";
+			else throw new IllegalArgumentException("no content");
+			
+		}catch(IOException e){ e.printStackTrace(); System.exit(0);}
+		
+		content=content.replaceAll(oldContent,newContent);
+		
+		try(FileWriter fw=new FileWriter(fname)){ fw.write(content);}
+		catch(IOException e){ e.printStackTrace(); System.exit(0);}
 	}
 	
 	
