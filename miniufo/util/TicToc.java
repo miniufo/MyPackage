@@ -28,8 +28,8 @@ public final class TicToc{
 		savedTime=System.nanoTime();
 	}
 	
-	public static void tic(String message,Object... args){
-		System.out.printf(message,args);
+	public static void tic(String format,Object... args){
+		System.out.printf(format,args);
 		System.out.print("...");
 		System.out.flush();
 		savedTime=System.nanoTime();
