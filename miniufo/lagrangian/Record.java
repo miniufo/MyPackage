@@ -7,6 +7,12 @@
 package miniufo.lagrangian;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
+import miniufo.basic.InterpolationModel;
+import miniufo.diagnosis.MDate;
 
 
 /**
@@ -105,9 +111,77 @@ public final class Record implements Serializable{
 	
 	
 	/**
+	 * Interpolate records between start and end.
+	 * 
+	 * @param	str		start record
+	 * @param	end		end   record
+	 * @param	times	times for interpolation
+	 */
+	public static List<Record> interpolateBetween(Record str,Record end,long... times){
+		MDate ref=new MDate(str.time);
+		
+		float dt=ref.getDT(new MDate(end.time));
+		
+		return LongStream.of(times).mapToObj(time->{
+			if(time<=str.time) throw new IllegalArgumentException("time is before str");
+			if(time>=end.time) throw new IllegalArgumentException("time is after  end");
+			
+			float ratio=ref.getDT(new MDate(time))/dt;
+			
+			Record res=new Record(time,0,0,str.data.length);
+			
+			for(int i=0,I=str.data.length;i<I;i++)
+			res.data[i]=InterpolationModel.linearInterpolation(str.data[i],end.data[i],ratio,undef);
+			res.lon    =InterpolationModel.linearInterpolation(str.lon    ,end.lon    ,ratio,undef);
+			res.lat    =InterpolationModel.linearInterpolation(str.lat    ,end.lat    ,ratio,undef);
+			res.cycleNum=str.cycleNum;
+			
+			return res;
+			
+		}).collect(Collectors.toList());
+	}
+	
+	/**
+	 * Interpolate records to an interval of deltaT.
+	 * 
+	 * @param	str		start record
+	 * @param	end		end   record
+	 * @param	deltaT	interval of deltaT
+	 */
+	public static List<Record> interpolateToDT(Record str,Record end,int deltaT){
+		long dt=new MDate(str.time).getDT(new MDate(end.time));
+		
+		if(dt==deltaT  ) return new ArrayList<>();
+		if(dt< deltaT  ) throw new IllegalArgumentException("deltaT should be larger than "+dt+" seconds");
+		if(dt%deltaT!=0) throw new IllegalArgumentException("deltaT cannot divide "+dt);
+		
+		int len=(int)(dt/deltaT)-1;
+		
+		long[] times=new long[len];
+		
+		MDate ref=new MDate(str.time);
+		
+		for(int i=0;i<len;i++) times[i]=ref.addSeconds(deltaT*(i+1)).getLongTime();
+		
+		return interpolateBetween(str,end,times);
+	}
+	
+	
+	/**
      * used to print out
      */
 	public String toString(){
 		return String.format("%9.3f%10.3f%10.3f%10.3f%19s",lon,lat,data[0],data[1],time);
 	}
+	
+	
+	/*** test **
+	public static void main(String[] args){
+		Record r1=new Record(1,2,3,4,5);
+		Record r2=new Record(r1);
+		
+		r1.time=3;
+		
+		System.out.println(r1.time+" "+r2.time);
+	}*/
 }

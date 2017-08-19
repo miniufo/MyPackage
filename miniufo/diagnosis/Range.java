@@ -13,7 +13,7 @@ import miniufo.descriptor.DataDescriptor;
 
 
 /**
- * descripe the range in the spacial model
+ * Describe the range in the spatial model, only recording the indices.
  *
  * @version 1.0, 02/01/2007
  * @author  MiniUFO
@@ -21,10 +21,10 @@ import miniufo.descriptor.DataDescriptor;
  */
 public final class Range implements Cloneable{
 	//
-	private int[] t_range=null;	// start from 1
-	private int[] z_range=null;	// start from 1
-	private int[] y_range=null;	// start from 1
-	private int[] x_range=null;	// start from 1
+	private int[] t_range=null;	// start from 1, [0] is start index
+	private int[] z_range=null;	//               [1] is end   index
+	private int[] y_range=null;	//               [2] is length
+	private int[] x_range=null;	//
 	
 	// like   x(1,144);y(1,73);z(1,20);t(1,10)
 	// or     lon(0,360);lat(-90,90);lev(1000,100);time(1998.1.1,1998.12.31);
@@ -201,7 +201,10 @@ public final class Range implements Cloneable{
      * @param	x	x-count
      */
 	public Range(int t,int z,int y,int x){
-		if(t<1||z<1||y<1||x<1) throw new IllegalArgumentException("dimension count should larger than 1");
+		if(t<1) throw new IllegalArgumentException("t count should larger than 1");
+		if(z<1) throw new IllegalArgumentException("z count should larger than 1");
+		if(y<1) throw new IllegalArgumentException("y count should larger than 1");
+		if(x<1) throw new IllegalArgumentException("x count should larger than 1");
 		
 		t_range=new int[3];	z_range=new int[3];
 		y_range=new int[3];	x_range=new int[3];

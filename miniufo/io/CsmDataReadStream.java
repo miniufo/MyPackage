@@ -339,10 +339,17 @@ public final class CsmDataReadStream implements DataRead,Print{
 		float[][] lons=cd.getLon()[maxLatT];
 		float[][] lats=cd.getLat()[maxLatT];
 		
-		Range brange=new Range(1,1,
-			ctl.getYNum(ArrayUtil.getMax(lats))-ctl.getYLENum(ArrayUtil.getMin(lats))+6,
-			ctl.getXNum(ArrayUtil.getMax(lons))-ctl.getXLENum(ArrayUtil.getMin(lons))+6
-		);
+		int ymax=ctl.getYNum  (ArrayUtil.getMax(lats));
+		int ymin=ctl.getYLENum(ArrayUtil.getMin(lats));
+		int xmax=ctl.getXNum  (ArrayUtil.getMax(lons));
+		int xmin=ctl.getXLENum(ArrayUtil.getMin(lons));
+		
+		if(ymax==-1) throw new IllegalArgumentException(ArrayUtil.getMax(lats)+" out of Y-range ["+ctl.getYDef().getFirst()+","+ctl.getYDef().getLast()+"]");
+		if(ymin==-1) throw new IllegalArgumentException(ArrayUtil.getMin(lats)+" out of Y-range ["+ctl.getYDef().getFirst()+","+ctl.getYDef().getLast()+"]");
+		if(xmax==-1) throw new IllegalArgumentException(ArrayUtil.getMax(lons)+" out of X-range ["+ctl.getXDef().getFirst()+","+ctl.getXDef().getLast()+"]");
+		if(xmin==-1) throw new IllegalArgumentException(ArrayUtil.getMin(lons)+" out of X-range ["+ctl.getXDef().getFirst()+","+ctl.getXDef().getLast()+"]");
+		
+		Range brange=new Range(1,1,ymax-ymin+6,xmax-xmin+6);
 		
 		buf=new Variable(vname,true,brange);
 	}

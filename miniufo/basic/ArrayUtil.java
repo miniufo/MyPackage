@@ -78,6 +78,18 @@ public final class ArrayUtil{
 		return re;
 	}
 	
+	/**
+     * return an array filled with a given value
+     *
+     * @param	len		array length
+     * @param	iniVal	initial value
+     */
+	public static float[] newArray(int len,float iniVal){
+		float[] re=new float[len];
+		Arrays.fill(re,iniVal);
+		return re;
+	}
+	
 	
 	/**
      * return a harmonic series with specified parameters in the form:

@@ -126,7 +126,7 @@ public class CtlDataWriteStream implements DataWrite,Print{
 			
 			for(int m=1;m<vcount;m++){
 				if(v[m].getTCount()!=tcount)
-					throw new IllegalArgumentException("time count not same for "+v[m].getName());
+					throw new IllegalArgumentException("time count ("+tcount+") not same for "+v[m].getName()+" ("+v[m].getTCount()+")");
 				if(v[m].getYCount()!=ycount||v[m].getXCount()!=xcount)
 					throw new IllegalArgumentException("area count not same for "+v[m].getName());
 				if(v[m].isTFirst()!=tfirst)

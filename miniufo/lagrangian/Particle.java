@@ -202,9 +202,9 @@ public class Particle implements Cloneable,Serializable{
 			Record next=records.get(1);
 			Record pres=prev;
 			
-			float dlon=next.getLon()-prev.getLon();
-			float dlat=next.getLat()-prev.getLat();
-			float clat=(next.getLat()+prev.getLat())/2;
+			float dlon= next.getLon()-prev.getLon();
+			float dlat= next.getLat()-prev.getLat();
+			float clat=(next.getLat()+prev.getLat())/2f;
 			
 			float u=(float)(dlon/180.0*Math.PI*SpatialModel.EARTH_RADIUS/dt*cos(toRadians(clat)));
 			float v=(float)(dlat/180.0*Math.PI*SpatialModel.EARTH_RADIUS/dt);
@@ -218,9 +218,9 @@ public class Particle implements Cloneable,Serializable{
 				pres=records.get(l  );
 				next=records.get(l+1);
 				
-				dlon=next.getLon()-prev.getLon();
-				dlat=next.getLat()-prev.getLat();
-				clat=(next.getLat()+prev.getLat())/2;
+				dlon= next.getLon()-prev.getLon();
+				dlat= next.getLat()-prev.getLat();
+				clat=(next.getLat()+prev.getLat())/2f;
 				
 				u=(float)(dlon/180.0*Math.PI*SpatialModel.EARTH_RADIUS/(dt*2.0)*cos(toRadians(clat)));
 				v=(float)(dlat/180.0*Math.PI*SpatialModel.EARTH_RADIUS/(dt*2.0));
@@ -234,9 +234,9 @@ public class Particle implements Cloneable,Serializable{
 			next=records.get(records.size()-1);
 			pres=next;
 			
-			dlon=next.getLon()-prev.getLon();
-			dlat=next.getLat()-prev.getLat();
-			clat=(next.getLat()+prev.getLat())/2;
+			dlon= next.getLon()-prev.getLon();
+			dlat= next.getLat()-prev.getLat();
+			clat=(next.getLat()+prev.getLat())/2f;
 			
 			u=(float)(dlon/180.0*Math.PI*SpatialModel.EARTH_RADIUS/dt*cos(toRadians(clat)));
 			v=(float)(dlat/180.0*Math.PI*SpatialModel.EARTH_RADIUS/dt);
@@ -281,20 +281,12 @@ public class Particle implements Cloneable,Serializable{
 	
 	
 	/**
-	 * get a subList of records into a new Particle
-	 * sharing the same memory
+	 * Get a view of portion of this Particle records.
+	 * 
+	 * @param	str		start index (from 0)
+	 * @param	len		length of records
 	 */
-	public Particle subRecord(String newID,int str,int len){
-		Particle p=new Particle(newID,len);
-		
-		for(int l=str,L=str+len;l<L;l++) p.records.add(records.get(l));
-		
-		//p.records=records.subList(str,str+len);
-		
-		return p;
-	}
-	
-	public Particle subRecord(int str,int len){ return subRecord(id,str,len);}
+	public void subRecords(int str,int len){ records=records.subList(str,str+len);}
 	
 	
 	/**
