@@ -16,7 +16,7 @@ import static java.lang.Math.toRadians;
 
 
 /**
- * spacial model in Cylindrical coordinate
+ * Spatial model in Cylindrical coordinates
  *
  * @version 1.0, 02/01/2007
  * @author  MiniUFO
@@ -138,14 +138,14 @@ public final class CylindricalSpatialModel extends SpatialModel{
 		if(tcount==1){ uwhole[0]=0;	vwhole[0]=0;}
 		else{
 			for(int l=1;l<tcount-1;l++){
-				uwhole[l]=(float)((olon[l+1]-olon[l-1])*EARTH_RADIUS*cos(olat[l-1])/(dt*2));
-				vwhole[l]=(float)((olat[l+1]-olat[l-1])*EARTH_RADIUS/(dt*2));
+				uwhole[l]=(float)((olon[l+1]-olon[l-1])*EARTH_RADIUS*cos((olat[l+1]+olat[l-1])/2f)/(dt*2f));
+				vwhole[l]=(float)((olat[l+1]-olat[l-1])*EARTH_RADIUS/(dt*2f));
 			}
 			
-			uwhole[0]=(float)((olon[1]-olon[0])*EARTH_RADIUS*cos(olat[0])/dt);
+			uwhole[0]=(float)((olon[1]-olon[0])*EARTH_RADIUS*cos((olat[1]+olat[0])/2f)/dt);
 			vwhole[0]=(float)((olat[1]-olat[0])*EARTH_RADIUS/dt);
 			
-			uwhole[tcount-1]=(float)((olon[tcount-1]-olon[tcount-2])*EARTH_RADIUS*cos(olat[tcount-2])/dt);
+			uwhole[tcount-1]=(float)((olon[tcount-1]-olon[tcount-2])*EARTH_RADIUS*cos((olat[tcount-1]+olat[tcount-2])/2f)/dt);
 			vwhole[tcount-1]=(float)((olat[tcount-1]-olat[tcount-2])*EARTH_RADIUS/dt);
 		}
 	}
@@ -169,6 +169,16 @@ public final class CylindricalSpatialModel extends SpatialModel{
 	public float[][][] getLon(){ return lon  ;}
 	
 	public float[][][] getLat(){ return lat  ;}
+	
+	public void setUWhole(float[] u){
+		if(uwhole.length==u.length) uwhole=u;
+		else throw new IllegalArgumentException("lengths are not the same");
+	}
+	
+	public void setVWhole(float[] v){
+		if(vwhole.length==v.length) vwhole=v;
+		else throw new IllegalArgumentException("lengths are not the same");
+	}
 	
 	
 	/**
@@ -282,14 +292,14 @@ public final class CylindricalSpatialModel extends SpatialModel{
 		if(tcount==1){ uwhole[0]=0;	vwhole[0]=0;}
 		else{
 			for(int l=1;l<tcount-1;l++){
-				uwhole[l]=(float)((olon[l+1]-olon[l-1])*EARTH_RADIUS*cos(olat[l-1])/(dt*2));
-				vwhole[l]=(float)((olat[l+1]-olat[l-1])*EARTH_RADIUS/(dt*2));
+				uwhole[l]=(float)((olon[l+1]-olon[l-1])*EARTH_RADIUS*cos((olat[l+1]+olat[l-1])/2f)/(dt*2f));
+				vwhole[l]=(float)((olat[l+1]-olat[l-1])*EARTH_RADIUS/(dt*2f));
 			}
 			
-			uwhole[0]=(float)((olon[1]-olon[0])*EARTH_RADIUS*cos(olat[0])/dt);
+			uwhole[0]=(float)((olon[1]-olon[0])*EARTH_RADIUS*cos((olat[1]+olat[0])/2f)/dt);
 			vwhole[0]=(float)((olat[1]-olat[0])*EARTH_RADIUS/dt);
 			
-			uwhole[tcount-1]=(float)((olon[tcount-1]-olon[tcount-2])*EARTH_RADIUS*cos(olat[tcount-2])/dt);
+			uwhole[tcount-1]=(float)((olon[tcount-1]-olon[tcount-2])*EARTH_RADIUS*cos((olat[tcount-1]+olat[tcount-2])/2f)/dt);
 			vwhole[tcount-1]=(float)((olat[tcount-1]-olat[tcount-2])*EARTH_RADIUS/dt);
 		}
 		

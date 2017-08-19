@@ -1,5 +1,5 @@
 /**
- * @(#)TyphoonRecord.java	1.0 07/02/01
+ * @(#)Typhoon.java	1.0 07/02/01
  *
  * Copyright 2007 MiniUFO, All rights reserved.
  * MiniUFO Studio. Use is subject to license terms.
@@ -15,7 +15,7 @@ import miniufo.diagnosis.SpatialModel;
 
 
 /**
- * a class associated with the typhoon record
+ * A class of Typhoon representing best-track data
  *
  * @version 1.0, 02/01/2007
  * @author  MiniUFO
@@ -239,16 +239,15 @@ public final class Typhoon extends Particle{
 	}
 	
 	/**
-     * insert records using linear interpolation
+     * Insert records using linear interpolation.
      * 
      * @param	insertNum	 number of records that inserted between two time slices
      */
 	public Typhoon interpolateAlongT(int insertNum){
-		if(insertNum<1)
-		throw new IllegalArgumentException("insert number should be larger than 0");
+		if(insertNum<1) return this;
 		
 		if(records.size()<2)
-		throw new IllegalArgumentException("no enough records for insertion");
+		throw new IllegalArgumentException("no enough records (2 at least) for insertion");
 		
 		MDate str=new MDate(records.get(0).getTime());
 		
@@ -310,6 +309,30 @@ public final class Typhoon extends Particle{
 		
 		return this;
 	}
+	
+	/**
+     * Interpolate so that the time interval between records is deltaT.
+     * 
+     * @param	deltaT	 a given constant deltaT
+     */
+	public Typhoon interpolateToDT(int deltaT){
+		List<Record> ls=new ArrayList<>();
+		
+		ls.add(records.get(0));
+		
+		for(int i=1,I=records.size();i<I;i++){
+			Record str=records.get(i-1);
+			Record end=records.get(i  );
+			
+			ls.addAll(Record.interpolateToDT(str,end,deltaT));
+			ls.add(end);
+		}
+		
+		records=ls;
+		
+		return this;
+	}
+	
 	
 	/**
      * generate a CSM-type string

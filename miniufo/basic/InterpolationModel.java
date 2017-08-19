@@ -785,6 +785,30 @@ public final class InterpolationModel{
 		return linearInterpolation(y0,y1,(xv-x0)/(x1-x0));
 	}
 	
+	
+	/**
+     * Linear interpolation y=f(x) given two data pairs y0=f(x0) and y1=f(x1) interpolate for yv=f(xv).
+     *
+     * @param	x0		1st x points
+     * @param	x1		2nd x points
+     * @param	y0		1st y points
+     * @param	y1		2nd y points
+     * @param	xv		value of x to be evaluated
+     * @param	undef	undefined value
+     *
+     * @return	re		result of interpolation at xv
+     */
+	public static float linearInterpolation(float x0,float x1,float y0,float y1,float xv,float undef){
+		if(y0==undef||y1==undef) return undef;
+		return linearInterpolation(y0,y1,(xv-x0)/(x1-x0));
+	}
+	
+	public static double linearInterpolation(double x0,double x1,double y0,double y1,double xv,double undef){
+		if(y0==undef||y1==undef) return undef;
+		return linearInterpolation(y0,y1,(xv-x0)/(x1-x0));
+	}
+	
+	
 	/**
      * Cubic Lagrangian interpolation y=f(x) given four data pairs
      * y0=f(x0), y1=f(x1), y2=f(x2) and y3=f(x3) interpolate for yv=f(xv).
