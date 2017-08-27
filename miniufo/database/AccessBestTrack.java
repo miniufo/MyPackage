@@ -801,7 +801,7 @@ public final class AccessBestTrack{
 		for(int l=0;l<res.size();l++){
 			Typhoon tr=res.get(l);
 			
-			float[] lon=tr.getLongitudes();
+			float[] lon=tr.getXPositions();
 			
 			for(int i=1,I=tr.getTCount();i<I;i++) if(lon[i-1]-lon[i]>300) lon[i]+=360;
 			

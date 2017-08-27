@@ -536,8 +536,8 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 			
 			int mon=new MDate(rec.getTime()).getMonth();
 			
-			int tagX=dd.getXNum(rec.getLon());
-			int tagY=dd.getYNum(rec.getLat());
+			int tagX=dd.getXNum(rec.getXPos());
+			int tagY=dd.getYNum(rec.getYPos());
 			
 			for(int s=0,S=seasons.length;s<S;s++)
 			for(int m=0,M=seasons[s].length;m<M;m++)
@@ -568,8 +568,8 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 		for(int l=0,L=p.getTCount();l<L;l++){
 			Record r=p.getRecord(l);
 			
-			int itag=dd.getXNum(r.getLon());
-			int jtag=dd.getYNum(r.getLat());
+			int itag=dd.getXNum(r.getXPos());
+			int jtag=dd.getYNum(r.getYPos());
 			
 			float u=r.getDataValue(0);
 			float v=r.getDataValue(1);
@@ -593,8 +593,8 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 		for(int l=0,L=p.getTCount();l<L;l++){
 			Record rec=p.getRecord(l);
 			
-			int tagX=dd.getXNum(rec.getLon());
-			int tagY=dd.getYNum(rec.getLat());
+			int tagX=dd.getXNum(rec.getXPos());
+			int tagY=dd.getYNum(rec.getYPos());
 			
 			if(cdata[tagY][tagX]<threshold){
 				rec.setData(0,Record.undef);
@@ -792,8 +792,8 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 			for(int i=0,I=p.getTCount();i<I;i++){
 				Record r=p.getRecord(i);
 				
-				int itag=dd.getXNumPeriodicX(r.getLon(),dlon);
-				int jtag=dd.getYNum(r.getLat());
+				int itag=dd.getXNumPeriodicX(r.getXPos(),dlon);
+				int jtag=dd.getYNum(r.getYPos());
 				
 				MDate md=new MDate(r.getTime());
 				
@@ -1266,8 +1266,8 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 			for(int l=0,L=p.getTCount();l<L;l++){
 				Record r=p.getRecord(l);
 				
-				int itag=dd.getXNumPeriodicX(r.getLon(),dlon);
-				int jtag=dd.getYNum(r.getLat());
+				int itag=dd.getXNumPeriodicX(r.getXPos(),dlon);
+				int jtag=dd.getYNum(r.getYPos());
 				
 				for(int m=0;m<attachedLen;m++)
 				r.setData(m,ad[m][jtag][itag][tmpPtrs[jtag][itag]]);
@@ -1284,8 +1284,8 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 			for(int l=0,L=p.getTCount();l<L;l++){
 				Record r=p.getRecord(l);
 				
-				int itag=dd.getXNumPeriodicX(r.getLon(),dlon);
-				int jtag=dd.getYNum(r.getLat());
+				int itag=dd.getXNumPeriodicX(r.getXPos(),dlon);
+				int jtag=dd.getYNum(r.getYPos());
 				int ltag=ptrs[jtag][itag];
 				
 				for(int m=0;m<attachedLen;m++)
@@ -1294,8 +1294,8 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 				tims[jtag][itag][ltag]=r.getTime();
 				
 				if(hasST){
-					disx[jtag][itag][ltag]=r.getLon()-xdef[itag];
-					disy[jtag][itag][ltag]=r.getLat()-ydef[jtag];
+					disx[jtag][itag][ltag]=r.getXPos()-xdef[itag];
+					disy[jtag][itag][ltag]=r.getYPos()-ydef[jtag];
 				}
 				
 				ptrs[jtag][itag]++;

@@ -124,8 +124,8 @@ public final class Typhoon extends Particle{
 		
 		float[] re=new float[len];
 		
-		float[] ux=getZonalVelocity();
-		float[] vy=getMeridionalVelocity();
+		float[] ux=getUVel();
+		float[] vy=getVVel();
 		
 		for(int l=0;l<len;l++) re[l]=(float)Math.hypot(ux[l],vy[l]);
 		
@@ -135,8 +135,8 @@ public final class Typhoon extends Particle{
 	public float[] getSpeeds(){
 		int len=records.size();
 		
-		float[] lons=getLongitudes();
-		float[] lats=getLatitudes();
+		float[] lons=getXPositions();
+		float[] lats=getYPositions();
 		
 		if(len>1){
 			float dt=getDT(records.get(0).getTime(),records.get(1).getTime());
@@ -230,8 +230,8 @@ public final class Typhoon extends Particle{
 		
 		Record r=records.get(getTag(time));
 		
-		float lon=r.getLon();
-		float lat=r.getLat();
+		float lon=r.getXPos();
+		float lat=r.getYPos();
 		
 		if(lon>=lon1&&lon<=lon2&&lat>=lat1&&lat<=lat2) return true;
 		
@@ -266,8 +266,8 @@ public final class Typhoon extends Particle{
 			
 			ls.add(rstr);
 			
-			float lonstr=rstr.getLon();	float lonend=rend.getLon();
-			float latstr=rstr.getLat();	float latend=rend.getLat();
+			float lonstr=rstr.getXPos();	float lonend=rend.getXPos();
+			float latstr=rstr.getYPos();	float latend=rend.getYPos();
 			
 			float uvelstr=rstr.getDataValue(0);	float uvelend=rend.getDataValue(0);
 			float vvelstr=rstr.getDataValue(1);	float vvelend=rend.getDataValue(1);
@@ -349,8 +349,8 @@ public final class Typhoon extends Particle{
 		int len=records.size();
 		
 		long[] date=getTimes();
-		float[] lons=getLongitudes();
-		float[] lats=getLatitudes();
+		float[] lons=getXPositions();
+		float[] lats=getYPositions();
 		float[] pres=getAttachedData(1);
 		float[] wnds=getAttachedData(0);
 		
@@ -411,7 +411,7 @@ public final class Typhoon extends Particle{
 			
 			sb.append(String.format(
 				"%5.1f  %4.1f %6.3f  %5.3f  %14d",
-				r.getLon(),r.getLat(),r.getDataValue(0),r.getDataValue(1),r.getTime()
+				r.getXPos(),r.getYPos(),r.getDataValue(0),r.getDataValue(1),r.getTime()
 			));
 			
 			if(len==5)      sb.append(String.format(" %7.3f  %4.0f  %s\n",wnds[l],pres[l],type[l]));

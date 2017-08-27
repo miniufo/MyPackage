@@ -55,8 +55,8 @@ public abstract class SingleParticleStatistics{
 			
 			Record r=p.getRecord(p.getMedianIndex());
 			
-			re[0][i]=r.getLon();
-			re[1][i]=r.getLat();
+			re[0][i]=r.getXPos();
+			re[1][i]=r.getYPos();
 		}
 		
 		writeDistribution(re[0],re[1],path);

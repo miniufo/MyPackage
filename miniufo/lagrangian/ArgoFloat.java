@@ -52,8 +52,8 @@ public final class ArgoFloat extends Particle{
 			Record r1=records.get(i-1);
 			Record r2=records.get(i+1);
 			
-			float lon1=r1.getLon(),lon2=r2.getLon();
-			float lat1=r1.getLat(),lat2=r2.getLat();
+			float lon1=r1.getXPos(),lon2=r2.getXPos();
+			float lat1=r1.getYPos(),lat2=r2.getYPos();
 			
 			uc[i]=(float)toRadians(lon2-lon1)*(EARTH_RADIUS*(float)cos(toRadians((lat1+lat2)/2)))/(86400f*2);
 			vc[i]=(float)toRadians(lat2-lat1)*(EARTH_RADIUS)/(86400f*2);
@@ -61,15 +61,15 @@ public final class ArgoFloat extends Particle{
 		
 		Record r1=records.get(0);
 		Record r2=records.get(1);
-		float lon1=r1.getLon(),lon2=r2.getLon();
-		float lat1=r1.getLat(),lat2=r2.getLat();
+		float lon1=r1.getXPos(),lon2=r2.getXPos();
+		float lat1=r1.getYPos(),lat2=r2.getYPos();
 		uc[0]=(float)toRadians(lon2-lon1)*(EARTH_RADIUS*(float)cos(toRadians((lat1+lat2)/2)))/86400f;
 		vc[0]=(float)toRadians(lat2-lat1)*(EARTH_RADIUS)/86400f;
 		
 		r1=records.get(len-2);
 		r2=records.get(len-1);
-		lon1=r1.getLon();lon2=r2.getLon();
-		lat1=r1.getLat();lat2=r2.getLat();
+		lon1=r1.getXPos();lon2=r2.getXPos();
+		lat1=r1.getYPos();lat2=r2.getYPos();
 		uc[len-1]=(float)toRadians(lon2-lon1)*(EARTH_RADIUS*(float)cos(toRadians((lat1+lat2)/2)))/86400f;
 		vc[len-1]=(float)toRadians(lat2-lat1)*(EARTH_RADIUS)/86400f;
 		
@@ -109,10 +109,10 @@ public final class ArgoFloat extends Particle{
 			for(int i=0;i<size;i++) x[i]=i;
 			
 			slon.cValues(x,y);
-			for(int i=0;i<size;i++) records.get(i).setLon(y[i]);
+			for(int i=0;i<size;i++) records.get(i).setXPos(y[i]);
 			
 			slat.cValues(x,y);
-			for(int i=0;i<size;i++) records.get(i).setLat(y[i]);
+			for(int i=0;i<size;i++) records.get(i).setYPos(y[i]);
 		}
 	}
 	
@@ -140,12 +140,12 @@ public final class ArgoFloat extends Particle{
 		
 		if(records.size()<2) return;
 		
-		float lon1=records.get(0).getLon();
+		float lon1=records.get(0).getXPos();
 		
 		if(lon1==undef) throw new IllegalArgumentException("first lon should not be undef");
 		
 		for(int i=1,I=records.size();i<I;i++){
-			float lon2=records.get(i).getLon();
+			float lon2=records.get(i).getXPos();
 			
 			if(lon2!=undef){
 				if(Math.abs(lon2-lon1)>300){
@@ -158,8 +158,8 @@ public final class ArgoFloat extends Particle{
 		
 		if(cross)
 		for(Record r:records){
-			float lon=r.getLon();
-			if(lon!=undef&&lon<180) r.setLon(lon+360);
+			float lon=r.getXPos();
+			if(lon!=undef&&lon<180) r.setXPos(lon+360);
 		}
 	}
 	
@@ -168,8 +168,8 @@ public final class ArgoFloat extends Particle{
 	 */
 	public void crossIDLToDiscontinuousRecord(){
 		for(Record r:records){
-			float lon=r.getLon();
-			if(lon!=undef&&lon>=360) r.setLon(lon-360);
+			float lon=r.getXPos();
+			if(lon!=undef&&lon>=360) r.setXPos(lon-360);
 		}
 	}
 	
@@ -234,8 +234,8 @@ public final class ArgoFloat extends Particle{
 			for(int l=tag[i],L=tag[i+1];l<L;l++){
 				Record r=records.get(l);
 				
-				float lon=r.getLon();
-				float lat=r.getLat();
+				float lon=r.getXPos();
+				float lat=r.getYPos();
 				
 				if(lon!=undef&&lat!=undef){
 					olon+=lon;
@@ -342,14 +342,14 @@ public final class ArgoFloat extends Particle{
 	private int[] getLonLatValidTag(){
 		int count=0;
 		
-		for(Record r:records){ if(r.getLon()!=undef) count++;}
+		for(Record r:records){ if(r.getXPos()!=undef) count++;}
 		
 		int[] tags=new int[count];
 		
 		for(int i=0,I=records.size(),tag=0;i<I;i++){
 			Record r=records.get(i);
 			
-			if(r.getLon()!=undef) tags[tag++]=i;
+			if(r.getXPos()!=undef) tags[tag++]=i;
 		}
 		
 		return tags;
@@ -363,8 +363,8 @@ public final class ArgoFloat extends Particle{
 		for(int i=0;i<count;i++){
 			Record r=records.get(tags[i]);
 			
-			lonlat[0][i]=r.getLon();
-			lonlat[1][i]=r.getLat();
+			lonlat[0][i]=r.getXPos();
+			lonlat[1][i]=r.getYPos();
 		}
 		
 		return lonlat;

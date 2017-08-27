@@ -226,14 +226,14 @@ public final class GridDataFetcher{
 	/**
 	 * fetch XY-slice data from prepared buffer
 	 * 
-	 * @param	lon		longitude of the point to be fetch
-	 * @param	lat		latitude  of the point to be fetch
+	 * @param	xpos	x-position (unit of degree or m) of the point to be fetch
+	 * @param	ypos	y-position (unit of degree or m) of the point to be fetch
 	 * @param	xybuf	XY-slice buffer obtained from calling prepareXYSliceBuffer
 	 */
-	public float fetchXYBuffer(float lon,float lat,float[][] xybuf){
-		if(region.inRange(lon,lat)){
-			int xtag=dd.getXLENum(lon);
-			int ytag=dd.getYLENum(lat);
+	public float fetchXYBuffer(float xpos,float ypos,float[][] xybuf){
+		if(region.inRange(xpos,ypos)){
+			int xtag=dd.getXLENum(xpos);
+			int ytag=dd.getYLENum(ypos);
 			int xend=xtag==dd.getXCount()-1?xtag:xtag+1;
 			int yend=ytag==dd.getYCount()-1?ytag:ytag+1;
 			
@@ -242,18 +242,18 @@ public final class GridDataFetcher{
 			float rb=xybuf[ytag][xend];	if(rb==undef) return undef;
 			float rt=xybuf[yend][xend];	if(rt==undef) return undef;
 			
-			float dx1=(lon-xdef[xtag])/dxdef[xend-1];
-			float dy1=(lat-ydef[ytag])/dydef[yend-1];
+			float dx1=(xpos-xdef[xtag])/dxdef[xend-1];
+			float dy1=(ypos-ydef[ytag])/dydef[yend-1];
 			
 			return bilinearInterpolation(lb,rb,lt,rt,dx1,dy1,undef);
 			
 		}else return undef;
 	}
 	
-	public float fetchXYBufferPeriodicX(float lon,float lat,float[][] xybuf){
-		if(region.inYRange(lat)){
-			int xtag=dd.getXLENumPeriodicX(lon,dd.getDXDef()[0]);
-			int ytag=dd.getYLENum(lat);
+	public float fetchXYBufferPeriodicX(float xpos,float ypos,float[][] xybuf){
+		if(region.inYRange(ypos)){
+			int xtag=dd.getXLENumPeriodicX(xpos,dd.getDXDef()[0]);
+			int ytag=dd.getYLENum(ypos);
 			int xend=xtag==dd.getXCount()-1?0:xtag+1;
 			int yend=ytag==dd.getYCount()-1?ytag:ytag+1;
 			
@@ -262,8 +262,8 @@ public final class GridDataFetcher{
 			float rb=xybuf[ytag][xend];	if(rb==undef) return undef;
 			float rt=xybuf[yend][xend];	if(rt==undef) return undef;
 			
-			float dx1=(lon-xdef[xtag])/dxdef[xend-1<0?0:xend-1];
-			float dy1=(lat-ydef[ytag])/dydef[yend-1];
+			float dx1=(xpos-xdef[xtag])/dxdef[xend-1<0?0:xend-1];
+			float dy1=(ypos-ydef[ytag])/dydef[yend-1];
 			
 			return bilinearInterpolation(lb,rb,lt,rt,dx1,dy1,undef);
 			
@@ -274,18 +274,18 @@ public final class GridDataFetcher{
 	/**
 	 * fetch XYZ-slice data from prepared buffer
 	 * 
-	 * @param	lon		longitude of the point to be fetch
-	 * @param	lat		latitude of the point to be fetch
-	 * @param	lev		level of the point to be fetch
+	 * @param	xpos	x-position (unit of degree or m) of the point to be fetch
+	 * @param	ypos	y-position (unit of degree or m) of the point to be fetch
+	 * @param	zpos	z-position (unit of Pa or m) of the point to be fetch
 	 * @param	xyzbuf	XYZ-slice buffer obtained from calling prepareXYZBuffer
 	 */
-	public float fetchXYZBuffer(float lon,float lat,float lev,float[][][] xyzbuf){
-		if(region.inRange(lon,lat)){
-			int xtag=dd.getXLENum(lon);
-			int ytag=dd.getYLENum(lat);
-			int ztag=dd.getZLENum(lev);	//int ztag=dd.getZLENum(lev+(lev==1000?0:0.1f));
+	public float fetchXYZBuffer(float xpos,float ypos,float zpos,float[][][] xyzbuf){
+		if(region.inRange(xpos,ypos)){
+			int xtag=dd.getXLENum(xpos);
+			int ytag=dd.getYLENum(ypos);
+			int ztag=dd.getZLENum(zpos);	//int ztag=dd.getZLENum(lev+(lev==1000?0:0.1f));
 			if(ztag==-1) throw new IllegalArgumentException(
-				"lev "+lev+" outside ["+dd.getZDef().getMin()+","+dd.getZDef().getMax()+"]"
+				"zpos "+zpos+" outside ["+dd.getZDef().getMin()+","+dd.getZDef().getMax()+"]"
 			);
 			
 			int xend=xtag==dd.getXCount()-1?xtag:xtag+1;
@@ -302,9 +302,9 @@ public final class GridDataFetcher{
 			float rbu=xyzbuf[zend][ytag][xend];	if(rbu==undef) return undef;
 			float rtu=xyzbuf[zend][yend][xend];	if(rtu==undef) return undef;
 			
-			float dx1=(lon-xdef[xtag])/dxdef[xend-1];
-			float dy1=(lat-ydef[ytag])/dydef[yend-1];
-			float dz1=(lev-zdef[ztag])/dzdef[zend-1];
+			float dx1=(xpos-xdef[xtag])/dxdef[xend-1];
+			float dy1=(ypos-ydef[ytag])/dydef[yend-1];
+			float dz1=(zpos-zdef[ztag])/dzdef[zend-1];
 			
 			float lower=bilinearInterpolation(lbl,rbl,ltl,rtl,dx1,dy1,undef);
 			float upper=bilinearInterpolation(lbu,rbu,ltu,rtu,dx1,dy1,undef);
@@ -314,13 +314,13 @@ public final class GridDataFetcher{
 		}else return undef;
 	}
 	
-	public float fetchXYZBufferPeriodicX(float lon,float lat,float lev,float[][][] xyzbuf){
-		if(region.inYRange(lat)){
-			int xtag=dd.getXLENumPeriodicX(lon,dd.getDXDef()[0]);
-			int ytag=dd.getYLENum(lat);
-			int ztag=dd.getZLENum(lev);
+	public float fetchXYZBufferPeriodicX(float xpos,float ypos,float zpos,float[][][] xyzbuf){
+		if(region.inYRange(ypos)){
+			int xtag=dd.getXLENumPeriodicX(xpos,dd.getDXDef()[0]);
+			int ytag=dd.getYLENum(ypos);
+			int ztag=dd.getZLENum(zpos);
 			if(ztag==-1) throw new IllegalArgumentException(
-				"lev "+lev+" outside ["+dd.getZDef().getMin()+","+dd.getZDef().getMax()+"]"
+				"zpos "+zpos+" outside ["+dd.getZDef().getMin()+","+dd.getZDef().getMax()+"]"
 			);
 			
 			int xend=xtag==dd.getXCount()-1?0:xtag+1;
@@ -337,9 +337,9 @@ public final class GridDataFetcher{
 			float rbu=xyzbuf[zend][ytag][xend];	if(rbu==undef) return undef;
 			float rtu=xyzbuf[zend][yend][xend];	if(rtu==undef) return undef;
 			
-			float dx1=(lon-xdef[xtag])/dxdef[xend-1<0?0:xend-1];
-			float dy1=(lat-ydef[ytag])/dydef[yend-1];
-			float dz1=(lev-zdef[ztag])/dzdef[zend-1];
+			float dx1=(xpos-xdef[xtag])/dxdef[xend-1<0?0:xend-1];
+			float dy1=(ypos-ydef[ytag])/dydef[yend-1];
+			float dz1=(zpos-zdef[ztag])/dzdef[zend-1];
 			
 			float lower=bilinearInterpolation(lbl,rbl,ltl,rtl,dx1,dy1,undef);
 			float upper=bilinearInterpolation(lbu,rbu,ltu,rtu,dx1,dy1,undef);
@@ -353,15 +353,15 @@ public final class GridDataFetcher{
 	/**
 	 * fetch XYT-slice data from prepared buffer
 	 * 
-	 * @param	lon		longitude of the point to be fetch
-	 * @param	lat		latitude  of the point to be fetch
+	 * @param	xpos	x-position (unit of degree or m) of the point to be fetch
+	 * @param	ypos	y-position (unit of degree or m) of the point to be fetch
 	 * @param	tim		time in long format
 	 * @param	xytbuf	XYT-slice buffer obtained from calling prepareXYSliceBuffer
 	 */
-	public float fetchXYTBuffer(float lon,float lat,long tim,float[][][] xytbuf){
-		if(region.inRange(lon,lat)){
-			int xtag=dd.getXLENum(lon);
-			int ytag=dd.getYLENum(lat);
+	public float fetchXYTBuffer(float xpos,float ypos,long tim,float[][][] xytbuf){
+		if(region.inRange(xpos,ypos)){
+			int xtag=dd.getXLENum(xpos);
+			int ytag=dd.getYLENum(ypos);
 			int ttag=dd.getTLENum(tim)-tlev+1;
 			int xend=xtag==dd.getXCount()-1?xtag:xtag+1;
 			int yend=ytag==dd.getYCount()-1?ytag:ytag+1;
@@ -377,8 +377,8 @@ public final class GridDataFetcher{
 			float rbn=xytbuf[ytag][xend][tend];	if(rbn==undef) return undef;
 			float rtn=xytbuf[yend][xend][tend];	if(rtn==undef) return undef;
 			
-			float dx1=(lon-xdef[xtag])/dxdef[xend-1];
-			float dy1=(lat-ydef[ytag])/dydef[yend-1];
+			float dx1=(xpos-xdef[xtag])/dxdef[xend-1];
+			float dy1=(ypos-ydef[ytag])/dydef[yend-1];
 			float dt1=new MDate(tim).getDT(tdef[ttag+tlev-1])/dtdef[0];
 			
 			float prev=bilinearInterpolation(lbp,rbp,ltp,rtp,dx1,dy1,undef);
@@ -389,10 +389,10 @@ public final class GridDataFetcher{
 		}else return undef;
 	}
 	
-	public float fetchXYTBufferPeriodicX(float lon,float lat,long tim,float[][][] xytbuf){
-		if(region.inYRange(lat)){
-			int xtag=dd.getXLENumPeriodicX(lon,dd.getDXDef()[0]);
-			int ytag=dd.getYLENum(lat);
+	public float fetchXYTBufferPeriodicX(float xpos,float ypos,long tim,float[][][] xytbuf){
+		if(region.inYRange(ypos)){
+			int xtag=dd.getXLENumPeriodicX(xpos,dd.getDXDef()[0]);
+			int ytag=dd.getYLENum(ypos);
 			int ttag=dd.getTLENum(tim)-tlev+1;
 			int xend=xtag==dd.getXCount()-1?0:xtag+1;
 			int yend=ytag==dd.getYCount()-1?ytag:ytag+1;
@@ -408,8 +408,8 @@ public final class GridDataFetcher{
 			float rbn=xytbuf[ytag][xend][tend];	if(rbn==undef) return undef;
 			float rtn=xytbuf[yend][xend][tend];	if(rtn==undef) return undef;
 			
-			float dx1=(lon-xdef[xtag])/dxdef[xend-1<0?0:xend-1];
-			float dy1=(lat-ydef[ytag])/dydef[yend-1];
+			float dx1=(xpos-xdef[xtag])/dxdef[xend-1<0?0:xend-1];
+			float dy1=(ypos-ydef[ytag])/dydef[yend-1];
 			float dt1=new MDate(tim).getDT(tdef[ttag+tlev-1])/dtdef[0];
 			
 			float prev=bilinearInterpolation(lbp,rbp,ltp,rtp,dx1,dy1,undef);

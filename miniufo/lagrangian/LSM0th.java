@@ -57,7 +57,7 @@ public final class LSM0th extends StochasticModel{
 		Record r3=forwardByMean(init,r2  ,dt/2f);	if(r3==null) return null;
 		Record r4=forwardByMean(init,r3  ,dt   );	if(r4==null) return null;
 		
-		float[] velm=fetchVelocity(init.getTime(),init.getLon(),init.getLat());
+		float[] velm=fetchVelocity(init.getTime(),init.getXPos(),init.getYPos());
 		
 		float velXk1=velm[0];
 		float velYk1=velm[1];

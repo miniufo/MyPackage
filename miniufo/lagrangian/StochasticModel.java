@@ -343,10 +343,10 @@ public abstract class StochasticModel{
 	protected Record forwardByMean(Record init,Record esti,float dt){
 		if(init==null||esti==null) return null;
 		
-		float[] velm=fetchVelocity(esti.getTime(),esti.getLon(),esti.getLat());
+		float[] velm=fetchVelocity(esti.getTime(),esti.getXPos(),esti.getYPos());
 		
-		float lon0=init.getLon();
-		float lat0=init.getLat();
+		float lon0=init.getXPos();
+		float lat0=init.getYPos();
 		float dlon=(float)toDegrees(velm[0]*dt/(EARTH_RADIUS*cos(toRadians(lat0))));
 		float dlat=(float)toDegrees(velm[1]*dt/EARTH_RADIUS);
 		float lon1=lon0+dlon;
@@ -363,8 +363,8 @@ public abstract class StochasticModel{
 		if(vel1==null) return null;
 		
 		re.setTime(tim1);
-		re.setLon(res1[0]); re.setData(0,vel1[0]);
-		re.setLat(res1[1]); re.setData(1,vel1[1]);
+		re.setXPos(res1[0]); re.setData(0,vel1[0]);
+		re.setYPos(res1[1]); re.setData(1,vel1[1]);
 		
 		return re;
 	}
@@ -372,8 +372,8 @@ public abstract class StochasticModel{
 	protected Record forwardByAll(Record init,Record esti,float resX,float resY,float dt,boolean cVel){
 		if(init==null||esti==null) return null;
 		
-		float lon0=init.getLon();
-		float lat0=init.getLat();
+		float lon0=init.getXPos();
+		float lat0=init.getYPos();
 		
 		float velXe=esti.getDataValue(0);
 		float velYe=esti.getDataValue(1);
@@ -390,8 +390,8 @@ public abstract class StochasticModel{
 		Record re=new Record(init);
 		
 		// new position
-		re.setLon(res1[0]);
-		re.setLat(res1[1]);
+		re.setXPos(res1[0]);
+		re.setYPos(res1[1]);
 		
 		if(cVel){ // new background mean and checked residual velocities
 			long tim1=new MDate(init.getTime()).addSeconds(Math.round(dt)).getLongTime();

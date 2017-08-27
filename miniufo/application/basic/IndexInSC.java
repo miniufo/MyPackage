@@ -134,7 +134,7 @@ public final class IndexInSC extends EquationInSphericalCoordinate{
 			"typhoon end time ("+tdef[r2.getTRange()[1]-1]+") is not the same as range-specified time ("+tdef[r1.getTRange()[1]-1]+")"
 		);
 		
-		return c2DHorizontalIndex(dd,rng,tr.getZonalVelocity(),tr.getMeridionalVelocity(),yinc,ycount,xcount,str,end,idxNames);
+		return c2DHorizontalIndex(dd,rng,tr.getUVel(),tr.getVVel(),yinc,ycount,xcount,str,end,idxNames);
 	}
 	
 	/**

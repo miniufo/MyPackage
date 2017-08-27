@@ -93,8 +93,8 @@ public final class LagrangianUtil{
 		for(Particle p:ls){
 			float dis=0;
 			
-			float[] lons=p.getLongitudes();
-			float[] lats=p.getLatitudes();
+			float[] lons=p.getXPositions();
+			float[] lats=p.getYPositions();
 			
 			for(int l=0,L=p.getTCount()-1;l<L;l++)
 			dis+=SpatialModel.cSphericalDistanceByDegree(
@@ -158,11 +158,11 @@ public final class LagrangianUtil{
 	}
 	
 	public static void removeLargeDeltaLon(List<? extends Particle> ls,float dlon){
-		removeByCond(ls,p->Math.abs(p.getRecord(0).getLon()-p.getRecord(p.getTCount()-1).getLon())>dlon);
+		removeByCond(ls,p->Math.abs(p.getRecord(0).getXPos()-p.getRecord(p.getTCount()-1).getXPos())>dlon);
 	}
 	
 	public static void removeLargeDeltaLat(List<? extends Particle> ls,float dlat){
-		removeByCond(ls,p->Math.abs(p.getRecord(0).getLat()-p.getRecord(p.getTCount()-1).getLat())>dlat);
+		removeByCond(ls,p->Math.abs(p.getRecord(0).getYPos()-p.getRecord(p.getTCount()-1).getYPos())>dlat);
 	}
 	
 	

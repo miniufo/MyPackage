@@ -118,8 +118,8 @@ public final class TCTracker{
 		for(int l=0;l<tcount;l++){
 			minp[l]=Float.MAX_VALUE;
 			
-			float lon=ty.getLongitude(l);
-			float lat=ty.getLatitude(l);
+			float lon=ty.getXPosition(l);
+			float lat=ty.getYPosition(l);
 			
 			if(!region.inRange(lon,lat))
 			throw new IllegalArgumentException("given location ("+lon+","+lat+") is not in the region "+region);

@@ -113,8 +113,8 @@ public final class LagrangianStatisticsByTalyor extends SingleParticleStatistics
 			
 			Record r=p.getRecord(p.getMedianIndex());
 			
-			pos[0][i]=r.getLon();
-			pos[1][i]=r.getLat();
+			pos[0][i]=r.getXPos();
+			pos[1][i]=r.getYPos();
 		}
 		
 		Variable[] re=null;//DataBaseUtil.binningMean(dd,pos[0],pos[1],false,vs);

@@ -230,8 +230,8 @@ public final class AccessGDPDrifter{
 		
 		if(drftr.getTCount()==0) throw new IllegalArgumentException("no records of this drifter");
 		
-		float[] lons=drftr.getLongitudes();
-		float[] lats=drftr.getLatitudes();
+		float[] lons=drftr.getXPositions();
+		float[] lats=drftr.getYPositions();
 		
 		List<int[]> ls=new ArrayList<int[]>(10);
 		
@@ -359,8 +359,8 @@ public final class AccessGDPDrifter{
 		for(int l=0,L=dft.getTCount();l<L;l++){
 			Record r=dft.getRecord(l);
 			
-			float lon=r.getLon();
-			float lat=r.getLat();
+			float lon=r.getXPos();
+			float lat=r.getYPos();
 			
 			if(region.inRange(lon,lat)) return true;
 		}

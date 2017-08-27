@@ -469,8 +469,8 @@ public final class DataBaseUtil{
 		float data=RcToF.apply(record);
 		
 		if(!isUndef(data)&&cond.test(record)){
-			int itag=dd.getXNumPeriodicX(record.getLon(),dlon);
-			int jtag=dd.getYNum(record.getLat());
+			int itag=dd.getXNumPeriodicX(record.getXPos(),dlon);
+			int jtag=dd.getYNum(record.getYPos());
 			
 			if(rdata[jtag][itag]!=undef) rdata[jtag][itag]+=data;
 			else rdata[jtag][itag]=data;
@@ -486,8 +486,8 @@ public final class DataBaseUtil{
 		float data=RcToF.apply(record);
 		
 		if(!isUndef(data)&&cond.test(record)){
-			int itag=dd.getXNumPeriodicX(record.getLon(),dlon);
-			int jtag=dd.getYNum(record.getLat());
+			int itag=dd.getXNumPeriodicX(record.getXPos(),dlon);
+			int jtag=dd.getYNum(record.getYPos());
 			int ltag=dd.getTNum(record.getTime());
 			
 			if(rdata[jtag][itag][ltag]!=undef) rdata[jtag][itag][ltag]+=data;

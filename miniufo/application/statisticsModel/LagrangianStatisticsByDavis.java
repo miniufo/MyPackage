@@ -159,7 +159,7 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 				final int jtag=j;
 				
 				Predicate<Record> cond=rec->
-				new Region2D(lons[itag]-bRad,lats[jtag]-bRad,lons[itag]+bRad,lats[jtag]+bRad).inRange(rec.getLon(),rec.getLat());
+				new Region2D(lons[itag]-bRad,lats[jtag]-bRad,lons[itag]+bRad,lats[jtag]+bRad).inRange(rec.getXPos(),rec.getYPos());
 				
 				ls.add(cs.submit(()->cStatisticsByDavisTheory1(cond,tRad).getMean(str,end,minTracks)));
 			}
@@ -255,7 +255,7 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 				final int jtag=j;
 				
 				Predicate<Record> cond=rec->
-				new Region2D(lons[itag]-bRad,lats[jtag]-bRad,lons[itag]+bRad,lats[jtag]+bRad).inRange(rec.getLon(),rec.getLat());
+				new Region2D(lons[itag]-bRad,lats[jtag]-bRad,lons[itag]+bRad,lats[jtag]+bRad).inRange(rec.getXPos(),rec.getYPos());
 				
 				ls.add(cs.submit(()->cStatisticsByDavisTheory2(cond,tRad).getMean(str,end,minTracks)));
 			}
@@ -351,7 +351,7 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 				final int jtag=j;
 				
 				Predicate<Record> cond=rec->
-				new Region2D(lons[itag]-bRad,lats[jtag]-bRad,lons[itag]+bRad,lats[jtag]+bRad).inRange(rec.getLon(),rec.getLat());
+				new Region2D(lons[itag]-bRad,lats[jtag]-bRad,lons[itag]+bRad,lats[jtag]+bRad).inRange(rec.getXPos(),rec.getYPos());
 				
 				ls.add(cs.submit(()->cStatisticsByDavisTheory3(cond,tRad).getMean(str,end,minTracks)));
 			}
@@ -434,12 +434,12 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 			Averager av=new Averager(4,tRad);
 			
 			for(Particle p:ls){
-				float[] uspd=p.getZonalVelocity();
-				float[] vspd=p.getMeridionalVelocity();
+				float[] uspd=p.getUVel();
+				float[] vspd=p.getVVel();
 				
 				for(int l=0,L=p.getTCount();l<L;l++){
-					float olon=p.getLongitude(l);
-					float olat=p.getLatitude(l);
+					float olon=p.getXPosition(l);
+					float olat=p.getYPosition(l);
 					
 					// meet condition to be an origin of pseudo-track
 					if(!cond.test(p.getRecord(l))) continue;
@@ -455,8 +455,8 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 						if(tau== tRad) noOfMaxLag++;
 						if(tau==-tRad) noOfMinLag++;
 						
-						float dlon=(float)Math.toRadians(p.getLongitude(ll)-olon);
-						float dlat=(float)Math.toRadians(p.getLatitude(ll)-olat);
+						float dlon=(float)Math.toRadians(p.getXPosition(ll)-olon);
+						float dlat=(float)Math.toRadians(p.getYPosition(ll)-olat);
 						
 						float disX=SpatialModel.EARTH_RADIUS*dlon*(float)Math.cos(olat*Math.PI/180.0);
 						float disY=SpatialModel.EARTH_RADIUS*dlat;
@@ -494,8 +494,8 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 			Averager av=new Averager(hasAcc?10:6,tRad);
 			
 			for(Particle p:ls){
-				float[] uspd=p.getZonalVelocity();
-				float[] vspd=p.getMeridionalVelocity();
+				float[] uspd=p.getUVel();
+				float[] vspd=p.getVVel();
 				float[] accx=hasAcc?p.getAttachedData(2):null;
 				float[] accy=hasAcc?p.getAttachedData(3):null;
 				
@@ -562,11 +562,11 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 			Averager av=new Averager(4,tRad);
 			
 			for(Particle p:ls){
-				float[] uspd=p.getZonalVelocity();
+				float[] uspd=p.getUVel();
 				
 				for(int l=0,L=p.getTCount();l<L;l++){
-					float olon=p.getLongitude(l);
-					float olat=p.getLatitude(l);
+					float olon=p.getXPosition(l);
+					float olat=p.getYPosition(l);
 					
 					// meet condition to be an origin of pseudo-track
 					if(!cond.test(p.getRecord(l))) continue;
@@ -578,8 +578,8 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 						if(tau>tRad||tau<-tRad) continue;
 						if(uspd[ll]==Record.undef) continue;
 						
-						float dlon=(float)Math.toRadians(p.getLongitude(ll)-olon);
-						float dlat=(float)Math.toRadians(p.getLatitude(ll)-olat);
+						float dlon=(float)Math.toRadians(p.getXPosition(ll)-olon);
+						float dlat=(float)Math.toRadians(p.getYPosition(ll)-olat);
 						
 						// dx'(tau)
 						float disX=SpatialModel.EARTH_RADIUS*dlon*(float)Math.cos(olat*Math.PI/180.0)-lsr.DXm[tRad+tau];
@@ -618,14 +618,14 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 			Averager av2=new Averager(2,tRad);
 			
 			for(Particle p:ls){
-				float[] uspd=p.getZonalVelocity();
-				float[] vspd=p.getMeridionalVelocity();
+				float[] uspd=p.getUVel();
+				float[] vspd=p.getVVel();
 				
 				float usqr=0,vsqr=0;
 				
 				for(int l=0,L=p.getTCount();l<L;l++){
-					float olon=p.getLongitude(l);
-					float olat=p.getLatitude(l);
+					float olon=p.getXPosition(l);
+					float olat=p.getYPosition(l);
 					
 					// meet condition to be an origin of pseudo-track
 					if(!cond.test(p.getRecord(l))) continue;
@@ -643,8 +643,8 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 						if(tau>tRad||tau<-tRad) continue;
 						if(uspd[ll]==Record.undef) continue;
 						
-						float dlon=(float)Math.toRadians(p.getLongitude(ll)-olon);
-						float dlat=(float)Math.toRadians(p.getLatitude(ll)-olat);
+						float dlon=(float)Math.toRadians(p.getXPosition(ll)-olon);
+						float dlat=(float)Math.toRadians(p.getYPosition(ll)-olat);
 						
 						// dx'(tau)
 						float disX=SpatialModel.EARTH_RADIUS*dlon*(float)Math.cos(olat*Math.PI/180.0)-lsr.DXm[tRad+tau];

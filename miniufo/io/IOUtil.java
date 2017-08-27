@@ -43,10 +43,10 @@ public final class IOUtil{
 	
 	
 	/**
-	 * Get file names
+	 * Get file names.
 	 *
      * @param	completePath	complete path includes path and file name
-     */ 
+     */
 	public static String getFileName(String completePath){ return new File(completePath).getName();}
 	
 	public static String getFilePrefixName(String completePath){
@@ -90,6 +90,24 @@ public final class IOUtil{
 			else return completePath.substring(0,idx)+"\\";
 			
 		}else return completePath.substring(0,idx)+"/";
+	}
+	
+	
+	/**
+	 * Get file length in integer.
+	 *
+     * @param	fname	a given file name
+     */
+	public static int getFileLength(String fname){
+		File f=new File(fname);
+		
+		if(!f.exists()) throw new IllegalArgumentException("file not found: "+fname);
+		
+		int fileLen=(int)f.length();
+		
+		if(fileLen!=f.length()) throw new IllegalArgumentException("file length overflow for integer");
+		
+		return fileLen;
 	}
 	
 	

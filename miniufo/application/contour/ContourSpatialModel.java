@@ -6,8 +6,6 @@
  */
 package miniufo.application.contour;
 
-import java.util.Arrays;
-
 import miniufo.application.GeoFluidApplication.BoundaryCondition;
 import miniufo.basic.ArrayUtil;
 import miniufo.basic.InterpolationModel;
@@ -117,32 +115,24 @@ public abstract class ContourSpatialModel{
 	
 	
 	/**
-     * Set resolution ratio so that the tracer field could be refined.
+     * Compute equivalent Ys given a series of contour values.
      *
-     * @param	resRatio	resolution ratio (>=1)
+     * @param	trace		a given tracer variable
+     * @param	cVals		contour values
+     * @param	resRatio	resolution ratio (>=1) for on-the-fly interpolation
      */
-	public void setResolutionRatio(int resRatio){
-		if(resRatio<1) throw new IllegalArgumentException("resRatio should be at least 1");
+	public double[] computeEquivalentYs(Variable tracer,double[] cVals,int resRation){
+		if(tracer.getTCount()!=1) throw new IllegalArgumentException("tcount should be 1 only");
+		if(tracer.getZCount()!=1) throw new IllegalArgumentException("zcount should be 1 only");
 		
-		this.resRatio=resRatio;
+		setResolutionRatio(resRatio);
 		
-		int x=dd.getXCount(),nx=(x-1)*resRatio+1;
-		int y=dd.getYCount(),ny=(y-1)*resRatio+1;
+		this.tracer=tracer;
 		
-		Type xType=Type.LINEAR;
-		Type yType=Type.LINEAR;
-		
-		if(BCx==BoundaryCondition.Periodic){ xType=Type.PERIODIC_LINEAR; nx=x*resRatio;}
-		if(BCy==BoundaryCondition.Periodic){ yType=Type.PERIODIC_LINEAR; ny=y*resRatio;}
-		
-		SpatialCoordinate xres=dd.getXDef().resample(nx,xType);
-		SpatialCoordinate yres=dd.getYDef().resample(ny,yType);
-		
-		 xdefS=xres.getSamples();
-		 ydefS=yres.getSamples();
-		dxdefS=xres.getIncrements();
-		dydefS=yres.getIncrements();
+		// to compute the area within each contour
+		return cEquivalentYs(integrateWithinContour1(cVals,true,0,0),tracer.getUndef());
 	}
+	
 	
 	/**
 	 * Print out the equivalent Ys for ctl.
@@ -397,6 +387,21 @@ public abstract class ContourSpatialModel{
 	 */
 	protected abstract double computeDS(int idx,int idy);
 	
+	/**
+     * Compute squared gradient in X-Y coordinates, i.e., |grad(tracer)|^2
+     * 
+     * @return	grd		squared gradient (a scalar)
+     */
+	protected abstract Variable cSquaredTracerGradient();
+	
+	/**
+	 * Compute the equivalent Y given the area enclosed by a tracer contour.
+	 * 
+	 * @param	area	area (m^2)
+	 * @param	undef	undefined value
+	 */
+	protected abstract double cEquivalentY(double area,float undef);
+	
 	
 	/**
 	 * Compute the equivalent Ys given areas enclosed by tracer contours.
@@ -413,14 +418,6 @@ public abstract class ContourSpatialModel{
 		
 		return Ys;
 	}
-	
-	/**
-	 * Compute the equivalent Y given the area enclosed by a tracer contour.
-	 * 
-	 * @param	area	area (m^2)
-	 * @param	undef	undefined value
-	 */
-	protected abstract double cEquivalentY(double area,float undef);
 	
 	/**
      * Areal-integrator that performed over areas enclosed by specific contours
@@ -473,12 +470,6 @@ public abstract class ContourSpatialModel{
 				
 				String info=mappingArea(cntrs[k][l],tdata);
 				
-				if(l==0&&k==0){
-					System.out.println(cntrs[0][0]);
-					System.out.println(Arrays.toString(cntrs[0][0].getValues()));
-					System.out.println(Arrays.toString(cntrs[0][0].getAreas()));
-				}
-				
 				if(info!=null||selfAdjust){
 					System.out.println("adjusting");
 					cntrs[k][l]=adjustContours(cntrs[k][l],undef);
@@ -492,6 +483,74 @@ public abstract class ContourSpatialModel{
 				}
 			}
 		}
+	}
+	
+	/**
+     * Areal-integrator that performed over areas enclosed by specific contours
+     * with 1 as integrand: area = integral(1 dS) within each contour
+     * 
+     * @param	cVals		non-ordered values of contours
+     * @param	increSToN	contours increase from south to north
+     * @param	ttag		t-index for a 2D tracer field
+     * @param	ztag		z-index for a 2D tracer field
+     */
+	protected double[] integrateWithinContour1(double[] cVals,boolean increSToN,int ttag,int ztag){
+		if(tracer.getRange().getYRange()[0]!=1||tracer.getRange().getXRange()[0]!=1)
+		throw new IllegalArgumentException("using tracer over the entire domain");
+		
+		float undef=tracer.getUndef();
+		
+		Type xType=Type.LINEAR;
+		Type yType=Type.LINEAR;
+		
+		if(BCx==BoundaryCondition.Periodic) xType=Type.PERIODIC_LINEAR;
+		if(BCy==BoundaryCondition.Periodic) yType=Type.PERIODIC_LINEAR;
+		
+		if(tracer.isTFirst()){
+			float[][] tbuff=tracer.getData()[ttag][ztag];
+			float[][] tdata=InterpolationModel.interp2D(tbuff,xdefS.length,ydefS.length,xType,yType,undef);
+			
+			return mappingArea(cVals,tdata,increSToN);
+			
+		}else{
+			float[][] tbuff=new float[tracer.getYCount()][tracer.getXCount()];
+			
+			for(int j=0,J=tracer.getYCount();j<J;j++)
+			for(int i=0,I=tracer.getXCount();i<I;i++) tbuff[j][i]=tracer.getData()[ztag][j][i][ttag];
+			
+			float[][] tdata=InterpolationModel.interp2D(tbuff,xdefS.length,ydefS.length,xType,yType,undef);
+			
+			return mappingArea(cVals,tdata,increSToN);
+		}
+	}
+	
+	
+	/**
+     * Set resolution ratio so that the tracer field could be refined.
+     *
+     * @param	resRatio	resolution ratio (>=1)
+     */
+	private void setResolutionRatio(int resRatio){
+		if(resRatio<1) throw new IllegalArgumentException("resRatio should be at least 1");
+		
+		this.resRatio=resRatio;
+		
+		int x=dd.getXCount(),nx=(x-1)*resRatio+1;
+		int y=dd.getYCount(),ny=(y-1)*resRatio+1;
+		
+		Type xType=Type.LINEAR;
+		Type yType=Type.LINEAR;
+		
+		if(BCx==BoundaryCondition.Periodic){ xType=Type.PERIODIC_LINEAR; nx=x*resRatio;}
+		if(BCy==BoundaryCondition.Periodic){ yType=Type.PERIODIC_LINEAR; ny=y*resRatio;}
+		
+		SpatialCoordinate xres=dd.getXDef().resample(nx,xType);
+		SpatialCoordinate yres=dd.getYDef().resample(ny,yType);
+		
+		 xdefS=xres.getSamples();
+		 ydefS=yres.getSamples();
+		dxdefS=xres.getIncrements();
+		dydefS=yres.getIncrements();
 	}
 	
 	/**
@@ -540,6 +599,45 @@ public abstract class ContourSpatialModel{
 		ct.setYEs(cEquivalentYs(rbuf,undef));
 		
 		return info;
+	}
+	
+	/**
+     * Mapping a given contour to area.
+     * 
+     * @param	cVal	contour value
+     * @param	tdata	2D x-y field after possible interpolation
+     */
+	private double[] mappingArea(double[] cVals,float[][] tdata,boolean increSToN){
+		int x=xdefS.length;
+		int y=ydefS.length;
+		int C=cVals.length;
+		
+		float undef=tracer.getUndef();
+		
+		double[] areas=new double[C];
+		
+		float[] extreme=ArrayUtil.getExtrema(tdata,undef);
+		
+		for(int c=0;c<C;c++){
+			if(cVals[c]<extreme[0]) throw new IllegalArgumentException("cVals["+c+"] ("+cVals[c]+") should be >= "+extreme[0]);
+			if(cVals[c]>extreme[1]) throw new IllegalArgumentException("cVals["+c+"] ("+cVals[c]+") should be <= "+extreme[1]);
+		}
+		
+		if(increSToN){
+			for(int j=0;j<y;j++)
+			for(int i=0;i<x;i++) if(tdata[j][i]!=undef){
+				double dS=computeDS(i,j);
+				for(int c=1;c<C;c++) if(tdata[j][i]>=cVals[c]) areas[c]+=dS;
+			}
+		}else{
+			for(int j=0;j<y;j++)
+			for(int i=0;i<x;i++) if(tdata[j][i]!=undef){
+				double dS=computeDS(i,j);
+				for(int c=1;c<C;c++) if(tdata[j][i]<=cVals[c]) areas[c]+=dS;
+			}
+		}
+		
+		return areas;
 	}
 	
 	
@@ -736,13 +834,6 @@ public abstract class ContourSpatialModel{
 		return ncs;
 	}
 	
-	
-	/**
-     * Compute squared gradient in X-Y coordinates, i.e., |grad(tracer)|^2
-     * 
-     * @return	grd		squared gradient (a scalar)
-     */
-	protected abstract Variable cSquaredTracerGradient();
 	
 	/**
      * Collect the area data into a Variable in contour coordinate.

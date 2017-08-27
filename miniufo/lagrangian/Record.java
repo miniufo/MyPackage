@@ -30,8 +30,8 @@ public final class Record implements Serializable{
 	
 	private long  time=0;		// time
 	
-	private float lon =0;		// longitude
-	private float lat =0;		// latitude
+	private float xpos=0;		// x-position
+	private float ypos=0;		// y-position
 	
 	private float[] data=null;	// values for attached data (e.g., uvel,vvel,temp,salt)
 	
@@ -49,16 +49,16 @@ public final class Record implements Serializable{
 	
 	public Record(long time,float lon,float lat){
 		this.time=time;
-		this.lon =lon;
-		this.lat =lat;
+		this.xpos =lon;
+		this.ypos =lat;
 		
 		data=new float[2];
 	}
 	
 	public Record(long time,float lon,float lat,float uvel,float vvel){
 		this.time=time;
-		this.lon =lon;
-		this.lat =lat;
+		this.xpos =lon;
+		this.ypos =lat;
 		
 		data=new float[2];
 		data[0]=uvel;
@@ -75,8 +75,8 @@ public final class Record implements Serializable{
 	
 	public Record(Record r){
 		this.time=r.time;
-		this.lon =r.lon;
-		this.lat =r.lat;
+		this.xpos =r.xpos;
+		this.ypos =r.ypos;
 		
 		if(r.data!=null) data=r.data.clone();
 	}
@@ -89,9 +89,9 @@ public final class Record implements Serializable{
 	
 	public long getTime(){ return time;}
 	
-	public float getLon(){ return lon;}
+	public float getXPos(){ return xpos;}
 	
-	public float getLat(){ return lat;}
+	public float getYPos(){ return ypos;}
 	
 	public float getDataValue(int idx){ return data[idx];}
 	
@@ -99,9 +99,9 @@ public final class Record implements Serializable{
 	
 	public void setCycleNum(int cycleNum){ this.cycleNum=cycleNum;}
 	
-	public void setLon(float lon){ this.lon=lon;}
+	public void setXPos(float xpos){ this.xpos=xpos;}
 	
-	public void setLat(float lat){ this.lat=lat;}
+	public void setYPos(float ypos){ this.ypos=ypos;}
 	
 	public void setTime(long time){ this.time=time;}
 	
@@ -132,8 +132,8 @@ public final class Record implements Serializable{
 			
 			for(int i=0,I=str.data.length;i<I;i++)
 			res.data[i]=InterpolationModel.linearInterpolation(str.data[i],end.data[i],ratio,undef);
-			res.lon    =InterpolationModel.linearInterpolation(str.lon    ,end.lon    ,ratio,undef);
-			res.lat    =InterpolationModel.linearInterpolation(str.lat    ,end.lat    ,ratio,undef);
+			res.xpos    =InterpolationModel.linearInterpolation(str.xpos    ,end.xpos    ,ratio,undef);
+			res.ypos    =InterpolationModel.linearInterpolation(str.ypos    ,end.ypos    ,ratio,undef);
 			res.cycleNum=str.cycleNum;
 			
 			return res;
@@ -171,7 +171,11 @@ public final class Record implements Serializable{
      * used to print out
      */
 	public String toString(){
-		return String.format("%9.3f%10.3f%10.3f%10.3f%19s",lon,lat,data[0],data[1],time);
+		return String.format("%9.3f%10.3f%10.3f%10.3f%19s",xpos,ypos,data[0],data[1],time);
+	}
+	
+	public String toString(boolean llpos){
+		return String.format("%9.3f%10.3f%10.3f%10.3f%19s",xpos/1000f,ypos/1000f,data[0],data[1],time);
 	}
 	
 	

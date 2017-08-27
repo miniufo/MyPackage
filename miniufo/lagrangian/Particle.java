@@ -15,7 +15,8 @@ import java.util.ArrayList;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import miniufo.diagnosis.MDate;
-import miniufo.diagnosis.SpatialModel;
+import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
+import static java.lang.Math.PI;
 import static java.lang.Math.cos;
 import static java.lang.Math.toRadians;
 
@@ -32,6 +33,7 @@ public class Particle implements Cloneable,Serializable{
 	private static final long serialVersionUID = -5698371935283702966L;
 
 	protected boolean finished=false;
+	protected boolean llpos   =true;
 	
 	protected String id=null;
 	
@@ -88,9 +90,9 @@ public class Particle implements Cloneable,Serializable{
 	
 	public long getTime(int l){ return records.get(l).getTime();}
 	
-	public float getLongitude(int i){ return records.get(i).getLon();}
+	public float getXPosition(int i){ return records.get(i).getXPos();}
 	
-	public float getLatitude(int i){ return records.get(i).getLat();}
+	public float getYPosition(int i){ return records.get(i).getYPos();}
 	
 	public long[] getTimes(){
 		int size=records.size();
@@ -105,32 +107,32 @@ public class Particle implements Cloneable,Serializable{
 	public float[] getInitialLocation(){
 		Record median=records.get(0);
 		
-		return new float[]{median.getLon(),median.getLat()};
+		return new float[]{median.getXPos(),median.getYPos()};
 	}
 	
-	public float[] getLongitudes(){
+	public float[] getXPositions(){
 		int size=records.size();
 		
 		float[] lons=new float[size];
 		
-		for(int i=0;i<size;i++) lons[i]=records.get(i).getLon();
+		for(int i=0;i<size;i++) lons[i]=records.get(i).getXPos();
 		
 		return lons;
 	}
 	
-	public float[] getLatitudes(){
+	public float[] getYPositions(){
 		int size=records.size();
 		
 		float[] lats=new float[size];
 		
-		for(int i=0;i<size;i++) lats[i]=records.get(i).getLat();
+		for(int i=0;i<size;i++) lats[i]=records.get(i).getYPos();
 		
 		return lats;
 	}
 	
-	public float[] getZonalVelocity(){ return getAttachedData(0);}
+	public float[] getUVel(){ return getAttachedData(0);}
 	
-	public float[] getMeridionalVelocity(){ return getAttachedData(1);}
+	public float[] getVVel(){ return getAttachedData(1);}
 	
 	public float[] getAttachedData(int idx){
 		int size=records.size();
@@ -179,7 +181,7 @@ public class Particle implements Cloneable,Serializable{
 		buf.append("* "+records.size()+" id: "+id+"\n");
 		
 		for(Record r:records){
-			buf.append(r);
+			buf.append(r.toString(llpos));
 			buf.append("\n");
 		}
 		
@@ -202,15 +204,18 @@ public class Particle implements Cloneable,Serializable{
 			Record next=records.get(1);
 			Record pres=prev;
 			
-			float dlon= next.getLon()-prev.getLon();
-			float dlat= next.getLat()-prev.getLat();
-			float clat=(next.getLat()+prev.getLat())/2f;
+			float dX= next.getXPos()-prev.getXPos();
+			float dY= next.getYPos()-prev.getYPos();
+			float mY=(next.getYPos()+prev.getYPos())/2f;
 			
-			float u=(float)(dlon/180.0*Math.PI*SpatialModel.EARTH_RADIUS/dt*cos(toRadians(clat)));
-			float v=(float)(dlat/180.0*Math.PI*SpatialModel.EARTH_RADIUS/dt);
-			
-			pres.setData(0,u);
-			pres.setData(1,v);
+			if(llpos){
+				pres.setData(0,(float)(dX/180.0*PI*EARTH_RADIUS/dt*cos(toRadians(mY))));
+				pres.setData(1,(float)(dY/180.0*PI*EARTH_RADIUS/dt));
+				
+			}else{
+				pres.setData(0,dX/dt);
+				pres.setData(1,dY/dt);
+			}
 			
 			// for all records between
 			for(int l=1,L=records.size()-1;l<L;l++){
@@ -218,15 +223,18 @@ public class Particle implements Cloneable,Serializable{
 				pres=records.get(l  );
 				next=records.get(l+1);
 				
-				dlon= next.getLon()-prev.getLon();
-				dlat= next.getLat()-prev.getLat();
-				clat=(next.getLat()+prev.getLat())/2f;
+				dX= next.getXPos()-prev.getXPos();
+				dY= next.getYPos()-prev.getYPos();
+				mY=(next.getYPos()+prev.getYPos())/2f;
 				
-				u=(float)(dlon/180.0*Math.PI*SpatialModel.EARTH_RADIUS/(dt*2.0)*cos(toRadians(clat)));
-				v=(float)(dlat/180.0*Math.PI*SpatialModel.EARTH_RADIUS/(dt*2.0));
-				
-				pres.setData(0,u);
-				pres.setData(1,v);
+				if(llpos){
+					pres.setData(0,(float)(dX/180.0*PI*EARTH_RADIUS/(dt*2.0)*cos(toRadians(mY))));
+					pres.setData(1,(float)(dY/180.0*PI*EARTH_RADIUS/(dt*2.0)));
+					
+				}else{
+					pres.setData(0,dX/dt/2f);
+					pres.setData(1,dY/dt/2f);
+				}
 			}
 			
 			// for the last record
@@ -234,15 +242,18 @@ public class Particle implements Cloneable,Serializable{
 			next=records.get(records.size()-1);
 			pres=next;
 			
-			dlon= next.getLon()-prev.getLon();
-			dlat= next.getLat()-prev.getLat();
-			clat=(next.getLat()+prev.getLat())/2f;
+			dX= next.getXPos()-prev.getXPos();
+			dY= next.getYPos()-prev.getYPos();
+			mY=(next.getYPos()+prev.getYPos())/2f;
 			
-			u=(float)(dlon/180.0*Math.PI*SpatialModel.EARTH_RADIUS/dt*cos(toRadians(clat)));
-			v=(float)(dlat/180.0*Math.PI*SpatialModel.EARTH_RADIUS/dt);
-			
-			pres.setData(0,u);
-			pres.setData(1,v);
+			if(llpos){
+				pres.setData(0,(float)(dX/180.0*PI*EARTH_RADIUS/dt*cos(toRadians(mY))));
+				pres.setData(1,(float)(dY/180.0*PI*EARTH_RADIUS/dt));
+				
+			}else{
+				pres.setData(0,dX/dt);
+				pres.setData(1,dY/dt);
+			}
 		}
 	}
 	
@@ -345,13 +356,19 @@ public class Particle implements Cloneable,Serializable{
      * used to print out
      */
 	public String toString(){
+		for(Record r:records) if(r.getXPos()>720&&Math.abs(r.getYPos())>360) llpos=false;
+		
 		StringBuilder buf=new StringBuilder();
 		
 		buf.append(getClass().getSimpleName()+" id ("+id+") "+records.size()+" records:\n");
-		buf.append("  lons(E-deg)  lats(N-deg) uspd(m/s) vspd(m/s) time(YYYYMMDDHHMMSS)\n");
+		
+		if(llpos)
+			buf.append("  lons(E-deg)  lats(N-deg) uspd(m/s) vspd(m/s) time(YYYYMMDDHHMMSS)\n");
+		else
+			buf.append("  xpos (km)    ypos (km)   uspd(m/s) vspd(m/s) time(YYYYMMDDHHMMSS)\n");
 		
 		for(Record r:records){
-			buf.append(r);
+			buf.append(r.toString(llpos));
 			buf.append("\n");
 		}
 		
