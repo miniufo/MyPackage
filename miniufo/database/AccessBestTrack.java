@@ -11,10 +11,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.function.Predicate;
-
 import miniufo.diagnosis.MDate;
 import miniufo.diagnosis.Range;
 import miniufo.diagnosis.Variable;
@@ -34,6 +35,8 @@ public final class AccessBestTrack{
 	//
 	public enum DataSets{CMA,GUAM,JMA,JTWC,NHC};
 	
+	public enum JTWCBasins{CP,EP,WP,IO,SH};
+	
 	
 	/**
 	 * prevent from construction
@@ -42,7 +45,7 @@ public final class AccessBestTrack{
 	
 	
 	/**
-     * write a list of typhoon to a file
+     * Write a list of typhoon to a file.
      *
      * @param	typhoons	a list of Typhoon
      */
@@ -53,6 +56,35 @@ public final class AccessBestTrack{
 		
 		try(FileWriter fw=new FileWriter(path)){
 			fw.write(sb.toString());
+			
+		}catch(IOException e){ e.printStackTrace(); System.exit(0);}
+	}
+	
+	/**
+     * glue JTWC best-track source files (one TC per file) into a single file
+     *
+     * @param	basin	basin of JTWC data
+     */
+	public static void glueJTWCSourceFiles(JTWCBasins basin){
+		String path="D:/Data/Typhoons/JTWC/";
+		
+		try(FileWriter fw=new FileWriter(path+"b"+basin.toString().toLowerCase()+".dat")){
+			Files.list(Paths.get(path+"original/b"+basin.toString().toLowerCase()+"/")).forEach(p->{
+				try{
+					long count=Files.lines(p).count();
+					
+					StringBuilder sb=new StringBuilder();
+					
+					if(count!=0){
+						sb.append(count+"\n");
+						Files.lines(p).forEach(line->sb.append(line+"\n"));
+						
+					}else System.out.println("file "+p+" has 0 record");
+					
+					fw.write(sb.toString());
+					
+				}catch(IOException e){ e.printStackTrace(); System.exit(0);}
+			});
 			
 		}catch(IOException e){ e.printStackTrace(); System.exit(0);}
 	}
@@ -175,7 +207,7 @@ public final class AccessBestTrack{
 		
 		List<Typhoon> res=getTyphoons(all,cond);
 		
-		validateCMA(res);
+		validate(res,r->true);
 		
 		return res;
 	}
@@ -247,7 +279,7 @@ public final class AccessBestTrack{
 		// to select the records which meet the requires
 		List<Typhoon> res=getTyphoons(all,cond);
 		
-		validateGuam(res);
+		validate(res,r->true);
 		
 		return res;
 	}
@@ -355,7 +387,7 @@ public final class AccessBestTrack{
 		// to select the records which meet the requires
 		List<Typhoon> res=getTyphoons(all,cond);
 		
-		validateJMA(res);
+		validate(res,r->true);
 		
 		return res;
 	}
@@ -437,7 +469,7 @@ public final class AccessBestTrack{
 		// to select the records which meet the requires
 		List<Typhoon> res=getTyphoons(all,cond);
 		
-		validateJTWC(res);
+		validate(res,r->true);
 		
 		return res;
 	}
@@ -556,7 +588,7 @@ public final class AccessBestTrack{
 		// to select the records which meet the requires
 		List<Typhoon> res=getTyphoons(all,cond);
 		
-		validateNHC(res);
+		validate(res,r->r.getDataValue(2)==0);
 		
 		return res;
 	}
@@ -748,80 +780,71 @@ public final class AccessBestTrack{
 	
 	
 	/*** helper methods ***/
-	private static void validateGuam(List<Typhoon> res){ for(Typhoon tr:res) tr.cVelocityByPosition();}
-	
-	private static void validateCMA(List<Typhoon> res){ for(Typhoon tr:res) tr.cVelocityByPosition();}
-	
-	private static void validateJMA(List<Typhoon> res){
-		for(int l=0;l<res.size();l++){
-			Typhoon tr=res.get(l);
+	private static void validate(List<Typhoon> res,Predicate<Record> cond){
+		List<Typhoon> remove=new ArrayList<>();
+		
+		for(Typhoon ty:res){
+			int count=ty.getTCount();
 			
-			Predicate<Record> cond=r->{
+			float[] lon=ty.getXPositions();
+			
+			for(int i=1;i<count;i++) if(lon[i-1]-lon[i]>300) lon[i]+=360;
+			
+			boolean removeAll=false;
+			
+			if(removeIdenticalTimeRecords(ty)==count) removeAll=true;
+			
+			Predicate<Record> cond1=r->{
 				int hour=(int)(r.getTime()%1000000L/10000L);
 				return hour!=0&&hour!=6&&hour!=12&&hour!=18;
 			};
 			
-			if(tr.removeRecords(cond).getTCount()==0){
-				res.remove(l);
-				System.out.println("remove the "+l+"(th) record");
-				l--;
+			if(removeRecords(ty,cond1.and(cond))==count) removeAll=true;
+			
+			if(removeAll){
+				remove.add(ty);
+				System.out.println("remove the Typhoon ("+ty.getID()+") with no valid record");
 			}
 		}
+		
+		res.removeAll(remove);
 		
 		for(Typhoon tr:res) tr.cVelocityByPosition();
 	}
 	
-	private static void validateJTWC(List<Typhoon> res){
-		for(int l=0;l<res.size();l++){
-			Typhoon tr=res.get(l);
-			
-			int count=tr.getTCount();
-			long last=tr.getTime(0);
-			boolean[] del=new boolean[count];
-			
-			for(int i=1;i<count;i++){
-				long current=tr.getTime(i);
-				
-				if(current==last) del[i]=true;
-				
-				last=current;
-			}
-			
-			if(tr.removeRecords(del).getTCount()==0){
-				res.remove(l);
-				System.out.println("remove the "+l+"(th) TC record");
-				l--;
-			}
-		}
-		
-		for(Typhoon tr:res) tr.cVelocityByPosition();
+	private static int removeRecords(Typhoon ty,Predicate<Record> cond){
+		// stateless filtering
+		int count =ty.getTCount();
+		int remain=ty.removeRecords(cond).getTCount();
+		return count-remain;
 	}
 	
-	private static void validateNHC(List<Typhoon> res){
-		for(int l=0;l<res.size();l++){
-			Typhoon tr=res.get(l);
+	private static int removeIdenticalTimeRecords(Typhoon ty){
+		// stateful filtering
+		int count=ty.getTCount();
+		long last=ty.getTime(0);
+		
+		boolean[] del=new boolean[count];
+		
+		for(int i=1;i<count;i++){
+			long current=ty.getTime(i);
 			
-			float[] lon=tr.getXPositions();
+			if(current==last) del[i]=true;
 			
-			for(int i=1,I=tr.getTCount();i<I;i++) if(lon[i-1]-lon[i]>300) lon[i]+=360;
-			
-			if(tr.removeRecords(r->r.getDataValue(2)==0).getTCount()==0){
-				res.remove(l);
-				System.out.println("remove the "+l+"(th) record");
-				l--;
-			}
+			last=current;
 		}
 		
-		for(Typhoon tr:res) tr.cVelocityByPosition();
+		int remain=ty.removeRecords(del).getTCount();
+		
+		return count-remain;
 	}
-	
 	
 	
 	
 	/** test
 	public static void main(String[] args){
-		long a=20020105060000L;
-		
-		System.out.println((a%1000000L)/10000L==6);
+		AccessBestTrack.glueJTWCSourceFiles(JTWCBasins.IO);
+		AccessBestTrack.glueJTWCSourceFiles(JTWCBasins.WP);
+		AccessBestTrack.glueJTWCSourceFiles(JTWCBasins.SH);
 	}*/
 }

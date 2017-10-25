@@ -15,7 +15,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
-
 import miniufo.concurrent.ConcurrentUtil;
 import miniufo.descriptor.DataDescriptor;
 import miniufo.diagnosis.MDate;
@@ -49,7 +48,7 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
      * @param	cond	condition for a record to be the origin of pseudo-track
      * @param	tRad	maximum lead or lag count
      */
-	public LagrangianStatResult cStatisticsByDavisTheory1(Predicate<Record> cond,int tRad){
+	public SingleParticleStatResult cStatisticsByDavisTheory1(Predicate<Record> cond,int tRad){
 		BinStatistics bd=new BinStatistics(tRad);
 		
 		bd.computeMean(cond);
@@ -66,7 +65,7 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
      * @param	cond	condition for a record to be the origin of pseudo-track
      * @param	tRad	maximum lead or lag count
      */
-	public LagrangianStatResult cStatisticsByDavisTheory2(Predicate<Record> cond,int tRad){
+	public SingleParticleStatResult cStatisticsByDavisTheory2(Predicate<Record> cond,int tRad){
 		BinStatistics bd=new BinStatistics(tRad);
 		
 		bd.computeMean(cond);
@@ -82,7 +81,7 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
      * @param	cond	condition for a record to be the origin of pseudo-track
      * @param	tRad	maximum lead or lag count
      */
-	public LagrangianStatResult cStatisticsByDavisTheory3(Predicate<Record> cond,int tRad){
+	public SingleParticleStatResult cStatisticsByDavisTheory3(Predicate<Record> cond,int tRad){
 		BinStatistics bd=new BinStatistics(tRad);
 		
 		bd.computeMean(cond);
@@ -400,14 +399,14 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 		private int noOfMaxLag  =0;	// observations at maximum lag
 		private int noOfMinLag  =0;	// observations at minimum lag
 		
-		private LagrangianStatResult lsr=null;
+		private SingleParticleStatResult lsr=null;
 		
 		
 		/**
 		 * constructor
 		 */
 		BinStatistics(int tRad){
-			lsr=new LagrangianStatResult(tRad);
+			lsr=new SingleParticleStatResult(tRad);
 			
 			Particle p1=null;
 			
@@ -438,8 +437,8 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 				float[] vspd=p.getVVel();
 				
 				for(int l=0,L=p.getTCount();l<L;l++){
-					float olon=p.getXPosition(l);
-					float olat=p.getYPosition(l);
+					float oX=p.getXPosition(l);
+					float oY=p.getYPosition(l);
 					
 					// meet condition to be an origin of pseudo-track
 					if(!cond.test(p.getRecord(l))) continue;
@@ -455,13 +454,18 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 						if(tau== tRad) noOfMaxLag++;
 						if(tau==-tRad) noOfMinLag++;
 						
-						float dlon=(float)Math.toRadians(p.getXPosition(ll)-olon);
-						float dlat=(float)Math.toRadians(p.getYPosition(ll)-olat);
-						
-						float disX=SpatialModel.EARTH_RADIUS*dlon*(float)Math.cos(olat*Math.PI/180.0);
-						float disY=SpatialModel.EARTH_RADIUS*dlat;
-						
-						av.addSample(tau,uspd[ll],vspd[ll],disX,disY);
+						if(llpos){
+							float dlon=(float)Math.toRadians(p.getXPosition(ll)-oX);
+							float dlat=(float)Math.toRadians(p.getYPosition(ll)-oY);
+							
+							float disX=SpatialModel.EARTH_RADIUS*dlon*(float)Math.cos(oY*Math.PI/180.0);
+							float disY=SpatialModel.EARTH_RADIUS*dlat;
+							
+							av.addSample(tau,uspd[ll],vspd[ll],disX,disY);
+							
+						}else{
+							av.addSample(tau,uspd[ll],vspd[ll],p.getXPosition(ll)-oX,p.getYPosition(ll)-oY);
+						}
 					}
 				}
 			}
@@ -565,8 +569,8 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 				float[] uspd=p.getUVel();
 				
 				for(int l=0,L=p.getTCount();l<L;l++){
-					float olon=p.getXPosition(l);
-					float olat=p.getYPosition(l);
+					float oX=p.getXPosition(l);
+					float oY=p.getYPosition(l);
 					
 					// meet condition to be an origin of pseudo-track
 					if(!cond.test(p.getRecord(l))) continue;
@@ -578,20 +582,35 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 						if(tau>tRad||tau<-tRad) continue;
 						if(uspd[ll]==Record.undef) continue;
 						
-						float dlon=(float)Math.toRadians(p.getXPosition(ll)-olon);
-						float dlat=(float)Math.toRadians(p.getYPosition(ll)-olat);
-						
-						// dx'(tau)
-						float disX=SpatialModel.EARTH_RADIUS*dlon*(float)Math.cos(olat*Math.PI/180.0)-lsr.DXm[tRad+tau];
-						// dy'(tau)
-						float disY=SpatialModel.EARTH_RADIUS*dlat-lsr.DYm[tRad+tau];
-						
-						float Dxx=disX*disX;	// dx'(tau)*dx'(tau)
-						float Dyy=disY*disY;	// dy'(tau)*dy'(tau)
-						float Dxy=disX*disY;	// dx'(tau)*dy'(tau)
-						float Dyx=disY*disX;	// dy'(tau)*dx'(tau)
-						
-						av.addSample(tau,Dxx,Dyy,Dxy,Dyx);
+						if(llpos){
+							float dlon=(float)Math.toRadians(p.getXPosition(ll)-oX);
+							float dlat=(float)Math.toRadians(p.getYPosition(ll)-oY);
+							
+							// dx'(tau)
+							float disX=SpatialModel.EARTH_RADIUS*dlon*(float)Math.cos(oY*Math.PI/180.0)-lsr.DXm[tRad+tau];
+							// dy'(tau)
+							float disY=SpatialModel.EARTH_RADIUS*dlat-lsr.DYm[tRad+tau];
+							
+							float Dxx=disX*disX;	// dx'(tau)*dx'(tau)
+							float Dyy=disY*disY;	// dy'(tau)*dy'(tau)
+							float Dxy=disX*disY;	// dx'(tau)*dy'(tau)
+							float Dyx=disY*disX;	// dy'(tau)*dx'(tau)
+							
+							av.addSample(tau,Dxx,Dyy,Dxy,Dyx);
+							
+						}else{
+							// dx'(tau)
+							float disX=p.getXPosition(ll)-oX-lsr.DXm[tRad+tau];
+							// dy'(tau)
+							float disY=p.getYPosition(ll)-oY-lsr.DYm[tRad+tau];
+							
+							float Dxx=disX*disX;	// dx'(tau)*dx'(tau)
+							float Dyy=disY*disY;	// dy'(tau)*dy'(tau)
+							float Dxy=disX*disY;	// dx'(tau)*dy'(tau)
+							float Dyx=disY*disX;	// dy'(tau)*dx'(tau)
+							
+							av.addSample(tau,Dxx,Dyy,Dxy,Dyx);
+						}
 					}
 				}
 			}
@@ -624,8 +643,8 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 				float usqr=0,vsqr=0;
 				
 				for(int l=0,L=p.getTCount();l<L;l++){
-					float olon=p.getXPosition(l);
-					float olat=p.getYPosition(l);
+					float oX=p.getXPosition(l);
+					float oY=p.getYPosition(l);
 					
 					// meet condition to be an origin of pseudo-track
 					if(!cond.test(p.getRecord(l))) continue;
@@ -643,21 +662,37 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 						if(tau>tRad||tau<-tRad) continue;
 						if(uspd[ll]==Record.undef) continue;
 						
-						float dlon=(float)Math.toRadians(p.getXPosition(ll)-olon);
-						float dlat=(float)Math.toRadians(p.getYPosition(ll)-olat);
-						
-						// dx'(tau)
-						float disX=SpatialModel.EARTH_RADIUS*dlon*(float)Math.cos(olat*Math.PI/180.0)-lsr.DXm[tRad+tau];
-						// dy'(tau)
-						float disY=SpatialModel.EARTH_RADIUS*dlat-lsr.DYm[tRad+tau];
-						
-						float Kxx=-ua0*disX;	// -u'(0)*dx'(tau)
-						float Kyy=-va0*disY;	// -v'(0)*dy'(tau)
-						float Kxy=-ua0*disY;	// -u'(0)*dy'(tau)
-						float Kyx=-va0*disX;	// -v'(0)*dx'(tau)
-						
-						av.addSample(-tau,Kxx,Kyy,Kxy,Kyx);
-						av2.addSample(tau,disX,disY);
+						if(llpos){
+							float dlon=(float)Math.toRadians(p.getXPosition(ll)-oX);
+							float dlat=(float)Math.toRadians(p.getYPosition(ll)-oY);
+							
+							// dx'(tau)
+							float disX=SpatialModel.EARTH_RADIUS*dlon*(float)Math.cos(oY*Math.PI/180.0)-lsr.DXm[tRad+tau];
+							// dy'(tau)
+							float disY=SpatialModel.EARTH_RADIUS*dlat-lsr.DYm[tRad+tau];
+							
+							float Kxx=-ua0*disX;	// -u'(0)*dx'(tau)
+							float Kyy=-va0*disY;	// -v'(0)*dy'(tau)
+							float Kxy=-ua0*disY;	// -u'(0)*dy'(tau)
+							float Kyx=-va0*disX;	// -v'(0)*dx'(tau)
+							
+							av.addSample(-tau,Kxx,Kyy,Kxy,Kyx);
+							av2.addSample(tau,disX,disY);
+							
+						}else{
+							// dx'(tau)
+							float disX=p.getXPosition(ll)-oX-lsr.DXm[tRad+tau];
+							// dy'(tau)
+							float disY=p.getYPosition(ll)-oY-lsr.DYm[tRad+tau];
+							
+							float Kxx=-ua0*disX;	// -u'(0)*dx'(tau)
+							float Kyy=-va0*disY;	// -v'(0)*dy'(tau)
+							float Kxy=-ua0*disY;	// -u'(0)*dy'(tau)
+							float Kyx=-va0*disX;	// -v'(0)*dx'(tau)
+							
+							av.addSample(-tau,Kxx,Kyy,Kxy,Kyx);
+							av2.addSample(tau,disX,disY);
+						}
 					}
 				}
 				

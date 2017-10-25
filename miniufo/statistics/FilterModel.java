@@ -1,5 +1,5 @@
 /**
- * @(#)StatisticsModel.java	1.0 07/02/01
+ * @(#)FilterModel.java	1.0 07/02/01
  *
  * Copyright 2007 MiniUFO, All rights reserved.
  * MiniUFO Studio. Use is subject to license terms.
@@ -23,13 +23,14 @@ import static java.lang.Math.sqrt;
 
 
 /**
- * used for basic statistic method
+ * Basic filter method for a series of data
  *
  * @version 1.0, 02/01/2007
  * @author  MiniUFO
  * @since   MDK1.0
  */
 public final class FilterModel{
+	
 	// for Killworth transformation only
 	private static final DMatrixRMaj invA=new DMatrixRMaj(12,12);
 	
@@ -81,7 +82,7 @@ public final class FilterModel{
 	
 	
 	/**
-     * get the running mean of the given data
+     * Get the running mean of the given data
      *
      * @param	data	an array of data
      * @param	points	points of data used to mean
@@ -96,6 +97,32 @@ public final class FilterModel{
 		return result;
 	}
 	
+	/**
+     * Get the running mean of the given data
+     *
+     * @param	data	an array of data
+     * @param	points	points of data used to mean
+     * @param	undef	undefined value
+     *
+     * @return	result	running mean of the data
+     */
+	public static float[] runningMean(float[] data,int points,float undef){
+		float[] re=new float[data.length];
+		
+		runningMean(data,re,points,undef);
+		
+		return re;
+	}
+	
+	/**
+     * Get the running mean of the given data
+     *
+     * @param	data	an array of data
+     * @param	result	result of running of data
+     * @param	points	points of data used to mean
+     *
+     * @return	result	running mean of the data
+     */
 	public static void runningMean(float[] data,float[] result,int points){
 		int length=data.length;
 		
@@ -117,6 +144,41 @@ public final class FilterModel{
 		}
 		
 		for(int i=end+1;i<length;i++) result[i]=data[i];
+	}
+	
+	/**
+     * Get the running mean of the given data
+     *
+     * @param	data	an array of data
+     * @param	result	result of running of data
+     * @param	points	points of data used to mean
+     * @param	undef	undefined value
+     *
+     * @return	result	running mean of the data
+     */
+	public static void runningMean(float[] data,float[] result,int points,float undef){
+		int length=data.length;
+		
+		if(points%2!=1||points>length)
+		throw new IllegalArgumentException("points should be a odd number and smaller than data length");
+		
+		if(length!=result.length) throw new IllegalArgumentException("array lengths not equal");
+		
+		int rad=points/2;
+		
+		for(int i=0;i<length;i++){
+			float sum=0; int count=0;
+			
+			for(int j=i-rad,J=i+rad;j<=J;j++)
+			if(data[i]==undef){
+				break;
+			}else if(j>=0&&j<length&&data[j]!=undef){
+				sum+=data[j]; count++;
+			}
+			
+			if(count==0) result[i]=undef;
+			else result[i]=sum/count;
+		}
 	}
 	
 	
@@ -494,7 +556,7 @@ public final class FilterModel{
 	public static void main(String[] args){
 		float[] a=new float[]{3,5,2,6,8,3,5,8,6,4,6,5};
 		
-		float[] re=KillworthTransform(a);
+		float[] re=runningMean(a,3,8);
 		
 		for(int i=0;i<12;i++){
 			System.out.println(a[i]+"\t"+re[i]);

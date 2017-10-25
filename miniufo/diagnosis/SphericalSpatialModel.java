@@ -11,11 +11,9 @@ import miniufo.descriptor.CtsDescriptor;
 import miniufo.descriptor.DataDescriptor;
 import miniufo.descriptor.SpatialCoordinate;
 import miniufo.descriptor.TemporalCoordinate;
-
 import static java.lang.Math.sin;
 import static java.lang.Math.cos;
 import static java.lang.Math.tan;
-import static java.lang.Math.toDegrees;
 
 
 /**
@@ -34,13 +32,6 @@ public final class SphericalSpatialModel extends SpatialModel{
 	private float[] lsin=null;	// sin(lat)
 	private float[] lcos=null;	// cos(lat)
 	private float[] ltan=null;	// tan(lat)
-	
-	// default 2.5 degree model
-	public static final SphericalSpatialModel Model2P5=
-	(SphericalSpatialModel)DiagnosisFactory.DF2P5.getSpatialModel();
-	
-	public static final SphericalSpatialModel Model1=
-	(SphericalSpatialModel)DiagnosisFactory.DF1.getSpatialModel();
 	
 	
 	/**
@@ -73,43 +64,17 @@ public final class SphericalSpatialModel extends SpatialModel{
 	
 	
 	/**
-     * whether the given point is in the area
-     *
-     * @param	lon		longitude (degree) of the given point
-     * @param	lat		latitude  (degree) of the given point
-     *
-     * @return	true or false
-     */
-	public boolean isInArea(float lon,float lat){
-		if(lon<0||lon>=360||lat<0||lat>=360) return false;
-		
-		int xcount=xdef.length(),ycount=ydef.length();
-		
-		if(lon<xdef.getSamples()[0]||lon>xdef.getSamples()[xcount-1]) return false;
-		if(lat<ydef.getSamples()[0]||lat>ydef.getSamples()[ycount-1]) return false;
-		
-		return true;
-	}
-	
-	/**
-     * whether the given model is global
+     * Whether the given model is global.
      */
 	public boolean isGlobal(){
-		if(360.0f/xdef.length()-(float)toDegrees(xdef.getIncrements()[0])>0.001f)
-			return false;
+		if(!periodicX) return false;
 		
-		if(180.0f/(ydef.length()-1)-(float)toDegrees(ydef.getIncrements()[0])>0.001f)
-			return false;
+		float dlon=xdef.getIncrements()[0];
+		float dlat=ydef.getIncrements()[0];
 		
-		return true;
-	}
-	
-	/**
-     * whether the given model is periodic in east-west boundary
-     */
-	public boolean isZonalPeriodic(){
-		if(360.0f/xdef.length()-(float)toDegrees(xdef.getIncrements()[0])>0.001f)
-			return false;
+		if(Math.abs(360/xdef.length()-dlon)/dlon>1e-2f) return false;
+		if(Math.abs(ydef.getFirst()+90)>=dlat) return false;
+		if(Math.abs(ydef.getLast ()-90)>=dlat) return false;
 		
 		return true;
 	}
@@ -204,6 +169,9 @@ public final class SphericalSpatialModel extends SpatialModel{
 			dxs[j]=EARTH_RADIUS*lcos[j]*(float)(dd.getDXDef()[0]*Math.PI/180);
 			dxs[j]=dxs[j]<0?0:dxs[j];
 		}
+		
+		this.periodicX=dd.isPeriodicX();
+		this.periodicY=dd.isPeriodicY();
 	}
 	
 	

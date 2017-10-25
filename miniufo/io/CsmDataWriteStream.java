@@ -253,14 +253,14 @@ public final class CsmDataWriteStream implements DataWrite{
 		int t=v[0].getTCount(),	z=v[vcount-1].getZCount(),	y=v[0].getYCount(),	x=v[0].getXCount();
 		float undef=v[0].getUndef();
 		
-		//if(lon.length!=t&&lon.length!=1) throw new IllegalArgumentException("invalid coordinates info");
-		if(lon.length!=lat.length) throw new IllegalArgumentException("dimensions not same");
-		if(lon[0].length!=lat[0].length) throw new IllegalArgumentException("dimensions not same");
-		if(lon[0][0].length!=lat[0][0].length) throw new IllegalArgumentException("dimensions not same");
+		if(lon.length!=lat.length)
+			throw new IllegalArgumentException("t-dimensions not same");
+		if(lon[0].length!=lat[0].length)
+			throw new IllegalArgumentException("y-dimensions not same");
+		if(lon[0][0].length!=lat[0][0].length)
+			throw new IllegalArgumentException("x-dimensions not same");
 		
 		int std_id=500000,svc=0,lvc=0,tstart=v[0].getRange().getTRange()[0];
-		
-		float[][][][][] data=new float[vcount][][][][];
 		
 		if(v[0].getZCount()==1) svc++;
 		else if(z!=1&&v[0].getZCount()==z) lvc++;
@@ -292,12 +292,9 @@ public final class CsmDataWriteStream implements DataWrite{
 		sr.tim=0;	sr.flag=0;	sr.nlev=z;
 		sr.sdata=new float[svc];
 		if(lvc>0) sr.ldata=new float[z][lvc+1];
+		if(svc>0){ sr.flag=1; if(lvc>0) sr.nlev++;}
 		
-		if(svc>0){
-			sr.flag=1;
-			
-			if(lvc>0) sr.nlev++;
-		}
+		float[][][][][] data=new float[vcount][][][][];
 		
 		for(int m=0;m<vcount;m++){ data[m]=v[m].getData(); al.add(v[m]);}
 		
@@ -359,38 +356,38 @@ public final class CsmDataWriteStream implements DataWrite{
      * @param	sr	a station record
      */
 	private void writeStationRecord(StationRecord sr){
-		try{
-			ByteBuffer buf=null;
-			if(sr.ldata==null)
-				buf=ByteBuffer.allocate(sr.sid.length()+(5*4)+(sr.sdata.length*4));
-			else
-				buf=ByteBuffer.allocate(
-					sr.sid.length()+(5*4)+(sr.sdata.length*4)+(sr.ldata.length*sr.ldata[0].length*4)
-				);
-			
-			buf.order(ByteOrder.nativeOrder());
-			
-			buf.put(sr.sid.getBytes());	//sid
-			buf.putFloat(sr.lat);		// lat
-			buf.putFloat(sr.lon);		// lon
-			buf.putFloat(sr.tim);		// tim
-			buf.putInt(sr.nlev);		// nlev
-			buf.putInt(sr.flag);		// nflag 1
-			
-			// surface data
-			if(sr.flag==1){
-			for(int i=0,I=sr.sdata.length;i<I;i++)
-			buf.putFloat(sr.sdata[i]);}
-			
-			// levels data
-			if(sr.nlev-sr.flag>=1)
-			for(int i=0,I=sr.ldata.length;i<I;i++)
-			for(int j=0,J=sr.ldata[0].length;j<J;j++)
-			buf.putFloat(sr.ldata[i][j]);
-			
-			buf.flip();	fc.write(buf);
-			
-	    }catch(IOException ex){ ex.printStackTrace(); System.exit(0);}
+		int size=0;
+		
+		if(sr.ldata==null)
+			size=sr.sid.length()+(5+sr.sdata.length)*4;
+		else
+			size=sr.sid.length()+(5+sr.sdata.length+sr.ldata.length*sr.ldata[0].length)*4;
+		
+		ByteBuffer buf=ByteBuffer.allocate(size);
+		
+		buf.order(ByteOrder.nativeOrder());
+		buf.put(sr.sid.getBytes());	//sid
+		buf.putFloat(sr.lat);		// lat
+		buf.putFloat(sr.lon);		// lon
+		buf.putFloat(sr.tim);		// tim
+		buf.putInt(sr.nlev);		// nlev
+		buf.putInt(sr.flag);		// nflag 1
+		
+		// surface data
+		if(sr.flag==1){
+		for(int i=0,I=sr.sdata.length;i<I;i++)
+		buf.putFloat(sr.sdata[i]);}
+		
+		// levels data
+		if(sr.nlev-sr.flag>=1)
+		for(int i=0,I=sr.ldata.length;i<I;i++)
+		for(int j=0,J=sr.ldata[0].length;j<J;j++)
+		buf.putFloat(sr.ldata[i][j]);
+		
+		buf.flip();
+		
+		try{ fc.write(buf);}
+		catch(IOException ex){ ex.printStackTrace(); System.exit(0);}
 	}
 	
 	/**
@@ -399,20 +396,18 @@ public final class CsmDataWriteStream implements DataWrite{
      * @param	sr	a station record
      */
 	private void writeStationRecordTerminator(StationRecord sr){
-		try{
-			ByteBuffer buf=ByteBuffer.allocate(sr.sid.length()+5*4);
-			
-			buf.order(ByteOrder.nativeOrder());
-			
-			buf.put(sr.sid.getBytes());	//sid
-			buf.putFloat(sr.lat);		//lat
-			buf.putFloat(sr.lon);		//lon
-			buf.putFloat(sr.tim);		//tim
-			buf.putInt(0);				//nlev
-			buf.putInt(1);				//nflag
-			
-			buf.flip();	fc.write(buf);
-			
-	    }catch(IOException ex){ ex.printStackTrace(); System.exit(0);}
+		ByteBuffer buf=ByteBuffer.allocate(sr.sid.length()+5*4);
+		
+		buf.order(ByteOrder.nativeOrder());
+		buf.put(sr.sid.getBytes());	//sid
+		buf.putFloat(sr.lat);		//lat
+		buf.putFloat(sr.lon);		//lon
+		buf.putFloat(sr.tim);		//tim
+		buf.putInt(0);				//nlev
+		buf.putInt(1);				//nflag
+		buf.flip();
+		
+		try{ fc.write(buf);}
+		catch(IOException ex){ ex.printStackTrace(); System.exit(0);}
 	}
 }

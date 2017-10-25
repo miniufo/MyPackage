@@ -350,7 +350,7 @@ public final class DataInterpolation{
 			
 			for(Var vv:srcdata.getVDef())
 			if(vv.getZCount()!=1){
-				float[][][] buffer=gdf.prepareXYZBuffer(vv.getName(),l+1);
+				Variable buffer=gdf.prepareXYZBuffer(vv.getName(),l+1);
 				float[][][] dedata=desv.getData()[0];
 				
 				if(inNameList(vv.getName(),vs)){ // linear interpolation
@@ -365,7 +365,7 @@ public final class DataInterpolation{
 						float[] bin =new float[sz];
 						float[] bout=new float[z ];
 						
-						for(int k=0;k<sz;k++) bin[k]=buffer[k][j][i];
+						for(int k=0;k<sz;k++) bin[k]=buffer.getData()[0][k][j][i];
 						
 						spln.updateData(bin);
 						if(increS>0)
@@ -381,9 +381,9 @@ public final class DataInterpolation{
 				cdws.writeData(desv);
 				
 			}else{ // for single-level data
-				float[][] buf=gdf.prepareXYBuffer(vv.getName(),l+1,1);
+				Variable buf=gdf.prepareXYBuffer(vv.getName(),l+1,1);
 				
-				cdws.writeData(new Variable("",true,new float[][][][]{{buf}}));
+				cdws.writeData(buf);
 			}
 		}
 		
@@ -512,9 +512,74 @@ public final class DataInterpolation{
 			dw.writeData(res);
 		}
 		
-		dw.writeCtl(srcdata);
-		
 		dw.closeFile();	dr.closeFile();
+		
+		// write ctl
+		FileWriteInterface fwi=new FileWriteInterface(IOUtil.getCompleteFileNameWithoutExtension(path)+".ctl");
+		
+		FileWriter fw=null;	Scanner sn=null;
+		
+		if(fwi.getFlag()!=SKIP){
+			StringBuilder sb=new StringBuilder();
+			
+			try{
+				switch(fwi.getFlag()){
+				case RENAME   : fw=new FileWriter(fwi.getParent()+fwi.getNewName()); break;
+				case OVERWRITE: fw=new FileWriter(fwi.getFile());                    break;
+				case APPEND   : fw=new FileWriter(fwi.getFile(),true);               break;
+				default       : throw new IllegalArgumentException("unsupported for "+fwi.getFlag());
+				}
+				
+				sn=new Scanner(new File(srcdata.getPath()));
+				
+			}catch(IOException e){ e.printStackTrace(); System.exit(0);}
+			
+			while(sn.hasNextLine()){
+				String line=sn.nextLine();
+				
+				if(line.toLowerCase().startsWith("dset")){
+					sb.append("dset ^");	sb.append(IOUtil.getFileName(path));
+					sb.append("\n");
+				
+				}else if(line.toLowerCase().startsWith("tdef")){
+					sb.append("tdef "+T+" linear ");
+					
+					int  dt=Math.round(srcdata.getDTDef()[0]);
+					int ndt=dt*(srcdata.getTCount()-1)/(T-1)/3600;
+					
+					Scanner tmp=new Scanner(line);
+					tmp.next();	tmp.next();	tmp.next();
+					sb.append(tmp.next()+" "+ndt+"hr\n");
+					tmp.close();
+				
+				}else if(line.toLowerCase().startsWith("vars")){
+					sb.append(line+"\n");
+					
+					Scanner tmp=new Scanner(line);
+					
+					tmp.next();	int lc=Integer.parseInt(tmp.next());
+					
+					tmp.close();
+					
+					for(int i=0;i<lc;i++){
+						line=sn.nextLine();
+						
+						tmp=new Scanner(line);
+						
+						sb.append(String.format("%-9s",tmp.next())+"  "+tmp.next()+"  -1,20  ");
+						tmp.next();
+						sb.append(tmp.nextLine()+"\n");
+					}
+				}
+				else if(line.startsWith("options")) continue;
+				else sb.append(line+"\n");
+			}
+			
+			sn.close();
+			
+			try{ fw.write(sb.toString());	fw.close();}
+			catch(IOException e){ e.printStackTrace(); System.exit(0);}
+		}
 	}
 	
 	

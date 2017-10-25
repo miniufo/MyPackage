@@ -108,6 +108,9 @@ public final class CartesianSpatialModel extends SpatialModel{
 		dt=dd.getDTDef()[0];
 		dy=ydef.getIncrements()[0];
 		dx=xdef.getIncrements()[0];
+		
+		this.periodicX=dd.isPeriodicX();
+		this.periodicY=dd.isPeriodicY();
 	}
 	
 	

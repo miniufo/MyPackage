@@ -18,6 +18,7 @@ import miniufo.concurrent.ConcurrentUtil;
 import miniufo.descriptor.CsmDescriptor;
 import miniufo.descriptor.DataDescriptor;
 import miniufo.diagnosis.MDate;
+import miniufo.diagnosis.Variable;
 import miniufo.util.GridDataFetcher;
 import miniufo.util.Region2D;
 import miniufo.util.TicToc;
@@ -43,8 +44,8 @@ public abstract class StochasticModel{
 	protected float dt=0;		// dt = deltaT/dtRatio, deltaT is defined in DataDescriptor
 	protected float undef=0;	// undefined value
 	
-	protected float[][][] ubuf=null;
-	protected float[][][] vbuf=null;
+	protected Variable ubuf=null;
+	protected Variable vbuf=null;
 	
 	protected BCType BCx=BCType.Landing;
 	protected BCType BCy=BCType.Landing;
@@ -103,11 +104,8 @@ public abstract class StochasticModel{
      */
 	public void setVelocityBuffer(String u,String v,int tstr){
 		if(constMean){
-			ubuf=new float[1][][];
-			vbuf=new float[1][][];
-			
-			ubuf[0]=gdf.prepareXYBuffer(u,tstr,1);
-			vbuf[0]=gdf.prepareXYBuffer(v,tstr,1);
+			ubuf=gdf.prepareXYBuffer(u,tstr,1);
+			vbuf=gdf.prepareXYBuffer(v,tstr,1);
 			
 		}else{
 			ubuf=gdf.prepareXYTBuffer(u,1,tstr,2,0);
@@ -150,19 +148,12 @@ public abstract class StochasticModel{
 		float U=0,V=0;
 		
 		if(constMean){
-			if(ubuf[0][dd.getYNum(lat)][dd.getXNum(lon)]!=undef){
-				U=gdf.fetchXYBuffer(lon,lat,ubuf[0]); if(U==undef) return null;	// zonal mean advective velocity
-				V=gdf.fetchXYBuffer(lon,lat,vbuf[0]); if(V==undef) return null;	// meridional mean advective velocity
-				
-			}else return null;
+			U=gdf.fetchXYBuffer(lon,lat,ubuf); if(U==undef) return null;	// zonal mean advective velocity
+			V=gdf.fetchXYBuffer(lon,lat,vbuf); if(V==undef) return null;	// meridional mean advective velocity
 			
 		}else{
-			if(ubuf[dd.getYNum(lat)][dd.getXNum(lon)][0]!=undef){
-				//if(lon==100) System.out.println(lon+"\t"+lat+"\t"+time);
-				U=gdf.fetchXYTBuffer(lon,lat,time,ubuf); if(U==undef) return null;	// zonal mean advective velocity
-				V=gdf.fetchXYTBuffer(lon,lat,time,vbuf); if(V==undef) return null;	// meridional mean advective velocity
-				
-			}else return null;
+			U=gdf.fetchXYTBuffer(lon,lat,time,ubuf); if(U==undef) return null;	// zonal mean advective velocity
+			V=gdf.fetchXYTBuffer(lon,lat,time,vbuf); if(V==undef) return null;	// meridional mean advective velocity
 		}
 		
 		StochasticParams params=func.apply(new Record(time,lon,lat)); validateOrder(params);
@@ -198,17 +189,17 @@ public abstract class StochasticModel{
 		
 		List<Particle> ps=new ArrayList<>();
 		
-		int yc=Math.round((r.getLatMax()-r.getLatMin())/del);
-		int xc=Math.round((r.getLonMax()-r.getLonMin())/del);
+		int yc=Math.round((r.getYMax()-r.getYMin())/del);
+		int xc=Math.round((r.getXMax()-r.getXMin())/del);
 		
-		if(((r.getLatMax()-r.getLatMin())%del)/del>0.99f) yc++;
-		if(((r.getLonMax()-r.getLonMin())%del)/del>0.99f) xc++;
+		if(((r.getYMax()-r.getYMin())%del)/del>0.99f) yc++;
+		if(((r.getXMax()-r.getXMin())%del)/del>0.99f) xc++;
 		
 		for(int j=0;j<yc;j++)
 		for(int i=0;i<xc;i++)
 		for(int m=0;m<ensemble;m++){
-			float lon=r.getLonMin()+del*i;
-			float lat=r.getLatMin()+del*j;
+			float lon=r.getXMin()+del*i;
+			float lat=r.getYMin()+del*j;
 			
 			Particle p=deployAt(""+(1000000+idx++),lon,lat,initLen);
 			
@@ -412,8 +403,8 @@ public abstract class StochasticModel{
 		if(!region.inXRange(lon)) switch(BCx){
 			case Landing: return null;
 			case Reflected:{
-				float lonmax=region.getLonMax();
-				float lonmin=region.getLonMin();
+				float lonmax=region.getXMax();
+				float lonmin=region.getXMin();
 				
 				if(lon>lonmax) lon=lonmax-(lon-lonmax);
 				else lon=lonmin+(lonmin-lon);
@@ -424,8 +415,8 @@ public abstract class StochasticModel{
 				break;
 			}
 			case Periodic:{
-				float lonmax=region.getLonMax()+dd.getDXDef()[0];
-				float lonmin=region.getLonMin();
+				float lonmax=region.getXMax()+dd.getDXDef()[0];
+				float lonmin=region.getXMin();
 				
 				if(lon>lonmax) lon-=lonmax-lonmin;
 				else if(lon<lonmin) lon+=lonmax-lonmin;
@@ -438,8 +429,8 @@ public abstract class StochasticModel{
 		if(!region.inYRange(lat)) switch(BCy){
 			case Landing: return null;
 			case Reflected:{
-				float latmax=region.getLatMax();
-				float latmin=region.getLatMin();
+				float latmax=region.getYMax();
+				float latmin=region.getYMin();
 				
 				if(lat>latmax) lat=latmax-(lat-latmax);
 				else lat=latmin+(latmin-lat);
@@ -461,12 +452,12 @@ public abstract class StochasticModel{
 		
 		if(constMean){
 			if(BCx==BCType.Periodic){
-				velX1=gdf.fetchXYBufferPeriodicX(lon,lat,ubuf[0]); if(velX1==undef) return null;
-				velY1=gdf.fetchXYBufferPeriodicX(lon,lat,vbuf[0]); if(velY1==undef) return null;
+				velX1=gdf.fetchXYBufferPeriodicX(lon,lat,ubuf); if(velX1==undef) return null;
+				velY1=gdf.fetchXYBufferPeriodicX(lon,lat,vbuf); if(velY1==undef) return null;
 				
 			}else{
-				velX1=gdf.fetchXYBuffer(lon,lat,ubuf[0]); if(velX1==undef) return null;
-				velY1=gdf.fetchXYBuffer(lon,lat,vbuf[0]); if(velY1==undef) return null;
+				velX1=gdf.fetchXYBuffer(lon,lat,ubuf); if(velX1==undef) return null;
+				velY1=gdf.fetchXYBuffer(lon,lat,vbuf); if(velY1==undef) return null;
 			}
 		}else{
 			if(BCx==BCType.Periodic){

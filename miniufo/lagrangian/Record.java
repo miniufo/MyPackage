@@ -13,10 +13,11 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import miniufo.basic.InterpolationModel;
 import miniufo.diagnosis.MDate;
+import miniufo.diagnosis.SpatialModel;
 
 
 /**
- * used to describe a record of a Lagrangian model at a specific time
+ * Used to describe a record of a Lagrangian particle at a specific time.
  *
  * @version 1.0, 02/01/2007
  * @author  MiniUFO
@@ -47,26 +48,26 @@ public final class Record implements Serializable{
 		data=new float[2];
 	}
 	
-	public Record(long time,float lon,float lat){
+	public Record(long time,float xpos,float ypos){
 		this.time=time;
-		this.xpos =lon;
-		this.ypos =lat;
+		this.xpos=xpos;
+		this.ypos=ypos;
 		
 		data=new float[2];
 	}
 	
-	public Record(long time,float lon,float lat,float uvel,float vvel){
+	public Record(long time,float xpos,float ypos,float uvel,float vvel){
 		this.time=time;
-		this.xpos =lon;
-		this.ypos =lat;
+		this.xpos=xpos;
+		this.ypos=ypos;
 		
 		data=new float[2];
 		data[0]=uvel;
 		data[1]=vvel;
 	}
 	
-	public Record(long time,float lon,float lat,int dataLen){
-		this(time,lon,lat);
+	public Record(long time,float xpos,float ypos,int dataLen){
+		this(time,xpos,ypos);
 		
 		data=new float[dataLen];
 		
@@ -75,10 +76,59 @@ public final class Record implements Serializable{
 	
 	public Record(Record r){
 		this.time=r.time;
-		this.xpos =r.xpos;
-		this.ypos =r.ypos;
+		this.xpos=r.xpos;
+		this.ypos=r.ypos;
 		
 		if(r.data!=null) data=r.data.clone();
+	}
+	
+	
+	/**
+	 * Compute x-distance relative to the position of another record.
+	 * 
+	 * @param	r		another record
+	 * @param	llpos	lat/lon position (degree) or Y/X position (m)
+	 */
+	public float cXDistanceTo(Record r,boolean llpos){
+		if(  xpos==undef||  ypos==undef) return undef;
+		if(r.xpos==undef||r.ypos==undef) return undef;
+		
+		if(llpos)	// in unit of degree (lat/lon grid)
+			return (float)(SpatialModel.EARTH_RADIUS*(xpos-r.xpos)*Math.PI/180.0*Math.cos((ypos+r.ypos)/2.0));
+		else		// in unit of meter (cartesian grid)
+			return Math.abs(xpos-r.xpos);
+	}
+	
+	/**
+	 * Compute y-distance relative to the position of another record.
+	 * 
+	 * @param	r		another record
+	 * @param	llpos	lat/lon position (degree) or Y/X position (m)
+	 */
+	public float cYDistanceTo(Record r,boolean llpos){
+		if(  xpos==undef||  ypos==undef) return undef;
+		if(r.xpos==undef||r.ypos==undef) return undef;
+		
+		if(llpos)	// in unit of degree (lat/lon grid)
+			return (float)(SpatialModel.EARTH_RADIUS*(ypos-r.ypos)*Math.PI/180.0);
+		else		// in unit of meter (cartesian grid)
+			return Math.abs(ypos-r.ypos);
+	}
+	
+	/**
+	 * Compute total-distance relative to the position of another record.
+	 * 
+	 * @param	r		another record
+	 * @param	llpos	lat/lon position (degree) or Y/X position (m)
+	 */
+	public float cDistanceTo(Record r,boolean llpos){
+		if(  xpos==undef||  ypos==undef) return undef;
+		if(r.xpos==undef||r.ypos==undef) return undef;
+		
+		if(llpos)	// in unit of degree (lat/lon grid)
+			return SpatialModel.cSphericalDistanceByDegree(xpos,ypos,r.xpos,r.ypos);
+		else		// in unit of meter (cartesian grid)
+			return (float)Math.hypot(xpos-r.xpos,ypos-r.ypos);
 	}
 	
 	
@@ -170,12 +220,39 @@ public final class Record implements Serializable{
 	/**
      * used to print out
      */
-	public String toString(){
-		return String.format("%9.3f%10.3f%10.3f%10.3f%19s",xpos,ypos,data[0],data[1],time);
+	public String toString(){ return toStringSimple(true);}
+	
+	public String toString(boolean llpos,boolean wrtAtt){
+		if(wrtAtt)
+			return toStringFull(llpos);
+		else
+			return toStringSimple(llpos);
 	}
 	
-	public String toString(boolean llpos){
-		return String.format("%9.3f%10.3f%10.3f%10.3f%19s",xpos/1000f,ypos/1000f,data[0],data[1],time);
+	
+	/*** helper methods ***/
+	private String toStringSimple(boolean llpos){
+		return String.format(
+			"%9.3f%10.3f%19s%10.3f%10.3f",
+			xpos/(llpos?1f:1000f),ypos/(llpos?1f:1000f),time,data[0],data[1]
+		);
+	}
+	
+	private String toStringFull(boolean llpos){
+		StringBuilder format=new StringBuilder("%9.3f%10.3f%19s");
+		
+		Object[] os=new Object[data.length+3];
+		
+		os[0]=xpos/(llpos?1f:1000f);
+		os[1]=ypos/(llpos?1f:1000f);
+		os[2]=time;
+		
+		for(int i=0;i<data.length;i++){
+			format.append("%10.3f");
+			os[i+3]=data[i];
+		}
+		
+		return String.format(format.toString(),os);
 	}
 	
 	

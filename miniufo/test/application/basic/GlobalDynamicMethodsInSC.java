@@ -29,7 +29,7 @@ public final class GlobalDynamicMethodsInSC extends DynamicMethodsInSC{
 	public GlobalDynamicMethodsInSC(SphericalSpatialModel ssm){
 		super(ssm);
 		
-		if(!ssm.isZonalPeriodic())
+		if(!ssm.isPeriodicX())
 		throw new IllegalArgumentException("Not a zonal periodic model");
 	}
 	

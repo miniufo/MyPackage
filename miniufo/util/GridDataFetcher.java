@@ -79,7 +79,7 @@ public final class GridDataFetcher{
 	 * 
 	 * @return	xybuf	2-D buffer data
 	 */
-	public float[][] prepareXYBuffer(String vname,int tstep,int zstep){
+	public Variable prepareXYBuffer(String vname,int tstep,int zstep){
 		return prepareXYBuffer(vname,tstep,zstep,0);
 	}
 	
@@ -93,7 +93,7 @@ public final class GridDataFetcher{
 	 * 
 	 * @return	xybuf	2-D buffer data
 	 */
-	public float[][] prepareXYBuffer(String vname,int tstep,int zstep,int expand){
+	public Variable prepareXYBuffer(String vname,int tstep,int zstep,int expand){
 		if(tstep<1||tstep>dd.getTCount())
 		throw new IllegalArgumentException("t-step ("+tstep+") should be in [1 "+dd.getTCount()+"]");
 		
@@ -109,13 +109,12 @@ public final class GridDataFetcher{
 		
 		dr.readData(xybuf);
 		
-		tlev =tstep;
-		zlev =zstep;
-		undef=xybuf.getUndef();
+		tlev=tstep;
+		zlev=zstep;
 		
 		expandXY(xybuf,expand);
 		
-		return xybuf.getData()[0][0];
+		return xybuf;
 	}
 	
 	
@@ -127,7 +126,7 @@ public final class GridDataFetcher{
 	 * 
 	 * @return	xyzbuf	3-D buffer data
 	 */
-	public float[][][] prepareXYZBuffer(String vname,int tstep){
+	public Variable prepareXYZBuffer(String vname,int tstep){
 		return prepareXYZBuffer(vname,tstep,1,dd.getZCount(),0);
 	}
 	
@@ -142,7 +141,7 @@ public final class GridDataFetcher{
 	 * 
 	 * @return	xyzbuf	3-D buffer data
 	 */
-	public float[][][] prepareXYZBuffer(String vname,int tstep,int zstr,int zlen,int expand){
+	public Variable prepareXYZBuffer(String vname,int tstep,int zstr,int zlen,int expand){
 		if(tstep<1||tstep>dd.getTCount())
 		throw new IllegalArgumentException("t-step should be in [1 "+dd.getTCount()+"]");
 		if(zstr<1||zstr>dd.getZCount())
@@ -161,12 +160,11 @@ public final class GridDataFetcher{
 		
 		dr.readData(xyzbuf);
 		
-		tlev =tstep;
-		undef=xyzbuf.getUndef();
+		tlev=tstep;
 		
 		expandXY(xyzbuf,expand);
 		
-		return xyzbuf.getData()[0];
+		return xyzbuf;
 	}
 	
 	
@@ -179,7 +177,7 @@ public final class GridDataFetcher{
 	 * 
 	 * @return	xytbuf	3-D buffer data
 	 */
-	public float[][][] prepareXYTBuffer(String vname,int zstep){
+	public Variable prepareXYTBuffer(String vname,int zstep){
 		return prepareXYTBuffer(vname,zstep,1,dd.getTCount(),0);
 	}
 	
@@ -194,7 +192,7 @@ public final class GridDataFetcher{
 	 * 
 	 * @return	xytbuf	3-D buffer data
 	 */
-	public float[][][] prepareXYTBuffer(String vname,int zstep,int tstr,int tlen,int expand){
+	public Variable prepareXYTBuffer(String vname,int zstep,int tstr,int tlen,int expand){
 		if(zstep<1||zstep>dd.getZCount())
 		throw new IllegalArgumentException("z-step should be in [1 "+dd.getZCount()+"]");
 		if(tstr<1||tstr>dd.getTCount())
@@ -213,13 +211,12 @@ public final class GridDataFetcher{
 		
 		dr.readData(xytbuf);
 		
-		zlev =zstep;
-		tlev =tstr;
-		undef=xytbuf.getUndef();
+		zlev=zstep;
+		tlev=tstr;
 		
 		expandXYT(xytbuf,expand);
 		
-		return xytbuf.getData()[0];
+		return xytbuf;
 	}
 	
 	
@@ -230,17 +227,21 @@ public final class GridDataFetcher{
 	 * @param	ypos	y-position (unit of degree or m) of the point to be fetch
 	 * @param	xybuf	XY-slice buffer obtained from calling prepareXYSliceBuffer
 	 */
-	public float fetchXYBuffer(float xpos,float ypos,float[][] xybuf){
+	public float fetchXYBuffer(float xpos,float ypos,Variable xybuf){
+		undef=xybuf.getUndef();
+		
+		float[][] xyb=xybuf.getData()[0][0];
+		
 		if(region.inRange(xpos,ypos)){
 			int xtag=dd.getXLENum(xpos);
 			int ytag=dd.getYLENum(ypos);
 			int xend=xtag==dd.getXCount()-1?xtag:xtag+1;
 			int yend=ytag==dd.getYCount()-1?ytag:ytag+1;
 			
-			float lt=xybuf[yend][xtag];	if(lt==undef) return undef;
-			float lb=xybuf[ytag][xtag];	if(lb==undef) return undef;
-			float rb=xybuf[ytag][xend];	if(rb==undef) return undef;
-			float rt=xybuf[yend][xend];	if(rt==undef) return undef;
+			float lt=xyb[yend][xtag];	if(lt==undef) return undef;
+			float lb=xyb[ytag][xtag];	if(lb==undef) return undef;
+			float rb=xyb[ytag][xend];	if(rb==undef) return undef;
+			float rt=xyb[yend][xend];	if(rt==undef) return undef;
 			
 			float dx1=(xpos-xdef[xtag])/dxdef[xend-1];
 			float dy1=(ypos-ydef[ytag])/dydef[yend-1];
@@ -250,17 +251,21 @@ public final class GridDataFetcher{
 		}else return undef;
 	}
 	
-	public float fetchXYBufferPeriodicX(float xpos,float ypos,float[][] xybuf){
+	public float fetchXYBufferPeriodicX(float xpos,float ypos,Variable xybuf){
+		undef=xybuf.getUndef();
+		
+		float[][] xyb=xybuf.getData()[0][0];
+		
 		if(region.inYRange(ypos)){
-			int xtag=dd.getXLENumPeriodicX(xpos,dd.getDXDef()[0]);
+			int xtag=dd.getXLENumPeriodicX(xpos);
 			int ytag=dd.getYLENum(ypos);
 			int xend=xtag==dd.getXCount()-1?0:xtag+1;
 			int yend=ytag==dd.getYCount()-1?ytag:ytag+1;
 			
-			float lt=xybuf[yend][xtag];	if(lt==undef) return undef;
-			float lb=xybuf[ytag][xtag];	if(lb==undef) return undef;
-			float rb=xybuf[ytag][xend];	if(rb==undef) return undef;
-			float rt=xybuf[yend][xend];	if(rt==undef) return undef;
+			float lt=xyb[yend][xtag];	if(lt==undef) return undef;
+			float lb=xyb[ytag][xtag];	if(lb==undef) return undef;
+			float rb=xyb[ytag][xend];	if(rb==undef) return undef;
+			float rt=xyb[yend][xend];	if(rt==undef) return undef;
 			
 			float dx1=(xpos-xdef[xtag])/dxdef[xend-1<0?0:xend-1];
 			float dy1=(ypos-ydef[ytag])/dydef[yend-1];
@@ -279,7 +284,11 @@ public final class GridDataFetcher{
 	 * @param	zpos	z-position (unit of Pa or m) of the point to be fetch
 	 * @param	xyzbuf	XYZ-slice buffer obtained from calling prepareXYZBuffer
 	 */
-	public float fetchXYZBuffer(float xpos,float ypos,float zpos,float[][][] xyzbuf){
+	public float fetchXYZBuffer(float xpos,float ypos,float zpos,Variable xyzbuf){
+		undef=xyzbuf.getUndef();
+		
+		float[][][] xyzb=xyzbuf.getData()[0];
+		
 		if(region.inRange(xpos,ypos)){
 			int xtag=dd.getXLENum(xpos);
 			int ytag=dd.getYLENum(ypos);
@@ -292,15 +301,15 @@ public final class GridDataFetcher{
 			int yend=ytag==dd.getYCount()-1?ytag:ytag+1;
 			int zend=ztag==dd.getZCount()-1?ztag:ztag+1;
 			
-			float ltl=xyzbuf[ztag][yend][xtag];	if(ltl==undef) return undef;
-			float lbl=xyzbuf[ztag][ytag][xtag];	if(lbl==undef) return undef;
-			float rbl=xyzbuf[ztag][ytag][xend];	if(rbl==undef) return undef;
-			float rtl=xyzbuf[ztag][yend][xend];	if(rtl==undef) return undef;
+			float ltl=xyzb[ztag][yend][xtag];	if(ltl==undef) return undef;
+			float lbl=xyzb[ztag][ytag][xtag];	if(lbl==undef) return undef;
+			float rbl=xyzb[ztag][ytag][xend];	if(rbl==undef) return undef;
+			float rtl=xyzb[ztag][yend][xend];	if(rtl==undef) return undef;
 			
-			float ltu=xyzbuf[zend][yend][xtag];	if(ltu==undef) return undef;
-			float lbu=xyzbuf[zend][ytag][xtag];	if(lbu==undef) return undef;
-			float rbu=xyzbuf[zend][ytag][xend];	if(rbu==undef) return undef;
-			float rtu=xyzbuf[zend][yend][xend];	if(rtu==undef) return undef;
+			float ltu=xyzb[zend][yend][xtag];	if(ltu==undef) return undef;
+			float lbu=xyzb[zend][ytag][xtag];	if(lbu==undef) return undef;
+			float rbu=xyzb[zend][ytag][xend];	if(rbu==undef) return undef;
+			float rtu=xyzb[zend][yend][xend];	if(rtu==undef) return undef;
 			
 			float dx1=(xpos-xdef[xtag])/dxdef[xend-1];
 			float dy1=(ypos-ydef[ytag])/dydef[yend-1];
@@ -314,9 +323,13 @@ public final class GridDataFetcher{
 		}else return undef;
 	}
 	
-	public float fetchXYZBufferPeriodicX(float xpos,float ypos,float zpos,float[][][] xyzbuf){
+	public float fetchXYZBufferPeriodicX(float xpos,float ypos,float zpos,Variable xyzbuf){
+		undef=xyzbuf.getUndef();
+		
+		float[][][] xyzb=xyzbuf.getData()[0];
+		
 		if(region.inYRange(ypos)){
-			int xtag=dd.getXLENumPeriodicX(xpos,dd.getDXDef()[0]);
+			int xtag=dd.getXLENumPeriodicX(xpos);
 			int ytag=dd.getYLENum(ypos);
 			int ztag=dd.getZLENum(zpos);
 			if(ztag==-1) throw new IllegalArgumentException(
@@ -327,15 +340,15 @@ public final class GridDataFetcher{
 			int yend=ytag==dd.getYCount()-1?ytag:ytag+1;
 			int zend=ztag==dd.getZCount()-1?ztag:ztag+1;
 			
-			float ltl=xyzbuf[ztag][yend][xtag];	if(ltl==undef) return undef;
-			float lbl=xyzbuf[ztag][ytag][xtag];	if(lbl==undef) return undef;
-			float rbl=xyzbuf[ztag][ytag][xend];	if(rbl==undef) return undef;
-			float rtl=xyzbuf[ztag][yend][xend];	if(rtl==undef) return undef;
+			float ltl=xyzb[ztag][yend][xtag];	if(ltl==undef) return undef;
+			float lbl=xyzb[ztag][ytag][xtag];	if(lbl==undef) return undef;
+			float rbl=xyzb[ztag][ytag][xend];	if(rbl==undef) return undef;
+			float rtl=xyzb[ztag][yend][xend];	if(rtl==undef) return undef;
 			
-			float ltu=xyzbuf[zend][yend][xtag];	if(ltu==undef) return undef;
-			float lbu=xyzbuf[zend][ytag][xtag];	if(lbu==undef) return undef;
-			float rbu=xyzbuf[zend][ytag][xend];	if(rbu==undef) return undef;
-			float rtu=xyzbuf[zend][yend][xend];	if(rtu==undef) return undef;
+			float ltu=xyzb[zend][yend][xtag];	if(ltu==undef) return undef;
+			float lbu=xyzb[zend][ytag][xtag];	if(lbu==undef) return undef;
+			float rbu=xyzb[zend][ytag][xend];	if(rbu==undef) return undef;
+			float rtu=xyzb[zend][yend][xend];	if(rtu==undef) return undef;
 			
 			float dx1=(xpos-xdef[xtag])/dxdef[xend-1<0?0:xend-1];
 			float dy1=(ypos-ydef[ytag])/dydef[yend-1];
@@ -358,24 +371,32 @@ public final class GridDataFetcher{
 	 * @param	tim		time in long format
 	 * @param	xytbuf	XYT-slice buffer obtained from calling prepareXYSliceBuffer
 	 */
-	public float fetchXYTBuffer(float xpos,float ypos,long tim,float[][][] xytbuf){
+	public float fetchXYTBuffer(float xpos,float ypos,long tim,Variable xytbuf){
+		undef=xytbuf.getUndef();
+		
+		float[][][] xytb=xytbuf.getData()[0];
+		
 		if(region.inRange(xpos,ypos)){
 			int xtag=dd.getXLENum(xpos);
 			int ytag=dd.getYLENum(ypos);
 			int ttag=dd.getTLENum(tim)-tlev+1;
 			int xend=xtag==dd.getXCount()-1?xtag:xtag+1;
 			int yend=ytag==dd.getYCount()-1?ytag:ytag+1;
-			int tend=ttag==xytbuf[0][0].length-1?ttag:ttag+1;
+			int tend=ttag==xytb[0][0].length-1?ttag:ttag+1;
 			
-			float ltp=xytbuf[yend][xtag][ttag];	if(ltp==undef) return undef;
-			float lbp=xytbuf[ytag][xtag][ttag];	if(lbp==undef) return undef;
-			float rbp=xytbuf[ytag][xend][ttag];	if(rbp==undef) return undef;
-			float rtp=xytbuf[yend][xend][ttag];	if(rtp==undef) return undef;
+			if(ttag==-1) throw new IllegalArgumentException(
+				"time "+tim+" outside ["+dd.getTDef().getFirst().getLongTime()+","+dd.getTDef().getLast().getLongTime()+"]"
+			);
 			
-			float ltn=xytbuf[yend][xtag][tend];	if(ltn==undef) return undef;
-			float lbn=xytbuf[ytag][xtag][tend];	if(lbn==undef) return undef;
-			float rbn=xytbuf[ytag][xend][tend];	if(rbn==undef) return undef;
-			float rtn=xytbuf[yend][xend][tend];	if(rtn==undef) return undef;
+			float ltp=xytb[yend][xtag][ttag];	if(ltp==undef) return undef;
+			float lbp=xytb[ytag][xtag][ttag];	if(lbp==undef) return undef;
+			float rbp=xytb[ytag][xend][ttag];	if(rbp==undef) return undef;
+			float rtp=xytb[yend][xend][ttag];	if(rtp==undef) return undef;
+			
+			float ltn=xytb[yend][xtag][tend];	if(ltn==undef) return undef;
+			float lbn=xytb[ytag][xtag][tend];	if(lbn==undef) return undef;
+			float rbn=xytb[ytag][xend][tend];	if(rbn==undef) return undef;
+			float rtn=xytb[yend][xend][tend];	if(rtn==undef) return undef;
 			
 			float dx1=(xpos-xdef[xtag])/dxdef[xend-1];
 			float dy1=(ypos-ydef[ytag])/dydef[yend-1];
@@ -389,24 +410,32 @@ public final class GridDataFetcher{
 		}else return undef;
 	}
 	
-	public float fetchXYTBufferPeriodicX(float xpos,float ypos,long tim,float[][][] xytbuf){
+	public float fetchXYTBufferPeriodicX(float xpos,float ypos,long tim,Variable xytbuf){
+		undef=xytbuf.getUndef();
+		
+		float[][][] xytb=xytbuf.getData()[0];
+		
 		if(region.inYRange(ypos)){
-			int xtag=dd.getXLENumPeriodicX(xpos,dd.getDXDef()[0]);
+			int xtag=dd.getXLENumPeriodicX(xpos);
 			int ytag=dd.getYLENum(ypos);
 			int ttag=dd.getTLENum(tim)-tlev+1;
 			int xend=xtag==dd.getXCount()-1?0:xtag+1;
 			int yend=ytag==dd.getYCount()-1?ytag:ytag+1;
-			int tend=ttag==xytbuf[0][0].length-1?ttag:ttag+1;
+			int tend=ttag==xytb[0][0].length-1?ttag:ttag+1;
 			
-			float ltp=xytbuf[yend][xtag][ttag];	if(ltp==undef) return undef;
-			float lbp=xytbuf[ytag][xtag][ttag];	if(lbp==undef) return undef;
-			float rbp=xytbuf[ytag][xend][ttag];	if(rbp==undef) return undef;
-			float rtp=xytbuf[yend][xend][ttag];	if(rtp==undef) return undef;
+			if(ttag==-1) throw new IllegalArgumentException(
+				"time "+tim+" outside ["+dd.getTDef().getFirst().getLongTime()+","+dd.getTDef().getLast().getLongTime()+"]"
+			);
 			
-			float ltn=xytbuf[yend][xtag][tend];	if(ltn==undef) return undef;
-			float lbn=xytbuf[ytag][xtag][tend];	if(lbn==undef) return undef;
-			float rbn=xytbuf[ytag][xend][tend];	if(rbn==undef) return undef;
-			float rtn=xytbuf[yend][xend][tend];	if(rtn==undef) return undef;
+			float ltp=xytb[yend][xtag][ttag];	if(ltp==undef) return undef;
+			float lbp=xytb[ytag][xtag][ttag];	if(lbp==undef) return undef;
+			float rbp=xytb[ytag][xend][ttag];	if(rbp==undef) return undef;
+			float rtp=xytb[yend][xend][ttag];	if(rtp==undef) return undef;
+			
+			float ltn=xytb[yend][xtag][tend];	if(ltn==undef) return undef;
+			float lbn=xytb[ytag][xtag][tend];	if(lbn==undef) return undef;
+			float rbn=xytb[ytag][xend][tend];	if(rbn==undef) return undef;
+			float rtn=xytb[yend][xend][tend];	if(rtn==undef) return undef;
 			
 			float dx1=(xpos-xdef[xtag])/dxdef[xend-1<0?0:xend-1];
 			float dy1=(ypos-ydef[ytag])/dydef[yend-1];

@@ -169,7 +169,7 @@ public final class Contours{
 		if(number<2)
 		throw new IllegalArgumentException("the number of contour is at least 2");
 		if(meanIntv==0)
-		throw new IllegalArgumentException("mean increment is 0");
+		throw new IllegalArgumentException("mean increment is 0 for "+toString());
 	}
 	
 	

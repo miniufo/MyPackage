@@ -243,8 +243,8 @@ public final class IndexInSC extends EquationInSphericalCoordinate{
 		int tlen=r.getTRange()[2];
 		int outputInterval=Math.round(r.getYRange()[2]*r.getXRange()[2]/20f);
 		
-		if(cus.length!=tlen) throw new IllegalArgumentException("length of cus do not equal time count");
-		if(cvs.length!=tlen) throw new IllegalArgumentException("length of cvs do not equal time count");
+		if(cus.length!=tlen) throw new IllegalArgumentException("length of cus ("+cus.length+") do not equal time count ("+tlen+")");
+		if(cvs.length!=tlen) throw new IllegalArgumentException("length of cus ("+cus.length+") do not equal time count ("+tlen+")");
 		
 		Variable u=new Variable("u",rtmp);
 		Variable v=new Variable("v",rtmp);

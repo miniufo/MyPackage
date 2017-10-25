@@ -19,12 +19,10 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
 import miniufo.application.advanced.CoordinateTransformation;
 import miniufo.application.basic.DynamicMethodsInSC;
 import miniufo.basic.ArrayUtil;
 import miniufo.concurrent.ConcurrentUtil;
-import miniufo.database.DataBaseUtil;
 import miniufo.descriptor.DataDescriptor;
 import miniufo.diagnosis.MDate;
 import miniufo.diagnosis.Range;
@@ -52,8 +50,6 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 	//
 	private int attachedLen=0;
 	
-	private float dlon=0;
-	
 	private BinStatistics bs=null;
 	
 	
@@ -65,16 +61,11 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 	 * @param	dlon		delta lon for periodic boundary condition
 	 * @param	hasST		has spatial terms or not
 	 */
-	public EulerianStatistics(List<? extends Particle> ls,DataDescriptor dd,float dlon,boolean hasST){
+	public EulerianStatistics(List<? extends Particle> ls,DataDescriptor dd,boolean hasST){
 		super(ls,dd);
 		
-		this.dlon=dlon;
 		this.attachedLen=ls.get(0).getRecord(0).getDataLength();
-		this.bs=new BinStatistics(dd,ls,dlon,hasST);
-	}
-	
-	public EulerianStatistics(List<? extends Particle> ls,DataDescriptor dd,boolean hasST){
-		this(ls,dd,0,hasST);
+		this.bs=new BinStatistics(dd,ls,hasST);
 	}
 	
 	
@@ -98,9 +89,7 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 		return re;
 	}
 	
-	public Variable cCount(DataDescriptor dd){ return DataBaseUtil.binningCount(dd,ls,dlon);}
-	
-	public Variable cCount(){ return cCount(dd);}
+	public Variable cCount(){ return new BinningStatistics(dd).binningCount(ls);}
 	
 	
 	/**
@@ -118,7 +107,7 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 		
 		DynamicMethodsInSC dm=new DynamicMethodsInSC(new SphericalSpatialModel(dd));
 		
-		Variable conc=dm.cConcentration(cCount(dd),dlon);
+		Variable conc=dm.cConcentration(cCount());
 		Variable[] ab=dm.c2DGradient(conc);
 		
 		ab[0].divideEq(conc);
@@ -359,7 +348,7 @@ public final class EulerianStatistics extends SingleParticleStatistics{
      * @return	re	means of different data of different seasons, [seasons][AttachedData]
      */
 	public Variable[][] cSeasonalMeans(int[][] seasons,int... idx){
-		return DataBaseUtil.binningSeasonalData(dd,ls,dlon,true,seasons,idx);
+		return new BinningStatistics(dd).binningSeasonalData(ls,seasons,idx);
 	}
 	
 	/**
@@ -674,8 +663,6 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 		
 		private int attachedLen=0;
 		
-		private float dlon=0;
-		
 		private int[][] ptrs=null;
 		
 		// dimension is [y][x][t]
@@ -697,13 +684,12 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 		/**
 		 * constructor
 		 */
-		public BinStatistics(DataDescriptor dd,List<? extends Particle> ls,float dlon,boolean hasST){
+		public BinStatistics(DataDescriptor dd,List<? extends Particle> ls,boolean hasST){
 			this.hasST=hasST;
-			this.dlon=dlon;
 			this.dd   =dd;
 			this.ls   =ls;
 			
-			count=DataBaseUtil.binningCount(dd,ls,dlon);
+			count=new BinningStatistics(dd).binningCount(ls);
 			
 			int y=count.getYCount(),x=count.getXCount();
 			
@@ -792,7 +778,7 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 			for(int i=0,I=p.getTCount();i<I;i++){
 				Record r=p.getRecord(i);
 				
-				int itag=dd.getXNumPeriodicX(r.getXPos(),dlon);
+				int itag=dd.getXNumPeriodicX(r.getXPos());
 				int jtag=dd.getYNum(r.getYPos());
 				
 				MDate md=new MDate(r.getTime());
@@ -1266,7 +1252,7 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 			for(int l=0,L=p.getTCount();l<L;l++){
 				Record r=p.getRecord(l);
 				
-				int itag=dd.getXNumPeriodicX(r.getXPos(),dlon);
+				int itag=dd.getXNumPeriodicX(r.getXPos());
 				int jtag=dd.getYNum(r.getYPos());
 				
 				for(int m=0;m<attachedLen;m++)
@@ -1284,7 +1270,7 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 			for(int l=0,L=p.getTCount();l<L;l++){
 				Record r=p.getRecord(l);
 				
-				int itag=dd.getXNumPeriodicX(r.getXPos(),dlon);
+				int itag=dd.getXNumPeriodicX(r.getXPos());
 				int jtag=dd.getYNum(r.getYPos());
 				int ltag=ptrs[jtag][itag];
 				

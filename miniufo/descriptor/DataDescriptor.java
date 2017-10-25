@@ -13,7 +13,7 @@ import miniufo.util.Region3D;
 
 
 /**
- * used to describe the data of all kinds of weather data
+ * Used to describe the 4D binary data
  *
  * @version 1.0, 02/01/2007
  * @author  MiniUFO
@@ -21,6 +21,9 @@ import miniufo.util.Region3D;
  */
 public abstract class DataDescriptor{
 	//
+	protected boolean periodicX=false;
+	protected boolean periodicY=false;
+	
 	protected TemporalCoordinate tdef=null;
 	protected  SpatialCoordinate zdef=null;
 	protected  SpatialCoordinate ydef=null;
@@ -57,66 +60,66 @@ public abstract class DataDescriptor{
 	
 	public int getTNum(long tt){ return ArrayUtil.getIdxIncre(times,tt);}
 	
-	public int getZNum(float lev){
-		if(zdef.isIncre) return ArrayUtil.getIdxIncre(zdef.getSamples(),lev);
-		else return ArrayUtil.getIdxDecre(zdef.getSamples(),lev);
+	public int getZNum(float zpos){
+		if(zdef.isIncre) return ArrayUtil.getIdxIncre(zdef.getSamples(),zpos);
+		else return ArrayUtil.getIdxDecre(zdef.getSamples(),zpos);
 	}
 	
-	public int getYNum(float lat){ return ArrayUtil.getIdxIncre(ydef.getSamples(),lat);}
+	public int getYNum(float ypos){ return ArrayUtil.getIdxIncre(ydef.getSamples(),ypos);}
 	
-	public int getXNum(float lon){ return ArrayUtil.getIdxIncre(xdef.getSamples(),lon);}
+	public int getXNum(float xpos){ return ArrayUtil.getIdxIncre(xdef.getSamples(),xpos);}
 	
 	public int getTLENum(MDate md){ return getTLENum(md.getLongTime());}
 	
 	public int getTLENum(long tt){ return ArrayUtil.getLEIdxIncre(times,tt);}
 	
-	public int getZLENum(float lev){
-		if(zdef.isIncre) return ArrayUtil.getLEIdxIncre(zdef.getSamples(),lev);
-		else return ArrayUtil.getLEIdxDecre(zdef.getSamples(),lev);
+	public int getZLENum(float zpos){
+		if(zdef.isIncre) return ArrayUtil.getLEIdxIncre(zdef.getSamples(),zpos);
+		else return ArrayUtil.getLEIdxDecre(zdef.getSamples(),zpos);
 	}
 	
-	public int getYLENum(float lat){ return ArrayUtil.getLEIdxIncre(ydef.getSamples(),lat);}
+	public int getYLENum(float ypos){ return ArrayUtil.getLEIdxIncre(ydef.getSamples(),ypos);}
 	
-	public int getXLENum(float lon){ return ArrayUtil.getLEIdxIncre(xdef.getSamples(),lon);}
+	public int getXLENum(float xpos){ return ArrayUtil.getLEIdxIncre(xdef.getSamples(),xpos);}
 	
-	public int getXNumPeriodicX(float lon,float dlon){
-		if(dlon==0) return getXNum(lon);
+	public int getXNumPeriodicX(float xpos){
+		float delx=dxdef[0];
 		
 		float lmin=xdef.getMin();
 		float lmax=xdef.getMax();
-		float lrep=lmax+dlon;	// physically, lrep equals to lmin
+		float lrep=lmax+delx;	// physically, lrep equals to lmin
 		float wide=lrep-lmin;
 		
 		// set lon into [lmin, lrep)
-		while(lon>=lrep) lon-=wide;
-		while(lon< lmin) lon+=wide;
+		while(xpos>=lrep) xpos-=wide;
+		while(xpos< lmin) xpos+=wide;
 		
 		
-		if(lon>lmax){
+		if(xpos>lmax){
 			// process the range (lmax, lrep)
-			if(lon<=lmax+dlon/2f) return xdef.length()-1;
+			if(xpos<=lmax+delx/2f) return xdef.length()-1;
 			else return 0;
 			
 		}else{
 			// process the range [lmin, lmax]
-			return getXNum(lon);
+			return getXNum(xpos);
 		}
 	}
 	
-	public int getXLENumPeriodicX(float lon,float dlon){
-		if(dlon==0) return getXNum(lon);
+	public int getXLENumPeriodicX(float xpos){
+		float delx=dxdef[0];
 		
 		float lmin=xdef.getMin();
 		float lmax=xdef.getMax();
-		float lrep=lmax+dlon;	// physically, lrep equals to lmin
+		float lrep=lmax+delx;	// physically, lrep equals to lmin
 		float wide=lrep-lmin;
 		
 		// set lon into [lmin, lrep)
-		while(lon>=lrep) lon-=wide;
-		while(lon< lmin) lon+=wide;
+		while(xpos>=lrep) xpos-=wide;
+		while(xpos< lmin) xpos+=wide;
 		
-		if(lon>lmax) return xdef.length()-1;	// process the range (lmax, lrep)
-		else return getXLENum(lon);				// process the range [lmin, lmax]
+		if(xpos>lmax) return xdef.length()-1;	// process the range (lmax, lrep)
+		else return getXLENum(xpos);				// process the range [lmin, lmax]
 	}
 	
 	public int getTCount(){ return tdef.length();}
@@ -150,18 +153,9 @@ public abstract class DataDescriptor{
 	
 	public boolean hasData(){ return hasData;}
 	
-	public boolean isPeriodicX(){
-		if(!xdef.islinear) return false;
-		
-		float[] lons=xdef.getSamples();
-		
-		float dlon=xdef.getIncrements()[0];
-		float lon0=lons[lons.length-1]+dlon-360;
-		
-		if(Math.abs((lon0-lons[0])/dlon)>1e-4) return false;
-		
-		return true;
-	}
+	public boolean isPeriodicX(){ return periodicX;}
+	
+	public boolean isPeriodicY(){ return periodicY;}
 	
 	public  long[] getTimes(){return times;}
 	
@@ -216,9 +210,13 @@ public abstract class DataDescriptor{
 	
 	public abstract float getUndef(String vname);
 	
+	public void setPeriodicX(boolean periodicX){ this.periodicX=periodicX;}
+	
+	public void setPeriodicY(boolean periodicY){ this.periodicY=periodicY;}
+	
 	
 	/**
-     * process the data, to radian and to Pa
+     * Post process the data.
      */
 	protected void postProcess(){
 		if(zdef.length()>1) dzdef=zdef.getIncrements();
@@ -240,6 +238,21 @@ public abstract class DataDescriptor{
 	}
 	
 	/**
+     * whether the x-dim is periodic given the total x-range
+     */
+	protected boolean isPeriodic(SpatialCoordinate sc,float range){
+		// not physically but generally true
+		if(!sc.islinear) return false;
+		
+		float delta=sc.getIncrements()[0];
+		float start=sc.getLast()+delta-range;
+		
+		if(Math.abs((start-sc.getFirst())/delta)>1e-4) return false;
+		
+		return true;
+	}
+	
+	/**
      * whether the dimension of the descriptor is the same with the given one
      */
 	public boolean isLikes(DataDescriptor dd){
@@ -258,6 +271,22 @@ public abstract class DataDescriptor{
 		if(tdef.length()!=dd.tdef.length()) return false;
 		if(ydef.length()!=dd.ydef.length()) return false;
 		if(xdef.length()!=dd.xdef.length()) return false;
+		
+		return true;
+	}
+	
+	/**
+     * Whether the given point is in the domain area.
+     *
+     * @param	lon		longitude (degree) of the given point
+     * @param	lat		latitude  (degree) of the given point
+     */
+	public boolean isInArea(float xcoord,float ycoord){
+		float x0=xdef.getFirst(),xN=xdef.getLast();
+		float y0=ydef.getFirst(),yN=ydef.getLast();
+		
+		if(!periodicX&&(xcoord<x0||xcoord>xN)) return false;
+		if(!periodicY&&(ycoord<y0||ycoord>yN)) return false;
 		
 		return true;
 	}

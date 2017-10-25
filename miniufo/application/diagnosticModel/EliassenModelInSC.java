@@ -37,8 +37,8 @@ implements EllipticEquationInterface{
 	public EliassenModelInSC(SphericalSpatialModel ssm){
 		super(ssm);
 		
-		if(!ssm.isZonalPeriodic()) throw new IllegalArgumentException("spatial model should be zonally periodic");
-		if(!ssm.isLinearModel()  ) throw new IllegalArgumentException("EliassenModelInSC requires a linear model");
+		if(!ssm.isPeriodicX()  ) throw new IllegalArgumentException("spatial model should be zonally periodic");
+		if(!ssm.isLinearModel()) throw new IllegalArgumentException("EliassenModelInSC requires a linear model");
 	}
 	
 	
@@ -215,7 +215,7 @@ implements EllipticEquationInterface{
 	}
 	
 	/**
-     * Calculate diabatic heating rate dï¿½ï¿½/dt = Qm / (Cp * ï¿½ï¿½).
+     * Calculate diabatic heating rate d¦È/dt = Qm / (Cp * ¦Ð).
      *
      * @param	Qm	zonally averaged heating rate (W kg^-1 or m^2 s^-3)
      *

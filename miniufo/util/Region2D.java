@@ -8,7 +8,7 @@ package miniufo.util;
 
 
 /**
- * define a 2D region
+ * Define a 2D region.
  *
  * @version 1.0, 2014.08.12
  * @author  MiniUFO
@@ -16,48 +16,46 @@ package miniufo.util;
  */
 public final class Region2D{
 	//
-	private float lonmin=0;
-	private float lonmax=0;
-	private float latmin=0;
-	private float latmax=0;
+	private float xmin=0;
+	private float xmax=0;
+	private float ymin=0;
+	private float ymax=0;
 	
-	private String name =null;
+	private String name=null;
 	
 	
 	/**
-	 * constructor
+	 * Constructor.
 	 * 
-	 * @param	lonmin	west-bounded of longitude
-	 * @param	lonmax	east-bounded of longitude
-	 * @param	latmin	south-bounded of latitude
-	 * @param	latmax	north-bounded of latitude
+	 * @param	xmin	west  bounded
+	 * @param	ymin	south bounded
+	 * @param	xmax	east  bounded
+	 * @param	ymax	north bounded
 	 */
-	public Region2D(float lonmin,float latmin,float lonmax,float latmax,String name){
-		if(lonmax<lonmin)
-		throw new IllegalArgumentException("lonmax ("+lonmax+") should be larger than lonmin ("+lonmin+")");
-		if(latmax<latmin)
-		throw new IllegalArgumentException("latmax ("+latmax+") should be larger than latmin ("+latmin+")");
+	public Region2D(float xmin,float ymin,float xmax,float ymax,String name){
+		if(xmax<xmin)
+		throw new IllegalArgumentException("xmax ("+xmax+") should be larger than xmin ("+xmin+")");
+		if(ymax<ymin)
+		throw new IllegalArgumentException("ymax ("+ymax+") should be larger than ymin ("+ymin+")");
 		
-		this.lonmin=lonmin;
-		this.lonmax=lonmax;
-		this.latmin=latmin;
-		this.latmax=latmax;
+		this.xmin=xmin;
+		this.xmax=xmax;
+		this.ymin=ymin;
+		this.ymax=ymax;
 		this.name  =name;
 	}
 	
-	public Region2D(float lonmin,float latmin,float lonmax,float latmax){
-		this(lonmin,latmin,lonmax,latmax,"noName");
-	}
+	public Region2D(float xmin,float ymin,float xmax,float ymax){ this(xmin,ymin,xmax,ymax,"noName");}
 	
 	
 	/*** getor and setor ***/
-	public float getLonMin(){ return lonmin;}
+	public float  getXMin(){ return xmin;}
 	
-	public float getLonMax(){ return lonmax;}
+	public float  getXMax(){ return xmax;}
 	
-	public float getLatMin(){ return latmin;}
+	public float  getYMin(){ return ymin;}
 	
-	public float getLatMax(){ return latmax;}
+	public float  getYMax(){ return ymax;}
 	
 	public String getName(){ return name;}
 	
@@ -65,21 +63,21 @@ public final class Region2D{
 	/**
 	 * whether a given point is in the region
 	 * 
-	 * @param	lon		longitude of a give location
-	 * @param	lat		latitude of a give location
+	 * @param	x	x-coordinate of a give location
+	 * @param	y	y-coordinate of a give location
 	 */
-	public boolean inRange(float lon,float lat){ return inXRange(lon)&&inYRange(lat);}
+	public boolean inRange(float x,float y){ return inXRange(x)&&inYRange(y);}
 	
-	public boolean inXRange(float lon){ return lon>=lonmin&&lon<=lonmax;}
+	public boolean inXRange(float x){ return x>=xmin&&x<=xmax;}
 	
-	public boolean inYRange(float lat){ return lat>=latmin&&lat<=latmax;}
+	public boolean inYRange(float y){ return y>=ymin&&y<=ymax;}
 	
 	
 	/**
 	 * used to print out
 	 */
 	public String toString(){
-		return String.format("%s: Lon[%5.1f ~ %5.1f]; Lat[%5.1f ~ %5.1f]",name,lonmin,lonmax,latmin,latmax);
+		return String.format("%s: X[%8.3f ~ %8.3f]; Y[%8.3f ~ %8.3f]",name,xmin,xmax,ymin,ymax);
 	}
 	
 	

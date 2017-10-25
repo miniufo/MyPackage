@@ -1,5 +1,5 @@
 /**
- * @(#)DescriptorFactory.java	1.0 07/02/01
+ * @(#)DiagnosisFactory.java	1.0 07/02/01
  *
  * Copyright 2007 MiniUFO, All rights reserved.
  * MiniUFO Studio. Use is subject to license terms.
@@ -8,6 +8,9 @@ package miniufo.diagnosis;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
 import miniufo.io.DataRead;
 import miniufo.io.DataIOFactory;
 import miniufo.descriptor.CsmDescriptor;
@@ -18,7 +21,7 @@ import miniufo.descriptor.NetCDFDescriptor;
 
 
 /**
- * return a specific DataDescriptor
+ * Wrapper of a DataDescriptor and associated variables.
  *
  * @version 1.0, 02/01/2007
  * @author  MiniUFO
@@ -29,7 +32,6 @@ public final class DiagnosisFactory{
 	private static boolean print=true;
 	
 	private DataDescriptor dd=null;
-	private SpatialModel   sm=null;
 	
 	public static final DiagnosisFactory DF10=
 	DiagnosisFactory.parseContent(
@@ -725,22 +727,57 @@ public final class DiagnosisFactory{
 	}
 	
 	
+	/**
+	 * Get variables from tstr to tend steps and return them as a stream of variable[].
+	 * This may be useful for long-time dataset analysis to avoid out-of-memory error.
+	 * 
+	 * @param	tstr	start time step (from 1), inclusive
+	 * @param	tend	end   time step (from 1), inclusive
+	 * @param	v1		the first variable name
+	 * @param	others	other names of variables
+	 */
+	public Stream<Variable[]> getVariablesTimeByTime(int tstr,int tend,String v1,String... others){
+		if(tstr<1   ) throw new IllegalArgumentException("tstr should be >= 1");
+		if(tstr>tend) throw new IllegalArgumentException("tstr should not be larger than tend");
+		
+		String[] vnames=new String[others.length+1];
+		
+		vnames[0]=v1;
+		System.arraycopy(others,0,vnames,1,others.length);
+		
+		return IntStream.range(tstr,tend+1).sequential().mapToObj(l->{
+			return getVariables(new Range("t("+l+","+l+")",dd),vnames);
+		});
+	}
+	
+	public Stream<Variable[]> getVariablesTimeByTime(String v1,String... others){
+		return getVariablesTimeByTime(1,dd.getTCount()+1,v1,others);
+	}
+	
+	/**
+	 * Get a variable from tstr to tend steps and return it as a stream of variable.
+	 * This may be useful for long-time dataset analysis to avoid out-of-memory error.
+	 * 
+	 * @param	tstr	start time step (from 1), inclusive
+	 * @param	tend	end   time step (from 1), inclusive
+	 * @param	vname	the variable name
+	 */
+	public Stream<Variable> getVariableTimeByTime(int tstr,int tend,String vname){
+		if(tstr<0   ) throw new IllegalArgumentException("tstr should be > 0");
+		if(tstr>tend) throw new IllegalArgumentException("tstr should not be larger than tend");
+		
+		return IntStream.range(tstr,tend).sequential().mapToObj(l->{
+			return getVariables(new Range("t("+l+","+l+")",dd),vname)[0];
+		});
+	}
+	
+	public Stream<Variable> getVariableTimeByTime(String vname){
+		return getVariableTimeByTime(1,dd.getTCount()+1,vname);
+	}
+	
+	
 	/*** getor and setor ***/
 	public DataDescriptor getDataDescriptor(){ return dd;}
-	
-	public SpatialModel getSpatialModel(){
-		if(sm==null){
-			if(dd instanceof CsmDescriptor)
-				sm=new CylindricalSpatialModel((CsmDescriptor)dd);
-			else if(dd instanceof CtsDescriptor)
-				sm=new CartesianSpatialModel((CtsDescriptor)dd);
-			else
-				sm=new SphericalSpatialModel(dd);
-			
-			return sm;
-			
-		}else return sm;
-	}
 	
 	public Variable[] getVariables(Range r,String... names){
 		int count=names.length;
@@ -779,8 +816,6 @@ public final class DiagnosisFactory{
 	public static DataDescriptor getDataDescriptor(String path){
 		return parseFile(path).dd;
 	}
-	
-	public static SpatialModel getSpaTialModel(String path){ return parseFile(path).getSpatialModel();}
 	
 	public static Variable[] getVariables(String path,String range,String... names){
 		DiagnosisFactory df=parseFile(path);

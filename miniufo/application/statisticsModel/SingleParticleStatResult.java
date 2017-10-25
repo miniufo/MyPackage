@@ -1,5 +1,5 @@
 /**
- * @(#)LagrangianStatResult.java	1.0 2013.07.21
+ * @(#)SingleParticleStatResult.java	1.0 2013.07.21
  *
  * Copyright 2007 MiniUFO, All rights reserved.
  * MiniUFO Studio. Use is subject to license terms.
@@ -11,13 +11,13 @@ import java.io.IOException;
 
 
 /**
- * result of Lagrangian statistics
+ * Result of single-particle statistics.
  *
  * @version 1.0, 2013.07.21
  * @author  MiniUFO
  * @since   MDK1.0
  */
-public final class LagrangianStatResult{
+public final class SingleParticleStatResult{
 	//
 	int     dt=0;	// delta-T in seconds
 	int  tRad =0;	// maximum time lag
@@ -86,7 +86,7 @@ public final class LagrangianStatResult{
 	 * @param	lat2	end latitude for the bin
 	 * @param	tRad	maximum time lag
 	 */
-	public LagrangianStatResult(int tRad){
+	public SingleParticleStatResult(int tRad){
 		if(tRad<1) throw new IllegalArgumentException("tRad should be positive");
 		
 		this.tRad=tRad;

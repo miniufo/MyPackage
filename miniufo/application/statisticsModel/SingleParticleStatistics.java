@@ -16,30 +16,18 @@ import miniufo.lagrangian.Record;
 
 
 /**
- * Single particle statistics
+ * Single particle statistics.
  *
  * @version 1.0, 02/01/2007
  * @author  MiniUFO
  * @since   MDK1.0
  */
-public abstract class SingleParticleStatistics{
-	//
-	protected List<? extends Particle> ls=null;
-	
-	protected DataDescriptor dd=null;
-	
+public abstract class SingleParticleStatistics extends ParticleStatistics{
 	
 	/**
 	 * prevent from initialization
 	 */
-	public SingleParticleStatistics(List<? extends Particle> ls,DataDescriptor dd){
-		this.ls=ls;
-		this.dd=dd;
-	}
-	
-	
-	/*** getor and setor ***/
-	public DataDescriptor getDataDescriptor(){ return dd;}
+	public SingleParticleStatistics(List<? extends Particle> ls,DataDescriptor dd){ super(ls,dd);}
 	
 	
 	/**
@@ -79,10 +67,10 @@ public abstract class SingleParticleStatistics{
 	
 	
 	/*** helper methods ***/
-	private static void writeDistribution(float[] lons,float[] lats,String path){
+	private static void writeDistribution(float[] xpos,float[] ypos,String path){
 		StringBuilder sb=new StringBuilder();
 		
-		for(int l=0,L=lons.length;l<L;l++) sb.append(lons[l]+" "+lats[l]+"\n");
+		for(int l=0,L=xpos.length;l<L;l++) sb.append(xpos[l]+" "+ypos[l]+"\n");
 		
 		try(FileWriter fw=new FileWriter(path)){
 			fw.write(sb.toString());

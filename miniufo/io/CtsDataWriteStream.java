@@ -93,7 +93,7 @@ public final class CtsDataWriteStream extends CtlDataWriteStream{
 			start=last.getRange().getXRange()[0];
 			if(dd.xLinear()){
 				sb.append("\nxdef "+String.format("%4d",last.getXCount())+" linear ");
-				sb.append(dd.getDXDef()[0]+"\n");
+				sb.append(dd.getXDef().getSamples()[start-1]+" "+dd.getDXDef()[0]+"\n");
 				
 			}else{
 				if(last.getXCount()!=1){
@@ -110,7 +110,7 @@ public final class CtsDataWriteStream extends CtlDataWriteStream{
 			start=last.getRange().getYRange()[0];
 			if(dd.yLinear()){
 				sb.append("ydef "+String.format("%4d",last.getYCount())+" linear ");
-				sb.append(dd.getDYDef()[0]+"\n");
+				sb.append(dd.getYDef().getSamples()[start-1]+" "+dd.getDYDef()[0]+"\n");
 				
 			}else{
 				if(last.getYCount()!=1){
@@ -181,7 +181,7 @@ public final class CtsDataWriteStream extends CtlDataWriteStream{
 			
 			CtsDescriptor cd=(CtsDescriptor)dd;
 			sb.append("f0   "+cd.getF0  ()+"\n");
-			sb.append("Beta "+cd.getBeta()+"\n");
+			sb.append("beta "+cd.getBeta()+"\n");
 			
 			sb.append(toStringBuilder(al,nm));
 			

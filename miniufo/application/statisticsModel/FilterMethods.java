@@ -15,7 +15,7 @@ import miniufo.statistics.FilterModel;
 
 
 /**
- * basic methods of all kinds of filters
+ * Basic filter methods for Variable
  *
  * @version 1.0, 02/01/2007
  * @author  MiniUFO
@@ -341,18 +341,16 @@ public final class FilterMethods extends StatisticsApplication{
 	
 	
 	/**
-     * running mean of T-dimension
+     * Running mean along T-dimension
      *
      * @param	v	a given variable
-     * @param	p	points of running length
-     *
-     * @return
+     * @param	p	points of running length (should be odd)
      */
 	public static void TRunningMean(Variable v,int p){
-		int t=v.getTCount(),	z=v.getZCount(),	y=v.getYCount(),	x=v.getXCount();
+		int t=v.getTCount(),z=v.getZCount();
+		int y=v.getYCount(),x=v.getXCount();
 		
 		float undef=v.getUndef();
-		float[] tmp=new float[t];
 		
 		float[][][][] vdata=v.getData();
 		
@@ -361,40 +359,28 @@ public final class FilterMethods extends StatisticsApplication{
 			
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++)
-	cc:		for(int i=0;i<x;i++){
-				for(int l=0;l<t;l++){
-					tmp[l]=vdata[l][k][j][i];
-					
-					if(tmp[l]==undef){
-						for(int ll=0;ll<t;ll++) vdata[ll][k][j][i]=undef;
-						continue cc;
-					}
-				}
+			for(int i=0;i<x;i++){
+				for(int l=0;l<t;l++) buf[l]=vdata[l][k][j][i];
 				
-				miniufo.statistics.FilterModel.runningMean(tmp,buf,p);
+				float[] re=FilterModel.runningMean(buf,p,undef);
 				
-				for(int l=0;l<t;l++) vdata[l][k][j][i]=buf[l];
+				for(int l=0;l<t;l++) vdata[l][k][j][i]=re[l];
 			}
 			
 		}else{
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++)
-	cc:		for(int i=0;i<x;i++){
-				for(int l=0;l<t;l++) if(vdata[k][j][i][l]==undef){
-					for(int ll=0;ll<t;ll++) vdata[k][j][i][ll]=undef;
-					continue cc;
-				}
-		
-				miniufo.statistics.FilterModel.runningMean(vdata[k][j][i],tmp,p);
+			for(int i=0;i<x;i++){
+				float[] re=FilterModel.runningMean(vdata[k][j][i],p,undef);
 				
-				System.arraycopy(tmp,0,vdata[k][j][i],0,t);
+				System.arraycopy(re,0,vdata[k][j][i],0,t);
 			}
 		}
 	}
 	
 	
 	/**
-     * band filter of one order Butterworth
+     * Band filter of one order Butterworth
      *
      * @param	v	a given Variable
      * @param	t1	lower boundry of time

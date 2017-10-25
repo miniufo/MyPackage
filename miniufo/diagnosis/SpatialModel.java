@@ -20,7 +20,7 @@ import miniufo.mathsphysics.MathsPhysicsUtil;
 
 
 /**
- * basic class for spatial model
+ * Abstract class for spatial model.
  *
  * @version 1.0, 02/01/2007
  * @author  MiniUFO
@@ -28,6 +28,9 @@ import miniufo.mathsphysics.MathsPhysicsUtil;
  */
 public abstract class SpatialModel{
 	//
+	protected boolean periodicX=false;
+	protected boolean periodicY=false;
+	
 	protected TemporalCoordinate tdef=null;
 	protected  SpatialCoordinate zdef=null;
 	protected  SpatialCoordinate ydef=null;
@@ -63,6 +66,10 @@ public abstract class SpatialModel{
 		tdef.isLinear()&&zdef.isLinear()&&
 		ydef.isLinear()&&xdef.isLinear();
 	}
+	
+	public boolean isPeriodicX(){ return periodicX;}
+	
+	public boolean isPeriodicY(){ return periodicY;}
 	
 	public float getDT(){ return dt;}
 	

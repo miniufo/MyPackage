@@ -1051,7 +1051,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
      *
      * @return	conc	concentration (m^-2)
      */
-	public Variable cConcentration(Variable count,float dlon){
+	public Variable cConcentration(Variable count){
 		assignSubDomainParams(count);
 		
 		Variable conc=new Variable("conc",count);
@@ -1063,10 +1063,11 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 	    if(conc.isTFirst()){
 			for(int j=0;j<y;j++){
 				float deltaY=(j==0||j==y-1)?dy/2f:dy;
-				float dxx   =(float)(EARTH_RADIUS*Math.toRadians(dlon/2f)*Math.cos(Math.toRadians(ydef[j])));
 				
 				for(int i=0;i<x;i++){
-					float deltaX=(i==0||i==x-1)?dxs[j]/2f+dxx:dxs[j];
+					float deltaX=dxs[j];
+					
+					if(!sm.isPeriodicX()&&(i==0||i==x-1)) deltaX/=2f;
 					
 					for(int l=0;l<t;l++)
 					for(int k=0;k<z;k++)
@@ -1078,10 +1079,11 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 		}else{
 			for(int j=0;j<y;j++){
 				float deltaY=(j==0||j==y-1)?dy/2f:dy;
-				float dxx   =(float)(EARTH_RADIUS*Math.toRadians(dlon/2f)*Math.cos(Math.toRadians(ydef[j])));
 				
 				for(int i=0;i<x;i++){
-					float deltaX=(i==0||i==x-1)?dxs[j]/2f+dxx:dxs[j];
+					float deltaX=dxs[j];
+					
+					if(!sm.isPeriodicX()&&(i==0||i==x-1)) deltaX/=2f;
 					
 					for(int l=0;l<t;l++)
 					for(int k=0;k<z;k++)

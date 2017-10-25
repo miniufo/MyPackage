@@ -46,8 +46,6 @@ public abstract class EquationInSphericalCoordinate extends GeoFluidApplication{
 		lcos=ssm.getLCos();
 		ltan=ssm.getLTan();
 		Beta=ssm.getBeta();
-		
-		if(ssm.isZonalPeriodic()) BCx=BoundaryCondition.Periodic;
 	}
 	
 	

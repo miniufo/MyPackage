@@ -144,7 +144,9 @@ public class CtlDescriptor extends DataDescriptor{
 		if(    vdef==null) throw new IllegalArgumentException("missing vdef information");
 		if(dsetPath==null) throw new IllegalArgumentException("missing data set path"   );
 		
-		postProcess();	// change data units
+		postProcess();
+		
+		periodicX=isPeriodic(xdef,360);
 	}
 	
 	private void processDSet(Scanner sc){

@@ -110,7 +110,7 @@ public final class CtsDescriptor extends CtlDescriptor{
 		if(Float.isNaN( f0 )) throw new IllegalArgumentException("missing f0"  );
 		if(Float.isNaN(beta)) throw new IllegalArgumentException("missing beta");
 		
-		postProcess();	// change data units
+		postProcess();
 	}
 	
 	private void processDSet(Scanner sc){
@@ -140,7 +140,7 @@ public final class CtsDescriptor extends CtlDescriptor{
 		float incre=-1.0f;
 		
 		if(mapping.equals("linear")){
-			df[0]=0;
+			df[0]=Float.parseFloat(scL.next());
 			incre=Float.parseFloat(scL.next());
 			
 			if(incre<=0) throw new IllegalArgumentException("Illegal (negative) xdef increment");
@@ -170,7 +170,7 @@ public final class CtsDescriptor extends CtlDescriptor{
 		float incre=1.0f;
 		
 		if(mapping.equals("linear")){
-			df[0]=0;
+			df[0]=Float.parseFloat(scL.next());
 			incre=Float.parseFloat(scL.next());
 			
 			if(incre<=0) throw new IllegalArgumentException("Illegal (negative) ydef increment");

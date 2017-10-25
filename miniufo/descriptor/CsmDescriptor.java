@@ -163,6 +163,8 @@ public final class CsmDescriptor extends DataDescriptor{
 				eta[l][j][i]=(float)(Math.toDegrees(eta[l][j][i]));
 			}
 		}
+		
+		periodicX=true;
 	}
 	
 	private void processDPath(Scanner sc){

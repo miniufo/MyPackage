@@ -72,6 +72,9 @@ public abstract class GeoFluidApplication{
 		dz=sm.getDZ(); zdef=sm.getZDef().getSamples();
 		dy=sm.getDY(); ydef=sm.getYDef().getSamples();
 		dx=sm.getDX(); xdef=sm.getXDef().getSamples();
+		
+		if(sm.isPeriodicX()) BCx=BoundaryCondition.Periodic;
+		if(sm.isPeriodicY()) BCy=BoundaryCondition.Periodic;
 	}
 	
 	

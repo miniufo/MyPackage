@@ -61,7 +61,7 @@ public final class GlobalLinearHeatInducedModel extends EquationInSphericalCoord
 	public GlobalLinearHeatInducedModel(SphericalSpatialModel ssm){
 		super(ssm);
 		
-		if(!ssm.isZonalPeriodic())
+		if(!ssm.isPeriodicX())
 		throw new IllegalArgumentException("Not a zonal periodic model");
 		
 		x=ssm.getXCount();	y=ssm.getYCount();

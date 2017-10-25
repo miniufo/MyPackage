@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-
 import miniufo.diagnosis.MDate;
 import miniufo.diagnosis.SpatialModel;
 
@@ -126,6 +125,23 @@ public final class LagrangianUtil{
 		Function<Particle,Stream<Record>> f=p->p.records.stream();
 		
 		return ls.stream().flatMap(f);
+	}
+	
+	
+	/**
+	 * Output trajectories if the start point is in a given region
+	 * 
+	 * @param	ls		a list of particles
+	 * @param	path	folder for output
+	 * @param	wrtAtt	write attached data or not
+	 * @param	cond	write to file if a particle meets this condition
+	 */
+	public static void writeTrajecories(List<? extends Particle> ls,String path,boolean wrtAtt,Predicate<Particle> cond){
+		for(Particle p:ls) if(cond.test(p)) p.toTrajectoryFile(path,wrtAtt);
+	}
+	
+	public static void writeTrajecories(List<? extends Particle> ls,String path){
+		writeTrajecories(ls,path,false,p->true);
 	}
 	
 	

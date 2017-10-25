@@ -9,12 +9,13 @@ package miniufo.application.statisticsModel;
 import miniufo.mathsphysics.HarmonicFitter;
 import miniufo.mathsphysics.PolynomialFitter;
 import miniufo.statistics.StatisticsUtil;
+import miniufo.basic.ArrayUtil;
 import miniufo.diagnosis.Range;
 import miniufo.diagnosis.Variable;
 
 
 /**
- * basic methods of statistics
+ * Basic statistical methods.
  *
  * @version 1.0, 02/01/2007
  * @author  MiniUFO
@@ -340,6 +341,101 @@ public final class StatisticsBasicAnalysisMethods extends StatisticsApplication{
 		var.setCommentAndUnit("T-std. of "+v.getName());
 		
 		return var.sqrtEq();
+	}
+	
+	
+	/**
+	 * Calculate maximum value along T-dimension at each grid.
+	 * 
+	 * @param	v	a given Variable
+	 * 
+	 * @return	re	maximum value in T-dimension
+	 */
+	public static Variable cTMaximum(Variable v){
+		int t=v.getTCount(),	z=v.getZCount(),	y=v.getYCount(),	x=v.getXCount();
+		
+		float undef=v.getUndef();
+		float[] tmp=new float[t];
+		
+		Range  r=v.getRange();
+		Range nr=new Range(1,z,y,x);
+		
+		Variable re=new Variable(v.getName(),v.isTFirst(),nr);
+		re.setComment("T-Maximum of "+v.getComment());
+		re.setUnit(v.getUnit());
+		re.setUndef(undef);
+		
+		float[][][][] vdata= v.getData();
+		float[][][][] rdata=re.getData();
+
+		if(v.isTFirst()){
+			for(int k=0;k<z;k++)
+			for(int j=0;j<y;j++)
+			for(int i=0;i<x;i++){
+				for(int l=0;l<t;l++) tmp[l]=vdata[l][k][j][i];
+				
+				rdata[0][k][j][i]=ArrayUtil.getMax(tmp,undef);
+			}
+			
+		}else{
+			for(int k=0;k<z;k++)
+			for(int j=0;j<y;j++)
+			for(int i=0;i<x;i++) rdata[k][j][i][0]=ArrayUtil.getMax(vdata[k][j][i],undef);
+		}
+		
+		nr.getTRange()[0]=r.getTRange()[0];
+		nr.getTRange()[1]=r.getTRange()[0];
+		
+		nr.setZRange(r);	nr.setYRange(r);	nr.setXRange(r);
+		
+		return re;
+	}
+	
+	/**
+	 * Calculate minimum value along T-dimension at each grid.
+	 * 
+	 * @param	v	a given Variable
+	 * 
+	 * @return	re	minimum value in T-dimension
+	 */
+	public static Variable cTMinimum(Variable v){
+		int t=v.getTCount(),	z=v.getZCount(),	y=v.getYCount(),	x=v.getXCount();
+		
+		float undef=v.getUndef();
+		float[] tmp=new float[t];
+		
+		Range  r=v.getRange();
+		Range nr=new Range(1,z,y,x);
+		
+		Variable re=new Variable(v.getName(),v.isTFirst(),nr);
+		re.setComment("T-Minimum of "+v.getComment());
+		re.setUnit(v.getUnit());
+		re.setUndef(undef);
+		
+		float[][][][] vdata= v.getData();
+		float[][][][] rdata=re.getData();
+
+		if(v.isTFirst()){
+			for(int k=0;k<z;k++)
+			for(int j=0;j<y;j++)
+			for(int i=0;i<x;i++){
+				for(int l=0;l<t;l++) tmp[l]=vdata[l][k][j][i];
+				
+				rdata[0][k][j][i]=ArrayUtil.getMin(tmp,undef);
+			}
+			
+		}else{
+			for(int k=0;k<z;k++)
+			for(int j=0;j<y;j++)
+			for(int i=0;i<x;i++) rdata[k][j][i][0]=ArrayUtil.getMin(vdata[k][j][i],undef);
+		}
+		
+		nr.getTRange()[0]=r.getTRange()[0];
+		nr.getTRange()[1]=r.getTRange()[0];
+		
+		nr.setZRange(r);	nr.setYRange(r);	nr.setXRange(r);
+		
+		return re;
 	}
 	
 	

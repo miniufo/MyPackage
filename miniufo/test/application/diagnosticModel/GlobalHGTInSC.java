@@ -37,7 +37,7 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 	public GlobalHGTInSC(SphericalSpatialModel ssm){
 		super(ssm);
 		
-		if(!ssm.isZonalPeriodic())
+		if(!ssm.isPeriodicX())
 		throw new IllegalArgumentException("Not a zonal periodic model");
 		
 		le=new GlobalLaplaceEquationInSC(ssm);

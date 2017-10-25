@@ -307,6 +307,9 @@ public final class CylindricalSpatialModel extends SpatialModel{
 			bsin[j]=(float)sin(ydef.getSamples()[j]);
 			bcos[j]=(float)cos(ydef.getSamples()[j]);
 		}
+		
+		this.periodicX=cd.isPeriodicX();
+		this.periodicY=cd.isPeriodicY();
 	}
 	
 	

@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import miniufo.diagnosis.MDate;
 import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
 import static java.lang.Math.PI;
@@ -22,7 +24,7 @@ import static java.lang.Math.toRadians;
 
 
 /**
- * used to describe a particle model in fluid
+ * Used to describe a Lagrangian particle in a fluid.
  *
  * @version 1.0, 02/01/2007
  * @author  MiniUFO
@@ -80,6 +82,12 @@ public class Particle implements Cloneable,Serializable{
 	
 	public boolean isFinished(){ return finished;}
 	
+	public boolean isLatLonPosition(){
+		llpos=true;
+		for(Record r:records) if(r.getXPos()>720||Math.abs(r.getYPos())>360){ llpos=false; break;}
+		return llpos;
+	}
+	
 	public boolean addRecord(Record r){ return records.add(r);}
 	
 	public boolean addAll(List<Record> ls){ return records.addAll(ls);}
@@ -105,9 +113,9 @@ public class Particle implements Cloneable,Serializable{
 	}
 	
 	public float[] getInitialLocation(){
-		Record median=records.get(0);
+		Record init=records.get(0);
 		
-		return new float[]{median.getXPos(),median.getYPos()};
+		return new float[]{init.getXPos(),init.getYPos()};
 	}
 	
 	public float[] getXPositions(){
@@ -162,6 +170,8 @@ public class Particle implements Cloneable,Serializable{
 	
 	public void finish(){ finished=true;}
 	
+	public Stream<Record> stream(){ return records.stream();}
+	
 	
 	/**
 	 * sort the profiles according to the timestamp
@@ -170,18 +180,20 @@ public class Particle implements Cloneable,Serializable{
 	
 	
 	/**
-	 * write the trajectory info to a file
-	 * so that it could be used to draw figures
+	 * Write the trajectory info to a ASCII file.
 	 * 
 	 * @param	path	path of the file, file name is this Particle's ID
+	 * @param	wrtAtt	write attached data or not
 	 */
-	public void toTrajectoryFile(String path){
+	public void toTrajectoryFile(String path,boolean wrtAtt){
 		StringBuilder buf=new StringBuilder();
 		
 		buf.append("* "+records.size()+" id: "+id+"\n");
 		
+		llpos=isLatLonPosition();
+		
 		for(Record r:records){
-			buf.append(r.toString(llpos));
+			buf.append(r.toString(llpos,wrtAtt));
 			buf.append("\n");
 		}
 		
@@ -190,6 +202,8 @@ public class Particle implements Cloneable,Serializable{
 			
 		}catch(IOException e){ e.printStackTrace(); System.exit(0);}
 	}
+	
+	public void toTrajectoryFile(String path){ toTrajectoryFile(path,false);}
 	
 	
 	/**
@@ -207,6 +221,8 @@ public class Particle implements Cloneable,Serializable{
 			float dX= next.getXPos()-prev.getXPos();
 			float dY= next.getYPos()-prev.getYPos();
 			float mY=(next.getYPos()+prev.getYPos())/2f;
+			
+			llpos=isLatLonPosition();
 			
 			if(llpos){
 				pres.setData(0,(float)(dX/180.0*PI*EARTH_RADIUS/dt*cos(toRadians(mY))));
@@ -301,7 +317,7 @@ public class Particle implements Cloneable,Serializable{
 	
 	
 	/**
-     * delete records that not meet some requirement
+     * remove records if they meet some requirement
      * 
      * @param	cond	an condition whether a record should be removed
      */
@@ -356,19 +372,17 @@ public class Particle implements Cloneable,Serializable{
      * used to print out
      */
 	public String toString(){
-		for(Record r:records) if(r.getXPos()>720&&Math.abs(r.getYPos())>360) llpos=false;
-		
 		StringBuilder buf=new StringBuilder();
 		
 		buf.append(getClass().getSimpleName()+" id ("+id+") "+records.size()+" records:\n");
 		
-		if(llpos)
-			buf.append("  lons(E-deg)  lats(N-deg) uspd(m/s) vspd(m/s) time(YYYYMMDDHHMMSS)\n");
+		if(isLatLonPosition())
+			buf.append("  lons(E-deg)  lats(N-deg) time(YYYYMMDDHHMMSS) uspd(m/s) vspd(m/s)\n");
 		else
-			buf.append("  xpos (km)    ypos (km)   uspd(m/s) vspd(m/s) time(YYYYMMDDHHMMSS)\n");
+			buf.append(" xpos(km)  ypos(km)   time(YYYYMMDDHHMMSS) uspd(m/s) vspd(m/s)\n");
 		
 		for(Record r:records){
-			buf.append(r.toString(llpos));
+			buf.append(r.toString(llpos,false));
 			buf.append("\n");
 		}
 		

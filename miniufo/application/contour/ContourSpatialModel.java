@@ -39,6 +39,7 @@ public abstract class ContourSpatialModel{
 	
 	protected Variable tracer   =null;	// a given tracer (X-Y coordinates)
 	protected Variable grdxy2   =null;	// squares of tracer gradient (X-Y coordinates)
+	protected Variable tr       =null;	// tracer in contour coordinate
 	protected Variable areas    =null;	// areas enclosed by each contour (contour coordinate)
 	
 	protected DataDescriptor dd =null;	// describing the grids of the tracer data
@@ -79,6 +80,7 @@ public abstract class ContourSpatialModel{
 		integrateWithinContour1(adjCtr);
 		
 		this.areas=toAreaVariable();
+		this.tr   =toTracerVariable();
 	}
 	
 	public void initContourByTracer(Variable tracer,int numOfC){
@@ -107,6 +109,7 @@ public abstract class ContourSpatialModel{
 		integrateWithinContour1(adjCtr);
 		
 		this.areas=toAreaVariable();
+		this.tr   =toTracerVariable();
 	}
 	
 	public void initContourByTracer(Variable tracer,float csouth,float cnorth,float inc){
@@ -131,6 +134,72 @@ public abstract class ContourSpatialModel{
 		
 		// to compute the area within each contour
 		return cEquivalentYs(integrateWithinContour1(cVals,true,0,0),tracer.getUndef());
+	}
+	
+	
+	public Variable mapVarInContourCoordToPhysicalCoord(Variable vcc){
+		int t=vcc.getTCount(); int y=tracer.getYCount();
+		int z=vcc.getZCount(); int x=tracer.getXCount();
+		int C=vcc.getXCount();
+		
+		float undef=vcc.getUndef();
+		
+		if(t!=tr.getTCount()) throw new IllegalArgumentException("tcounts are not the same");
+		if(z!=tr.getZCount()) throw new IllegalArgumentException("zcounts are not the same");
+		
+		Variable re=new Variable(vcc.getName(),tracer);
+		re.setCommentAndUnit(vcc.getCommentAndUnit());
+		re.setUndef(vcc.getUndef());
+		re.setValue(undef);
+		
+		for(int l=0;l<t;l++)
+		for(int k=0;k<z;k++){
+			boolean increSToN=cntrs[k][l].increaseSToN();
+			double[] cVals=cntrs[k][l].getValues();
+			
+			if(vcc.isTFirst()){
+				float[]   vccData=   vcc.getData()[l][k][0];
+				float[][] txyData=tracer.getData()[l][k];
+				float[][]  reData=    re.getData()[l][k];
+				
+				for(int j=0;j<y;j++)
+				for(int i=0;i<x;i++){
+					float trVal=txyData[j][i];
+					if(trVal!=undef){
+						int tag=increSToN?ArrayUtil.getLEIdxIncre(cVals,trVal):ArrayUtil.getLEIdxDecre(cVals,trVal);
+						
+						if(tag==-1) throw new IllegalArgumentException(
+							"traer ("+trVal+") are out of range ["+cVals[0]+","+cVals[cVals.length-1]+"]"
+						);
+						
+						if(tag==C-1) reData[j][i]=vccData[C-1];
+						else reData[j][i]=(float)InterpolationModel.linearInterpolation(cVals[tag],cVals[tag+1],vccData[tag],vccData[tag+1],trVal);
+					}
+				}
+				
+			}else{
+				float[][]   vccData=   vcc.getData()[k][0];
+				float[][][] txyData=tracer.getData()[k];
+				float[][][]  reData=    re.getData()[k];
+				
+				for(int j=0;j<y;j++)
+				for(int i=0;i<x;i++){
+					float trVal=txyData[j][i][l];
+					if(trVal!=undef){
+						int tag=increSToN?ArrayUtil.getLEIdxIncre(cVals,trVal):ArrayUtil.getLEIdxDecre(cVals,trVal);
+						
+						if(tag==-1) throw new IllegalArgumentException(
+							"traer ("+trVal+") are out of range ["+cVals[0]+","+cVals[cVals.length-1]+"]"
+						);
+						
+						if(tag==C-1) reData[j][i]=vccData[C-1];
+						else reData[j][i][l]=(float)InterpolationModel.linearInterpolation(cVals[tag],cVals[tag+1],vccData[tag][l],vccData[tag+1][l],trVal);
+					}
+				}
+			}
+		}
+		
+		return re;
 	}
 	
 	
@@ -357,6 +426,9 @@ public abstract class ContourSpatialModel{
 			}
 		}
 		
+		re.getRange().setTRange(v.getRange());
+		re.getRange().setZRange(v.getRange());
+		
 		return re;
 	}
 	
@@ -371,6 +443,8 @@ public abstract class ContourSpatialModel{
 	public Variable getAreasBoundedByContour(){ return areas;}
 	
 	public Variable getTracer(){ return tracer;}
+	
+	public Variable getTracerInContourCoordinate(){ return tr;}
 	
 	public Variable getSquaredTracerGradient(){ return grdxy2;}
 	
@@ -447,6 +521,7 @@ public abstract class ContourSpatialModel{
 				String info=mappingArea(cntrs[k][l],tdata);
 				
 				if(info!=null||selfAdjust){
+					if(!selfAdjust) System.out.println("adjusting");
 					cntrs[k][l]=adjustContours(cntrs[k][l],undef);
 					
 					info=mappingArea(cntrs[k][l],tdata);
@@ -471,7 +546,7 @@ public abstract class ContourSpatialModel{
 				String info=mappingArea(cntrs[k][l],tdata);
 				
 				if(info!=null||selfAdjust){
-					System.out.println("adjusting");
+					if(!selfAdjust) System.out.println("adjusting");
 					cntrs[k][l]=adjustContours(cntrs[k][l],undef);
 					
 					info=mappingArea(cntrs[k][l],tdata);
@@ -618,7 +693,7 @@ public abstract class ContourSpatialModel{
 		
 		float[] extreme=ArrayUtil.getExtrema(tdata,undef);
 		
-		for(int c=0;c<C;c++){
+		for(int c=0;c<C;c++) if(cVals[c]!=undef){
 			if(cVals[c]<extreme[0]) throw new IllegalArgumentException("cVals["+c+"] ("+cVals[c]+") should be >= "+extreme[0]);
 			if(cVals[c]>extreme[1]) throw new IllegalArgumentException("cVals["+c+"] ("+cVals[c]+") should be <= "+extreme[1]);
 		}
@@ -627,15 +702,19 @@ public abstract class ContourSpatialModel{
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++) if(tdata[j][i]!=undef){
 				double dS=computeDS(i,j);
-				for(int c=1;c<C;c++) if(tdata[j][i]>=cVals[c]) areas[c]+=dS;
+				if(tdata[j][i]>=cVals[0]) areas[0]+=dS;
+				for(int c=1;c<C;c++) if(tdata[j][i]>cVals[c]) areas[c]+=dS;
 			}
 		}else{
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++) if(tdata[j][i]!=undef){
 				double dS=computeDS(i,j);
-				for(int c=1;c<C;c++) if(tdata[j][i]<=cVals[c]) areas[c]+=dS;
+				if(tdata[j][i]<=cVals[0]) areas[0]+=dS;
+				for(int c=1;c<C;c++) if(tdata[j][i]<cVals[c]) areas[c]+=dS;
 			}
 		}
+		
+		for(int c=0;c<C;c++) if(cVals[c]==undef) areas[c]=undef;
 		
 		return areas;
 	}
@@ -794,7 +873,7 @@ public abstract class ContourSpatialModel{
 			System.arraycopy(valid[0],0,values,0,vLen);
 			System.arraycopy(valid[1],0, areas,0,vLen);
 			
-			values[vLen]=max;
+			values[vLen]=cs.increaseSToN()?max:min;
 			 areas[vLen]=0;
 			
 		}else if(!hasStr&&hasEnd){
@@ -804,7 +883,7 @@ public abstract class ContourSpatialModel{
 			System.arraycopy(valid[0],0,values,1,vLen);
 			System.arraycopy(valid[1],0, areas,1,vLen);
 			
-			values[0]=min;
+			values[0]=cs.increaseSToN()?min:max;
 			 areas[0]=areaT;
 			
 		}else{
@@ -814,8 +893,10 @@ public abstract class ContourSpatialModel{
 			System.arraycopy(valid[0],0,values,1,vLen);
 			System.arraycopy(valid[1],0, areas,1,vLen);
 			
-			values[0]=min;   values[vLen]=max;
-			 areas[0]=areaT;  areas[vLen]=0;
+			if(cs.increaseSToN()){ values[0]=min; values[vLen]=max;}
+			else{                  values[0]=max; values[vLen]=min;}
+			
+			areas[0]=areaT; areas[vLen]=0;
 		}
 		
 		double[] newAs=new double[cs.getContourNumber()];
@@ -869,7 +950,47 @@ public abstract class ContourSpatialModel{
 			}
 		}
 		
+		area.getRange().setTRange(tracer.getRange());
+		area.getRange().setZRange(tracer.getRange());
+		
 		return area;
+	}
+	
+	private Variable toTracerVariable(){
+		float undef=tracer.getUndef();
+		
+		int t=tracer.getTCount();
+		int z=tracer.getZCount();
+		int C=cntrs[0][0].getContourNumber();
+		
+		Variable tr=new Variable("tr",tracer.isTFirst(),new Range(t,z,1,C));
+		tr.setCommentAndUnit("tracer of "+tracer.getName()+" in contour coordinates ("+tracer.getUnit()+")");
+		tr.setUndef(undef);
+		tr.setValue(undef);
+		
+		if(tracer.isTFirst()){
+			for(int l=0;l<t;l++)
+			for(int k=0;k<z;k++){
+				double[] trcrs=cntrs[k][l].getValues();
+				 float[] adata=tr.getData()[l][k][0];
+				
+				for(int c=0;c<C;c++) adata[c]=(float)(trcrs[c]);
+			}
+			
+		}else{
+			for(int l=0;l<t;l++)
+			for(int k=0;k<z;k++){
+				double[] trcrs=cntrs[k][l].getValues();
+				float[][] adata=tr.getData()[k][0];
+				
+				for(int c=0;c<C;c++) adata[c][l]=(float)(trcrs[c]);
+			}
+		}
+		
+		tr.getRange().setTRange(tracer.getRange());
+		tr.getRange().setZRange(tracer.getRange());
+		
+		return tr;
 	}
 	
 	

@@ -8,8 +8,6 @@ package miniufo.lagrangian;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import miniufo.database.DataBaseUtil;
 import miniufo.diagnosis.MDate;
 import miniufo.diagnosis.SpatialModel;
 
@@ -176,39 +174,6 @@ public final class Typhoon extends Particle{
 	public float[] getPressures(){
 		if(attachedVars.length<=3) return null;
 		else return getAttachedData(3);
-	}
-	
-	
-	/**
-	 * compute changes of the data (delta-data) using centered time differencing.
-	 * The first and last are computed using one-sided time differencing.
-	 */
-	public static float[] getChangesByCentralDiff(float[] data){
-		int N=data.length;
-		
-		if(N==1) return new float[1];
-		
-		float[] ch=new float[N];
-		
-		ch[0]=data[1]-data[0];
-		
-		for(int l=1,L=N-1;l<L;l++) ch[l]=data[l+1]-data[l-1];
-		
-		ch[N-1]=data[N-1]-data[N-2];
-		
-		return ch;
-	}
-	
-	public static float[] getChangesByForwardDiff(float[] data,int interv){
-		int N=data.length;
-		
-		float[] ch=new float[N];
-		
-		for(int l=0;l<N;l++) ch[l]=DataBaseUtil.undef;
-		
-		for(int l=0,L=N-interv;l<L;l++) ch[l]=data[l+interv]-data[l];
-		
-		return ch;
 	}
 	
 	
@@ -410,12 +375,12 @@ public final class Typhoon extends Particle{
 			Record r=records.get(l);
 			
 			sb.append(String.format(
-				"%5.1f  %4.1f %6.3f  %5.3f  %14d",
+				"%6.2f  %5.2f %6.3f  %5.3f  %14d",
 				r.getXPos(),r.getYPos(),r.getDataValue(0),r.getDataValue(1),r.getTime()
 			));
 			
-			if(len==5)      sb.append(String.format(" %7.3f  %4.0f  %s\n",wnds[l],pres[l],type[l]));
-			else if(len==4) sb.append(String.format(" %7.3f  %4.0f\n",wnds[l],pres[l]));
+			if(len==5)      sb.append(String.format(" %7.3f  %5.1f  %s\n",wnds[l],pres[l],type[l]));
+			else if(len==4) sb.append(String.format(" %7.3f  %5.1f\n",wnds[l],pres[l]));
 			else if(len==3) sb.append(String.format(" %7.3f\n",wnds[l]));
 		}
 		
