@@ -116,7 +116,7 @@ public abstract class EquationInCartesianCoordinate extends GeoFluidApplication{
 					}else if(BCy==BoundaryCondition.Fixed){
 						if(vdata[l][k][1][i  ]!=undef&&vdata[l][k][0  ][i]!=undef)
 						ddata[l][k][0  ][i]=(vdata[l][k][1  ][i]-vdata[l][k][0  ][i])/dy;
-						if(vdata[l][k][1][y-1]!=undef&&vdata[l][k][y-2][i]!=undef)
+						if(vdata[l][k][y-1][i]!=undef&&vdata[l][k][y-2][i]!=undef)
 						ddata[l][k][y-1][i]=(vdata[l][k][y-1][i]-vdata[l][k][y-2][i])/dy;
 					}
 					
