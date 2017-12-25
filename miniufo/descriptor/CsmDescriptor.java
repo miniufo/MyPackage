@@ -17,7 +17,7 @@ import static miniufo.diagnosis.SpatialModel.cLatLons;
 
 
 /**
- * used to describe the cylindrical spatial model
+ * A class used to describe the cylindrical spatial model.
  *
  * @version 1.0, 02/01/2007
  * @author  MiniUFO
@@ -218,11 +218,21 @@ public final class CsmDescriptor extends DataDescriptor{
 		if(zcount<=0) throw new IllegalArgumentException("z count should be positive");
 		
 		float[] df=new float[zcount];
-		df[0]=Float.parseFloat(sc.next());
-		dzdef=new float[]{Float.parseFloat(sc.next())};
 		
-		for(int i=1;i<zcount;i++) df[i]=df[i-1]+dzdef[0];
-		//for(int i=1;i<zcount-1;i++) dzdef[i]=dzdef[0];
+		String next=sc.next();
+		
+		if(next.equalsIgnoreCase("levels")){
+			dzdef=new float[zcount-1];
+			for(int k=0;k<zcount;k++) df[k]=Float.parseFloat(sc.next());
+			for(int k=1;k<zcount;k++) dzdef[k-1]=df[k]-df[k-1];
+			
+		}else{
+			df[0]=Float.parseFloat(next);
+			dzdef=new float[]{Float.parseFloat(sc.next())};
+			
+			for(int i=1;i<zcount;i++) df[i]=df[i-1]+dzdef[0];
+			//for(int i=1;i<zcount-1;i++) dzdef[i]=dzdef[0];
+		}
 		
 		zdef=new SpatialCoordinate("zdef",df);
 	}
