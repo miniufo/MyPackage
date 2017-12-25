@@ -751,7 +751,7 @@ public final class DiagnosisFactory{
 	}
 	
 	public Stream<Variable[]> getVariablesTimeByTime(String v1,String... others){
-		return getVariablesTimeByTime(1,dd.getTCount()+1,v1,others);
+		return getVariablesTimeByTime(1,dd.getTCount(),v1,others);
 	}
 	
 	/**
@@ -766,13 +766,13 @@ public final class DiagnosisFactory{
 		if(tstr<0   ) throw new IllegalArgumentException("tstr should be > 0");
 		if(tstr>tend) throw new IllegalArgumentException("tstr should not be larger than tend");
 		
-		return IntStream.range(tstr,tend).sequential().mapToObj(l->{
+		return IntStream.range(tstr,tend+1).sequential().mapToObj(l->{
 			return getVariables(new Range("t("+l+","+l+")",dd),vname)[0];
 		});
 	}
 	
 	public Stream<Variable> getVariableTimeByTime(String vname){
-		return getVariableTimeByTime(1,dd.getTCount()+1,vname);
+		return getVariableTimeByTime(1,dd.getTCount(),vname);
 	}
 	
 	

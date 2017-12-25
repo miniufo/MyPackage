@@ -179,17 +179,20 @@ public final class Range implements Cloneable{
 		y_range[2]=y_range[1]-y_range[0]+1;
 		x_range[2]=x_range[1]-x_range[0]+1;
 		
-		if(x_range[2]<=0||y_range[2]<=0||z_range[2]<=0||t_range[2]<=0)
-			throw new IllegalArgumentException("invalid range");
+		if(x_range[2]<=0) throw new IllegalArgumentException("non-positive x-range count ("+x_range[2]+")");
+		if(y_range[2]<=0) throw new IllegalArgumentException("non-positive y-range count ("+y_range[2]+")");
+		if(z_range[2]<=0) throw new IllegalArgumentException("non-positive z-range count ("+z_range[2]+")");
+		if(t_range[2]<=0) throw new IllegalArgumentException("non-positive t-range count ("+t_range[2]+")");
 		
-		if(x_range[0]<=0||y_range[0]<=0||z_range[0]<=0||t_range[0]<=0)
-			throw new IllegalArgumentException("invalid range");
+		if(x_range[0]<=0) throw new IllegalArgumentException("non-positive lower x-range ("+x_range[0]+")");
+		if(y_range[0]<=0) throw new IllegalArgumentException("non-positive lower y-range ("+y_range[0]+")");
+		if(z_range[0]<=0) throw new IllegalArgumentException("non-positive lower z-range ("+z_range[0]+")");
+		if(t_range[0]<=0) throw new IllegalArgumentException("non-positive lower t-range ("+t_range[0]+")");
 		
-		if(t_range[1]>dd.getTDef().length()||z_range[1]>dd.getZDef().length())
-			throw new IllegalArgumentException("range beyond limit");
-		
-		if(y_range[1]>dd.getYDef().length()||x_range[1]>dd.getXDef().length())
-			throw new IllegalArgumentException("range beyond limit");
+		if(x_range[1]>dd.getXCount()) throw new IllegalArgumentException("upper x-range ("+x_range[1]+") beyond limit ("+dd.getXCount()+")");
+		if(y_range[1]>dd.getYCount()) throw new IllegalArgumentException("upper y-range ("+y_range[1]+") beyond limit ("+dd.getYCount()+")");
+		if(z_range[1]>dd.getZCount()) throw new IllegalArgumentException("upper z-range ("+z_range[1]+") beyond limit ("+dd.getZCount()+")");
+		if(t_range[1]>dd.getTCount()) throw new IllegalArgumentException("upper t-range ("+t_range[1]+") beyond limit ("+dd.getTCount()+")");
 	}
 	
 	/**
