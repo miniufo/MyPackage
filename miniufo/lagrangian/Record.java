@@ -196,7 +196,7 @@ public final class Record implements Serializable{
 	 * 
 	 * @param	str		start record
 	 * @param	end		end   record
-	 * @param	deltaT	interval of deltaT
+	 * @param	deltaT	interval of deltaT (seconds)
 	 */
 	public static List<Record> interpolateToDT(Record str,Record end,int deltaT){
 		long dt=new MDate(str.time).getDT(new MDate(end.time));

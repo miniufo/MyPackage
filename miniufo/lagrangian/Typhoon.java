@@ -278,7 +278,7 @@ public final class Typhoon extends Particle{
 	/**
      * Interpolate so that the time interval between records is deltaT.
      * 
-     * @param	deltaT	 a given constant deltaT
+     * @param	deltaT	 a given constant deltaT (second)
      */
 	public Typhoon interpolateToDT(int deltaT){
 		List<Record> ls=new ArrayList<>();
