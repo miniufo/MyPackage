@@ -25,7 +25,12 @@ import static java.lang.Math.sqrt;
 
 
 /**
- * a class for solving elliptic equation
+ * A class for solving elliptic equation of the form:
+ * 
+ *   d   dS    d   dS    d   dS    d   dS
+ *   --(A--) + --(B--) + --(B--) + --(C--) = F
+ *   dx  dx    dy  dx    dx  dy    dy  dy
+ * 
  * Reference: my note on inverting elliptic equation using SOR iteration
  *
  * @version 1.0, 2015.03.12
