@@ -13,7 +13,6 @@ import java.text.DecimalFormat;
 import miniufo.io.FileWriteInterface;
 import miniufo.descriptor.CtsDescriptor;
 import miniufo.descriptor.DataDescriptor;
-import miniufo.diagnosis.Variable;
 import static miniufo.io.FileWriteInterface.Solution.*;
 
 
@@ -50,7 +49,7 @@ public final class CtsDataWriteStream extends CtlDataWriteStream{
      * @param	tinc	time incremence need to be written into new ctl file
      */
 	public void writeCtl(DataDescriptor dd,float[] zdef,String tinc){
-		if(al.size()==0) return;
+		if(vars.size()==0) return;
 		
 		String[] s=file_path.split("\\.");
 		StringBuilder name=new StringBuilder();
@@ -78,27 +77,27 @@ public final class CtsDataWriteStream extends CtlDataWriteStream{
 		
 		if(!is_skip){
 			StringBuilder sb=new StringBuilder();
-			Variable last=al.get(al.size()-1);
+			Var last=vars.get(vars.size()-1);
 			
 			// pick up the variable has largest z-count
-			for(Variable v:al) if(v.getZCount()>last.getZCount()) last=v;
+			for(Var v:vars) if(v.zcount>last.zcount) last=v;
 			
 			int start=0;
 			
 			sb.append("dset ^");	sb.append(file_name);
 			if(order==ByteOrder.BIG_ENDIAN) sb.append("\noptions big_endian");
-			sb.append("\nundef ");	sb.append(al.get(0).getUndef());
+			sb.append("\nundef ");	sb.append(vars.get(0).undef);
 			sb.append("\ntitle ");	sb.append(dd.getTitle());
 			
-			start=last.getRange().getXRange()[0];
+			start=last.xstart;
 			if(dd.xLinear()){
-				sb.append("\nxdef "+String.format("%4d",last.getXCount())+" linear ");
+				sb.append("\nxdef "+String.format("%4d",last.xcount)+" linear ");
 				sb.append(dd.getXDef().getSamples()[start-1]+" "+dd.getDXDef()[0]+"\n");
 				
 			}else{
-				if(last.getXCount()!=1){
-					sb.append("\nxdef "+String.format("%4d",last.getXCount())+" levels\n");
-					for(int i=0;i<last.getXCount();i++)
+				if(last.xcount!=1){
+					sb.append("\nxdef "+String.format("%4d",last.xcount)+" levels\n");
+					for(int i=0;i<last.xcount;i++)
 					sb.append("\t"+dd.getXDef().getSamples()[start-1+i]+"\n");
 					
 				}else{
@@ -107,15 +106,15 @@ public final class CtsDataWriteStream extends CtlDataWriteStream{
 				}
 			}
 			
-			start=last.getRange().getYRange()[0];
+			start=last.ystart;
 			if(dd.yLinear()){
-				sb.append("ydef "+String.format("%4d",last.getYCount())+" linear ");
+				sb.append("ydef "+String.format("%4d",last.ycount)+" linear ");
 				sb.append(dd.getYDef().getSamples()[start-1]+" "+dd.getDYDef()[0]+"\n");
 				
 			}else{
-				if(last.getYCount()!=1){
-					sb.append("ydef "+String.format("%4d",last.getYCount())+" levels\n");
-					for(int i=0;i<last.getYCount();i++)
+				if(last.ycount!=1){
+					sb.append("ydef "+String.format("%4d",last.ycount)+" levels\n");
+					for(int i=0;i<last.ycount;i++)
 					sb.append("\t"+dd.getYDef().getSamples()[start-1+i]+"\n");
 					
 				}else{
@@ -125,38 +124,38 @@ public final class CtsDataWriteStream extends CtlDataWriteStream{
 			}
 			
 			if(zdef==null){
-				start=last.getRange().getZRange()[0];
+				start=last.zstart;
 				if(dd.zLinear()){
 					if(dd.getDZDef()==null||dd.getDZDef()[0]<0){
-						sb.append("zdef "+String.format("%4d",last.getZCount())+" levels ");
+						sb.append("zdef "+String.format("%4d",last.zcount)+" levels ");
 						
-						if(last.getZCount()<=dd.getZDef().length()){
-							for(int i=0;i<last.getZCount();i++)
+						if(last.zcount<=dd.getZDef().length()){
+							for(int i=0;i<last.zcount;i++)
 							sb.append(dd.getZDef().getSamples()[start-1+i]+" ");
 							
 						}else{
 							float zstr=dd.getZDef().getSamples()[0];
-							for(int i=0;i<last.getZCount();i++) sb.append(zstr-50*i+" ");
+							for(int i=0;i<last.zcount;i++) sb.append(zstr-50*i+" ");
 						}
 						
 						sb.append("\n");
 						
 					}else{
-						sb.append("zdef "+String.format("%4d",last.getZCount())+" linear ");
+						sb.append("zdef "+String.format("%4d",last.zcount)+" linear ");
 						sb.append(dd.getZDef().getSamples()[start-1]+" "+dd.getDZDef()[0]+"\n");
 					}
 					
 				}else{
-					if(last.getZCount()!=1){
+					if(last.zcount!=1){
 						if(dd.getZDef().length()!=1){
-							sb.append("zdef "+String.format("%4d",last.getZCount())+" levels ");
-							for(int i=0;i<last.getZCount();i++)
+							sb.append("zdef "+String.format("%4d",last.zcount)+" levels ");
+							for(int i=0;i<last.zcount;i++)
 							sb.append(dd.getZDef().getSamples()[start-1+i]+" ");
 							sb.append("\n");
 							
 						}else{
-							sb.append("zdef "+String.format("%4d",last.getZCount())+" levels ");
-							for(int i=0;i<last.getZCount();i++)
+							sb.append("zdef "+String.format("%4d",last.zcount)+" levels ");
+							for(int i=0;i<last.zcount;i++)
 							sb.append(dd.getZDef().getSamples()[0]-10*i+" ");
 							sb.append("\n");
 						}
@@ -173,9 +172,9 @@ public final class CtsDataWriteStream extends CtlDataWriteStream{
 				sb.append("\n");
 			}
 			
-			start=last.getRange().getTRange()[0];
+			start=last.tstart;
 			
-			sb.append("tdef "+String.format("%4d",last.getTCount())+" linear ");
+			sb.append("tdef "+String.format("%4d",last.tcount)+" linear ");
 			sb.append(dd.getTDef().getSamples()[start-1].toGradsDate());
 			sb.append(" "+(tinc==null?dd.getTIncrement():tinc)+"\n");
 			
@@ -183,13 +182,13 @@ public final class CtsDataWriteStream extends CtlDataWriteStream{
 			sb.append("f0   "+cd.getF0  ()+"\n");
 			sb.append("beta "+cd.getBeta()+"\n");
 			
-			sb.append(toStringBuilder(al,nm));
+			sb.append(toStringBuilder(vars));
 			
 			try{ fw.write(sb.toString()); fw.close();}
 			catch(IOException e){ e.printStackTrace(); System.exit(0);}
 		}
 		
-		al.clear();
+		vars.clear();
 	}
 	
 	

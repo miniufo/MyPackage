@@ -28,7 +28,7 @@ import static miniufo.io.FileWriteInterface.Solution.*;
  * @author  MiniUFO
  * @since   MDK1.0
  */
-public class CtlDataWriteStream implements DataWrite,Print{
+public class CtlDataWriteStream extends DataWrite{
 	//
 	protected boolean is_skip       =true;	// whether to skip overwriting the file
 	protected boolean isUsed99      =false;
@@ -44,8 +44,7 @@ public class CtlDataWriteStream implements DataWrite,Print{
 	protected FileOutputStream   fos=null;	// file access object
 	protected FileWriteInterface fwi=null;
 	
-	protected ArrayList<String>   nm=null;
-	protected ArrayList<Variable> al=null;
+	protected ArrayList<Var>    vars=null;
 	
 	
 	/**
@@ -88,8 +87,7 @@ public class CtlDataWriteStream implements DataWrite,Print{
 		
 		this.order=order;	fwi=null;
 		
-		nm=new ArrayList<String>();
-		al=new ArrayList<Variable>();
+		vars=new ArrayList<Var>();
 	}
 	
 	/**
@@ -178,26 +176,28 @@ public class CtlDataWriteStream implements DataWrite,Print{
 					"writeData(Variable[]) and writeData(Variable) cannot be called in a same instance"
 				);
 				
-				al.add(v[0]);	nm.add(v[0].getName()+"mini_ufo"+v[0].getCommentAndUnit());
+				Var oneVar=new Var(v[0]);
 				
-				if(al.size()!=1){
+				vars.add(oneVar);
+				
+				if(vars.size()!=1){
 					storageType="-1,20";
 					
-					if(!al.get(al.size()-1).isAreaLike(v[0]))
+					if(!vars.get(vars.size()-1).isAreaLike(oneVar))
 						throw new IllegalArgumentException("dimensions not same");
 					
 				}else storageType="99";
 				
 			}else{
-				if(al.size()!=0) throw new UnsupportedOperationException(
+				if(vars.size()!=0) throw new UnsupportedOperationException(
 					"writeData(Variable) and writeData(Variable[]) cannot be called in a same instance"
 				);
 				
 				isUsed99=true;
 				
-				al.clear();	storageType="99";
+				vars.clear();	storageType="99";
 				
-				for(int i=0;i<v.length;i++){ al.add(v[i]);	nm.add(v[i].getName()+"mini_ufo"+v[i].getCommentAndUnit());}
+				for(int i=0;i<v.length;i++) vars.add(new Var(v[i]));
 				
 				if(print) System.out.println("Finish writing data.");
 			}
@@ -231,7 +231,7 @@ public class CtlDataWriteStream implements DataWrite,Print{
      * @param	tinc	time incremence need to be written into new ctl file
      */
 	public void writeCtl(DataDescriptor dd,float[] zdef,String tinc){
-		if(al.size()==0) return;
+		if(vars.size()==0) return;
 		
 		String[] s=file_path.split("\\.");
 		StringBuilder name=new StringBuilder();
@@ -259,27 +259,27 @@ public class CtlDataWriteStream implements DataWrite,Print{
 		
 		if(!is_skip){
 			StringBuilder sb=new StringBuilder();
-			Variable last=al.get(al.size()-1);
+			Var last=vars.get(vars.size()-1);
 			
 			// pick up the variable has largest z-count
-			for(Variable v:al) if(v.getZCount()>last.getZCount()) last=v;
+			for(Var v:vars) if(v.zcount>last.zcount) last=v;
 			
 			int start=0;
 			
 			sb.append("dset ^");	sb.append(file_name);
 			if(order==ByteOrder.BIG_ENDIAN) sb.append("\noptions big_endian");
-			sb.append("\nundef ");	sb.append(al.get(0).getUndef());
+			sb.append("\nundef ");	sb.append(vars.get(0).undef);
 			sb.append("\ntitle ");	sb.append(dd.getTitle());
 			
-			start=last.getRange().getXRange()[0];
+			start=last.xstart;
 			if(dd.xLinear()){
-				sb.append("\nxdef "+String.format("%4d",last.getXCount())+" linear ");
+				sb.append("\nxdef "+String.format("%4d",last.xcount)+" linear ");
 				sb.append(dd.getXDef().getSamples()[start-1]+" "+dd.getDXDef()[0]+"\n");
 				
 			}else{
-				if(last.getXCount()!=1){
-					sb.append("\nxdef "+String.format("%4d",last.getXCount())+" levels\n");
-					for(int i=0;i<last.getXCount();i++)
+				if(last.xcount!=1){
+					sb.append("\nxdef "+String.format("%4d",last.xcount)+" levels\n");
+					for(int i=0;i<last.xcount;i++)
 					sb.append("\t"+dd.getXDef().getSamples()[start-1+i]+"\n");
 					
 				}else{
@@ -288,15 +288,15 @@ public class CtlDataWriteStream implements DataWrite,Print{
 				}
 			}
 			
-			start=last.getRange().getYRange()[0];
+			start=last.ystart;
 			if(dd.yLinear()){
-				sb.append("ydef "+String.format("%4d",last.getYCount())+" linear ");
+				sb.append("ydef "+String.format("%4d",last.ycount)+" linear ");
 				sb.append(dd.getYDef().getSamples()[start-1]+" "+dd.getDYDef()[0]+"\n");
 				
 			}else{
-				if(last.getYCount()!=1){
-					sb.append("ydef "+String.format("%4d",last.getYCount())+" levels\n");
-					for(int i=0;i<last.getYCount();i++)
+				if(last.ycount!=1){
+					sb.append("ydef "+String.format("%4d",last.ycount)+" levels\n");
+					for(int i=0;i<last.ycount;i++)
 					sb.append("\t"+dd.getYDef().getSamples()[start-1+i]+"\n");
 					
 				}else{
@@ -306,38 +306,38 @@ public class CtlDataWriteStream implements DataWrite,Print{
 			}
 			
 			if(zdef==null){
-				start=last.getRange().getZRange()[0];
+				start=last.zstart;
 				if(dd.zLinear()){
 					if(dd.getDZDef()==null||dd.getDZDef()[0]<0){
-						sb.append("zdef "+String.format("%4d",last.getZCount())+" levels ");
+						sb.append("zdef "+String.format("%4d",last.zcount)+" levels ");
 						
-						if(last.getZCount()<=dd.getZDef().length()){
-							for(int i=0;i<last.getZCount();i++)
+						if(last.zcount<=dd.getZDef().length()){
+							for(int i=0;i<last.zcount;i++)
 							sb.append(dd.getZDef().getSamples()[start-1+i]+" ");
 							
 						}else{
 							float zstr=dd.getZDef().getSamples()[0];
-							for(int i=0;i<last.getZCount();i++) sb.append(zstr-50*i+" ");
+							for(int i=0;i<last.zcount;i++) sb.append(zstr-50*i+" ");
 						}
 						
 						sb.append("\n");
 						
 					}else{
-						sb.append("zdef "+String.format("%4d",last.getZCount())+" linear ");
+						sb.append("zdef "+String.format("%4d",last.zcount)+" linear ");
 						sb.append(dd.getZDef().getSamples()[start-1]+" "+dd.getDZDef()[0]+"\n");
 					}
 					
 				}else{
-					if(last.getZCount()!=1){
+					if(last.zcount!=1){
 						if(dd.getZDef().length()!=1){
-							sb.append("zdef "+String.format("%4d",last.getZCount())+" levels ");
-							for(int i=0;i<last.getZCount();i++)
+							sb.append("zdef "+String.format("%4d",last.zcount)+" levels ");
+							for(int i=0;i<last.zcount;i++)
 							sb.append(dd.getZDef().getSamples()[start-1+i]+" ");
 							sb.append("\n");
 							
 						}else{
-							sb.append("zdef "+String.format("%4d",last.getZCount())+" levels ");
-							for(int i=0;i<last.getZCount();i++)
+							sb.append("zdef "+String.format("%4d",last.zcount)+" levels ");
+							for(int i=0;i<last.zcount;i++)
 							sb.append(dd.getZDef().getSamples()[0]-10*i+" ");
 							sb.append("\n");
 						}
@@ -354,23 +354,23 @@ public class CtlDataWriteStream implements DataWrite,Print{
 				sb.append("\n");
 			}
 			
-			start=last.getRange().getTRange()[0];
+			start=last.tstart;
 			
 			sb.append("tdef ");
-			sb.append(String.format("%4d",last.getTCount()));
+			sb.append(String.format("%4d",last.tcount));
 			sb.append(" linear ");
 			sb.append(dd.getTDef().getSamples()[start-1].toGradsDate());
 			sb.append(" ");
 			sb.append(tinc==null?dd.getTIncrement():tinc);
 			
 			sb.append("\n");
-			sb.append(toStringBuilder(al,nm));
+			sb.append(toStringBuilder(vars));
 			
 			try{ fw.write(sb.toString()); fw.close();}
 			catch(IOException e){ e.printStackTrace(); System.exit(0);}
 		}
 		
-		al.clear();
+		vars.clear();
 	}
 	
 	
@@ -388,7 +388,7 @@ public class CtlDataWriteStream implements DataWrite,Print{
 	public void closeFile(){
 		is_skip=true;
 		
-		al.clear();	al=null;
+		vars.clear();	vars=null;
 		
 		try{ if(fos!=null){ fc.close(); fos.close();}}
 	    catch(IOException ex){ ex.printStackTrace(); System.exit(0);}
@@ -398,25 +398,21 @@ public class CtlDataWriteStream implements DataWrite,Print{
 	
 	
 	/*** change the info of an array of variables into a string ***/
-	protected StringBuilder toStringBuilder(ArrayList<Variable> al,ArrayList<String> nm){
+	protected StringBuilder toStringBuilder(ArrayList<Var> vars){
 		StringBuilder sb=new StringBuilder();
 		
-		int length=al.size();
-		
 		sb.append("vars ");
-		sb.append(String.format("%4d",length));
+		sb.append(String.format("%4d",vars.size()));
 		sb.append("\n");
-		for(int m=0;m<length;m++){
-			Variable v=al.get(m);	String[] s=nm.get(m).split("mini_ufo");
-			
-			sb.append(String.format("%-11s",s[0]));
+		
+		for(Var v:vars){
+			sb.append(String.format("%-11s",v.name));
 			sb.append(" ");
-			sb.append(String.format("%3d",v.getZCount()==1?0:v.getZCount()));
+			sb.append(String.format("%3d",v.zcount==1?0:v.zcount));
 			sb.append(" ");
 			sb.append(String.format("%5s",storageType));
 			sb.append(" ");
-			if(s.length>1) sb.append((s[1].equals("")||s[1].equals("null"))?"comment":s[1]);
-			else sb.append("comment");
+			sb.append(v.cmmt);
 			sb.append("\n");
 		}
 		

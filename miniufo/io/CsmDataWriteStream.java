@@ -28,7 +28,7 @@ import static miniufo.io.FileWriteInterface.Solution.*;
  * @author  MiniUFO
  * @since   MDK1.0
  */
-public final class CsmDataWriteStream implements DataWrite{
+public final class CsmDataWriteStream extends DataWrite{
 	//
 	private boolean is_skip       =true;	// whether to skip overwriting the file
 	private boolean print         =true;
@@ -40,7 +40,7 @@ public final class CsmDataWriteStream implements DataWrite{
 	private FileOutputStream fos  =null;	// file access object
 	private FileWriteInterface fwi=null;
 	
-	private ArrayList<Variable> al=null;
+	protected ArrayList<Var>  vars=null;
 	
 	
 	/**
@@ -79,7 +79,7 @@ public final class CsmDataWriteStream implements DataWrite{
 		}
 		
 		fc=fos.getChannel();
-		al=new ArrayList<Variable>();
+		vars=new ArrayList<Var>();
 	}
 	
 	
@@ -154,9 +154,9 @@ public final class CsmDataWriteStream implements DataWrite{
 		for(int i=0;i<s.length-1;i++) name.append(s[i]+".");
 		String npath=name.append("ctl").toString();
 		
-		is_skip=true;	int vcount=al.size();
+		is_skip=true;	int vcount=vars.size();
 		fwi=new FileWriteInterface(npath);
-		Variable last=al.get(vcount-1);
+		Var last=vars.get(vcount-1);
 		FileWriter fw=null;
 		
 		try{
@@ -187,9 +187,9 @@ public final class CsmDataWriteStream implements DataWrite{
 			sb.append("\nstnmap ^");	sb.append(mapname);
 			sb.append("\nundef ");		sb.append(cd.getUndef(null));
 			
-			start=last.getRange().getTRange()[0];
+			start=last.tstart;
 			sb.append("\ntdef ");
-			sb.append(last.getTCount());
+			sb.append(last.tcount);
 			sb.append(" linear ");
 			sb.append(cd.getTDef().getSamples()[start-1].toGradsDate());
 			sb.append(" ");
@@ -199,11 +199,11 @@ public final class CsmDataWriteStream implements DataWrite{
 			sb.append(vcount);
 			sb.append("\n");
 			
-			for(Variable v:al){
-				sb.append(String.format("%-9s",v.getName()));
+			for(Var v:vars){
+				sb.append(String.format("%-9s",v.name));
 				sb.append(" ");
-				sb.append(v.getZCount()==1?0:v.getZCount());
-				sb.append(" 99 "+v.getCommentAndUnit()+"\n");
+				sb.append(v.zcount==1?0:v.zcount);
+				sb.append(" 99 "+v.cmmt+"\n");
 			}
 			
 			sb.append("endvars\n");
@@ -212,7 +212,7 @@ public final class CsmDataWriteStream implements DataWrite{
 			catch(IOException e){ e.printStackTrace(); System.exit(0);}
 		}
 		
-		al.clear();
+		vars.clear();
 	}
 	
 	
@@ -296,7 +296,7 @@ public final class CsmDataWriteStream implements DataWrite{
 		
 		float[][][][][] data=new float[vcount][][][][];
 		
-		for(int m=0;m<vcount;m++){ data[m]=v[m].getData(); al.add(v[m]);}
+		for(int m=0;m<vcount;m++){ data[m]=v[m].getData(); vars.add(new Var(v[m]));}
 		
 		if(v[0].isTFirst()){
 			for(int l=0;l<t;l++){
