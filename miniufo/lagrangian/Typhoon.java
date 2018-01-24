@@ -403,7 +403,7 @@ public final class Typhoon extends Particle{
 		for(int i=0,I=types.length;i<I;i++)
 		if(ordinal==types[i].ordinal()) return types[i];
 		
-		throw new IllegalArgumentException("no ordinal for number: "+ordinal);
+		return TYPE.OTHERS;
 	}
 	
 	private static int getDT(long t1,long t2){

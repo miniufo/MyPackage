@@ -137,10 +137,10 @@ public final class CsmDataReadStream implements DataRead,Print{
 			xrange[1]=xrange[2]+xrange[0]-1;
 			yrange[1]=yrange[2]+yrange[0]-1;
 			
-			if(xrange[0]<0||xrange[1]>ctl.getXCount())
+			if(!ctl.isPeriodicX()&&(xrange[0]<0||xrange[1]>ctl.getXCount()))
 				throw new IllegalArgumentException("csm is beyond ctl xrange, olon = "+cd.getOLon()[l]);
 			
-			if(yrange[0]<0||yrange[1]>ctl.getYCount())
+			if(!ctl.isPeriodicY()&&(yrange[0]<0||yrange[1]>ctl.getYCount()))
 				throw new IllegalArgumentException("csm is beyond ctl yrange, olat = "+cd.getOLat()[l]);
 			
 			for(int k=0;k<z;k++){

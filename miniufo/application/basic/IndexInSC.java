@@ -281,13 +281,13 @@ public final class IndexInSC extends EquationInSphericalCoordinate{
 				float[][][][] idata= idx[m].getData();
 				
 				if(idx[0].isTFirst()){
-					for(int l=0,L=idx[0].getTCount();l<L;l++)
-					for(int k=0,K=idx[0].getZCount();k<K;k++)
+					for(int l=0,L=CIDX[m].getTCount();l<L;l++)
+					for(int k=0,K=CIDX[m].getZCount();k<K;k++)
 					idata[l][k][jj-ystart][ii-xstart]=edata[l][k][0][0];
 					
 				}else{
-					for(int l=0,L=u.getTCount();l<L;l++)
-					for(int k=0,K=u.getZCount();k<K;k++)
+					for(int l=0,L=CIDX[m].getTCount();l<L;l++)
+					for(int k=0,K=CIDX[m].getZCount();k<K;k++)
 					idata[k][jj-ystart][ii-xstart][l]=edata[k][0][0][l];
 				}
 			}
@@ -363,6 +363,15 @@ public final class IndexInSC extends EquationInSphericalCoordinate{
 				Variable th=tdm.cPotentialTemperature(Tc);
 				th.anomalizeX();
 				CIDX[m]=dm.cEddyHeatHFC(th,vra).averageAlong(Dimension.Y,str,end);
+				
+			}else if(idxNames[m].equalsIgnoreCase("VWS")){
+				Variable[] uv =ct.reprojectToCylindrical(ct.transToCylindrical(u),ct.transToCylindrical(v));
+				Variable[] shr=dm.cVerticalWindShear(uv[0],uv[1]);
+				
+				Variable shrsum=dm.cRadialAverage(shr[0],0,str).anomalizeX();	// within str km
+				Variable shrsvm=dm.cRadialAverage(shr[1],0,str).anomalizeX();	// within str km
+				
+				CIDX[m]=shrsum.hypotenuse(shrsvm); CIDX[m].setName("VWS");
 				
 			}else throw new IllegalArgumentException("invalid type for horizontal index: "+idxNames[m]);
 		}

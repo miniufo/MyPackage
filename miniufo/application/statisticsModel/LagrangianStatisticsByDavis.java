@@ -332,8 +332,8 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 		float[][] k2data=stats[7].getData()[0][0];
 		float[][] agdata=stats[8].getData()[0][0];
 		
-		float[] lons=dd.getXDef().getSamples();
-		float[] lats=dd.getYDef().getSamples();
+		float[] xdef=dd.getXDef().getSamples();
+		float[] ydef=dd.getYDef().getSamples();
 		
 		List<Future<float[]>> ls=new ArrayList<>(dd.getXCount()-1);
 		ExecutorService es=ConcurrentUtil.defaultExecutor();
@@ -350,7 +350,7 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 				final int jtag=j;
 				
 				Predicate<Record> cond=rec->
-				new Region2D(lons[itag]-bRad,lats[jtag]-bRad,lons[itag]+bRad,lats[jtag]+bRad).inRange(rec.getXPos(),rec.getYPos());
+				new Region2D(xdef[itag]-bRad,ydef[jtag]-bRad,xdef[itag]+bRad,ydef[jtag]+bRad).inRange(rec.getXPos(),rec.getYPos());
 				
 				ls.add(cs.submit(()->cStatisticsByDavisTheory3(cond,tRad).getMean(str,end,minTracks)));
 			}

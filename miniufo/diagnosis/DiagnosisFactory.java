@@ -712,14 +712,14 @@ public final class DiagnosisFactory{
 	public static DiagnosisFactory parseContent(String content){
 		DiagnosisFactory df=new DiagnosisFactory();
 		
-		if(content.toLowerCase().indexOf("\nvars ")!=-1)
-			df.dd=new CtlDescriptor(content);
-		
+		if(content.toLowerCase().indexOf("\nf0")!=-1)
+			df.dd=new CtsDescriptor(content);
+			
 		else if(content.toLowerCase().indexOf("\ncoords")!=-1)
 			df.dd=new CsmDescriptor(content);
-		
-		else if(content.toLowerCase().indexOf("\nf0")!=-1)
-			df.dd=new CtsDescriptor(content);
+			
+		else if(content.toLowerCase().indexOf("\nvars ")!=-1)
+			df.dd=new CtlDescriptor(content);
 			
 		else throw new IllegalArgumentException("unsupported DataDescriptor type");
 		
