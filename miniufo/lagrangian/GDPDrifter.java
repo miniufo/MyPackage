@@ -33,7 +33,7 @@ public final class GDPDrifter extends Particle{
 	 */
 	public GDPDrifter(String id,int attLen){ super(id,attLen);}
 	
-	public GDPDrifter(String id,int size,int attLen){ super(id,size,attLen);}
+	public GDPDrifter(String id,int size,int attLen){ super(id,size,attLen,true);}
 	
 	
 	/*** getor and setor ***/

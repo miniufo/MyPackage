@@ -117,7 +117,7 @@ public final class SingleParticleStatResult{
 	
 	
 	/**
-	 * average the result from str to end lag for both positive and negtive time lags
+	 * Average the result from str to end lag for both positive and negtive time lags.
 	 * 
 	 * @param	str		start index
 	 * @param	end		end index
@@ -183,6 +183,75 @@ public final class SingleParticleStatResult{
 		mean[8]=AngM;
 		
 		return mean;
+	}
+	
+	/**
+	 * Get the maximum result from str to end lag for both positive and negtive time lags.
+	 * 
+	 * @param	str		start index
+	 * @param	end		end index
+	 * 
+	 * @return	max		[0,1] for [Kxx,Kyy], [2,3] for [Tx,Ty] and [4,5] for [Lx,Ly]
+	 */
+	public float[] getMax(int str,int end,int minTracks){
+		checkIndices(str,end);
+		
+		if(pseudoTracks<minTracks||noOfMaxLag<minTracks*0.2f||noOfMinLag<minTracks*0.2f) return null;
+		
+		int cK=0;
+		
+		float KxxM=0,KyyM=0,K11M=0,K22M=0,AngM=0,tmpMax=0;
+		
+		tmpMax=getAbsMax(Kxx,tRad+str,tRad+end); if(tmpMax!=0){ KxxM+=tmpMax; cK++;}
+		tmpMax=getAbsMax(Kxx,tRad-end,tRad-str); if(tmpMax!=0){ KxxM+=tmpMax; cK++;}
+		
+		if(cK!=0) KxxM/=cK;	cK=0;
+		
+		tmpMax=getAbsMax(Kyy,tRad+str,tRad+end); if(tmpMax!=0){ KyyM+=tmpMax; cK++;}
+		tmpMax=getAbsMax(Kyy,tRad-end,tRad-str); if(tmpMax!=0){ KyyM+=tmpMax; cK++;}
+		
+		if(cK!=0) KyyM/=cK;	cK=0;
+		
+		tmpMax=getAbsMax(K11,tRad+str,tRad+end); if(tmpMax!=0){ K11M+=tmpMax; cK++;}
+		tmpMax=getAbsMax(K11,tRad-end,tRad-str); if(tmpMax!=0){ K11M+=tmpMax; cK++;}
+		
+		if(cK!=0) K11M/=cK;	cK=0;
+		
+		tmpMax=getAbsMax(K22,tRad+str,tRad+end); if(tmpMax!=0){ K22M+=tmpMax; cK++;}
+		tmpMax=getAbsMax(K22,tRad-end,tRad-str); if(tmpMax!=0){ K22M+=tmpMax; cK++;}
+		
+		if(cK!=0) K22M/=cK;	cK=0;
+		
+		float angP=0,angN=0;	int cP=0,cN=0;
+		tmpMax=getAbsMax(ang,tRad+str,tRad+end); if(tmpMax!=0){ angP+=tmpMax; cP++;}
+		tmpMax=getAbsMax(ang,tRad-end,tRad-str); if(tmpMax!=0){ angN+=tmpMax; cN++;}
+		
+		if(cP!=0) angP/=cP;
+		if(cN!=0) angN/=cN;
+		
+		if(angN!=0){
+			angN+=Math.PI/2.0;
+			if(angN>Math.PI/2.0) angN-=Math.PI;
+		}
+		
+		AngM=(angP+angN)/2f;
+		
+		float[] extremes=new float[9];
+		
+		extremes[0]=KxxM/1e3f;
+		extremes[1]=KyyM/1e3f;
+		
+		extremes[2]=KxxM/Pxx[tRad]/86400f;
+		extremes[3]=KyyM/Pyy[tRad]/86400f;
+		
+		extremes[4]=KxxM/(float)Math.sqrt(Pxx[tRad])/1000f;
+		extremes[5]=KyyM/(float)Math.sqrt(Pyy[tRad])/1000f;
+		
+		extremes[6]=K11M/1e3f;
+		extremes[7]=K22M/1e3f;
+		extremes[8]=AngM;
+		
+		return extremes;
 	}
 	
 	/**
@@ -252,6 +321,18 @@ public final class SingleParticleStatResult{
 	/*** helper methods ***/
 	private void checkIndices(int str,int end){
 		if(str<0||end>tRad||str>end) throw new IllegalArgumentException("0 <= str <= end <= tRad");
+	}
+	
+	private float getAbsMax(float[] data,int str,int end){
+		float re=0;
+		
+		for(int i=str;i<=end;i++) if(!Float.isNaN(data[i])){
+			float abs=Math.abs(data[i]);
+			
+			if(abs>re) re=abs;
+		}
+		
+		return re;
 	}
 	
 	

@@ -50,19 +50,21 @@ public class Particle implements Cloneable,Serializable{
 	 * @param	r	initial record
 	 */
 	public Particle(String id,int attLen){
-		this(id,10,attLen);
+		this(id,10,attLen,true);
 	}
 	
-	public Particle(String id,int initSize,int attLen){
+	public Particle(String id,int initSize,int attLen,boolean llpos){
 		this.id=id;
 		
 		attachedVars=new String[attLen];
 		
 		records=new ArrayList<>(initSize);
+		
+		this.llpos=llpos;
 	}
 	
 	public Particle(String id,Record init,int attLen){
-		this(id,10,attLen);
+		this(id,10,attLen,true);
 		
 		records.add(init);
 	}
@@ -82,11 +84,7 @@ public class Particle implements Cloneable,Serializable{
 	
 	public boolean isFinished(){ return finished;}
 	
-	public boolean isLatLonPosition(){
-		llpos=true;
-		for(Record r:records) if(r.getXPos()>720||Math.abs(r.getYPos())>360){ llpos=false; break;}
-		return llpos;
-	}
+	public boolean isLatLonPosition(){ return llpos;}
 	
 	public boolean addRecord(Record r){ return records.add(r);}
 	
@@ -354,6 +352,7 @@ public class Particle implements Cloneable,Serializable{
 		    
 			p.finished=finished;
 			p.id=id;
+			p.llpos=llpos;
 			p.records=new ArrayList<>(records.size());
 			
 			for(int i=0,I=records.size();i<I;i++)
@@ -376,7 +375,7 @@ public class Particle implements Cloneable,Serializable{
 		
 		buf.append(getClass().getSimpleName()+" id ("+id+") "+records.size()+" records:\n");
 		
-		if(isLatLonPosition())
+		if(llpos)
 			buf.append("  lons(E-deg)  lats(N-deg) time(YYYYMMDDHHMMSS) uspd(m/s) vspd(m/s)\n");
 		else
 			buf.append(" xpos(km)  ypos(km)   time(YYYYMMDDHHMMSS) uspd(m/s) vspd(m/s)\n");

@@ -43,12 +43,12 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 	
 	
 	/**
-     * compute the Lagrangian diffusivity using <v'd'>
+     * Compute the Lagrangian diffusivity using Davis' (1991) theory: <v'd'>.
      *
      * @param	cond	condition for a record to be the origin of pseudo-track
      * @param	tRad	maximum lead or lag count
      */
-	public SingleParticleStatResult cStatisticsByDavisTheory1(Predicate<Record> cond,int tRad){
+	public SingleParticleStatResult cStatisticsByDavisTheory(Predicate<Record> cond,int tRad){
 		BinStatistics bd=new BinStatistics(tRad);
 		
 		bd.computeMean(cond);
@@ -60,12 +60,12 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 	}
 	
 	/**
-     * compute the Lagrangian diffusivity using <v'v'>
+     * Compute the Lagrangian diffusivity using Taylor's theory: <v'v'>.
      *
      * @param	cond	condition for a record to be the origin of pseudo-track
      * @param	tRad	maximum lead or lag count
      */
-	public SingleParticleStatResult cStatisticsByDavisTheory2(Predicate<Record> cond,int tRad){
+	public SingleParticleStatResult cStatisticsByTaylorTheory(Predicate<Record> cond,int tRad){
 		BinStatistics bd=new BinStatistics(tRad);
 		
 		bd.computeMean(cond);
@@ -76,12 +76,12 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 	}
 	
 	/**
-     * compute the Lagrangian diffusivity using 0.5*d<d'd'>/dt
+     * Compute the Lagrangian diffusivity using growth rate of dispersion: 0.5*d<d'd'>/dt.
      *
      * @param	cond	condition for a record to be the origin of pseudo-track
      * @param	tRad	maximum lead or lag count
      */
-	public SingleParticleStatResult cStatisticsByDavisTheory3(Predicate<Record> cond,int tRad){
+	public SingleParticleStatResult cStatisticsByDispersionTheory(Predicate<Record> cond,int tRad){
 		BinStatistics bd=new BinStatistics(tRad);
 		
 		bd.computeMean(cond);
@@ -93,7 +93,7 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 	
 	
 	/**
-     * compute Lagrangian statistics map
+     * Compute Lagrangian statistics maps using time mean within the given time lags [str, end].
      *
      * @param	tRad		maximum time lags
      * @param	bRad		radius for bins (degree)
@@ -101,9 +101,60 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
      * @param	end			end index
      * @param	minTracks	minimum tracks within the bin, else undef value is assigned to result
      * 
-     * @return	stats	[0,1] for [Kxx,Kyy], [2,3] for [Tx,Ty] and [4,5] for [Lx,Ly]
+     * @return	stats		[0,1] for [Kxx,Kyy], [2,3] for [Tx,Ty] and [4,5] for [Lx,Ly]
      */
-	public Variable[] cStatisticsMapByDavisTheory1(int tRad,float bRad,int str,int end,int minTracks){
+	public Variable[] cMeanStatisticsMapByDavisTheory(int tRad,float bRad,int str,int end,int minTracks){
+		return cStatisticsMapByDavisTheory(tRad,bRad,str,end,minTracks,true);
+	}
+	
+	public Variable[] cMeanStatisticsMapByTaylorTheory(int tRad,float bRad,int str,int end,int minTracks){
+		return cStatisticsMapByTaylorTheory(tRad,bRad,str,end,minTracks,true);
+	}
+	
+	public Variable[] cMeanStatisticsMapByDispersionTheory(int tRad,float bRad,int str,int end,int minTracks){
+		return cStatisticsMapByDispersionTheory(tRad,bRad,str,end,minTracks,true);
+	}
+	
+	
+	/**
+     * Compute Lagrangian statistics maps using time mean within the given time lags [str, end].
+     *
+     * @param	tRad		maximum time lags
+     * @param	bRad		radius for bins (degree)
+     * @param	str			start index
+     * @param	end			end index
+     * @param	minTracks	minimum tracks within the bin, else undef value is assigned to result
+     * 
+     * @return	stats		[0,1] for [Kxx,Kyy], [2,3] for [Tx,Ty] and [4,5] for [Lx,Ly]
+     */
+	public Variable[] cMaxStatisticsMapByDavisTheory(int tRad,float bRad,int str,int end,int minTracks){
+		return cStatisticsMapByDavisTheory(tRad,bRad,str,end,minTracks,false);
+	}
+	
+	public Variable[] cMaxStatisticsMapByTaylorTheory(int tRad,float bRad,int str,int end,int minTracks){
+		return cStatisticsMapByTaylorTheory(tRad,bRad,str,end,minTracks,false);
+	}
+	
+	public Variable[] cMaxStatisticsMapByDispersionTheory(int tRad,float bRad,int str,int end,int minTracks){
+		return cStatisticsMapByDispersionTheory(tRad,bRad,str,end,minTracks,false);
+	}
+	
+	
+	/*** helper method and class ***/
+	
+	/**
+     * Compute Lagrangian statistics maps using mean/maximum value within the given time lags [str, end].
+     *
+     * @param	tRad		maximum time lags
+     * @param	bRad		radius for bins (degree)
+     * @param	str			start index
+     * @param	end			end index
+     * @param	minTracks	minimum tracks within the bin, else undef value is assigned to result
+     * @param	ave			mean method or maximum method to be used
+     * 
+     * @return	stats		[0,1] for [Kxx,Kyy], [2,3] for [Tx,Ty] and [4,5] for [Lx,Ly]
+     */
+	private Variable[] cStatisticsMapByDavisTheory(int tRad,float bRad,int str,int end,int minTracks,boolean ave){
 		float undef=dd.getUndef(null);
 		
 		Variable[] stats=new Variable[9];
@@ -158,9 +209,12 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 				final int jtag=j;
 				
 				Predicate<Record> cond=rec->
-				new Region2D(lons[itag]-bRad,lats[jtag]-bRad,lons[itag]+bRad,lats[jtag]+bRad).inRange(rec.getXPos(),rec.getYPos());
+				new Region2D(lons[itag]-bRad,lats[jtag]-bRad,lons[itag]+bRad,lats[jtag]+bRad).inRange(rec.getDataValue(2),rec.getDataValue(3));
 				
-				ls.add(cs.submit(()->cStatisticsByDavisTheory1(cond,tRad).getMean(str,end,minTracks)));
+				if(ave)
+					ls.add(cs.submit(()->cStatisticsByDavisTheory(cond,tRad).getMean(str,end,minTracks)));
+				else
+					ls.add(cs.submit(()->cStatisticsByDavisTheory(cond,tRad).getMax(str,end,minTracks)));
 			}
 			
 			try{
@@ -199,7 +253,7 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 		return stats;
 	}
 	
-	public Variable[] cStatisticsMapByDavisTheory2(int tRad,float bRad,int str,int end,int minTracks){
+	private Variable[] cStatisticsMapByTaylorTheory(int tRad,float bRad,int str,int end,int minTracks,boolean ave){
 		float undef=dd.getUndef(null);
 		
 		Variable[] stats=new Variable[9];
@@ -254,9 +308,12 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 				final int jtag=j;
 				
 				Predicate<Record> cond=rec->
-				new Region2D(lons[itag]-bRad,lats[jtag]-bRad,lons[itag]+bRad,lats[jtag]+bRad).inRange(rec.getXPos(),rec.getYPos());
+				new Region2D(lons[itag]-bRad,lats[jtag]-bRad,lons[itag]+bRad,lats[jtag]+bRad).inRange(rec.getDataValue(2),rec.getDataValue(3));
 				
-				ls.add(cs.submit(()->cStatisticsByDavisTheory2(cond,tRad).getMean(str,end,minTracks)));
+				if(ave)
+					ls.add(cs.submit(()->cStatisticsByTaylorTheory(cond,tRad).getMean(str,end,minTracks)));
+				else
+					ls.add(cs.submit(()->cStatisticsByTaylorTheory(cond,tRad).getMax(str,end,minTracks)));
 			}
 			
 			try{
@@ -295,7 +352,7 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 		return stats;
 	}
 	
-	public Variable[] cStatisticsMapByDavisTheory3(int tRad,float bRad,int str,int end,int minTracks){
+	private Variable[] cStatisticsMapByDispersionTheory(int tRad,float bRad,int str,int end,int minTracks,boolean ave){
 		float undef=dd.getUndef(null);
 		
 		Variable[] stats=new Variable[9];
@@ -350,9 +407,12 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 				final int jtag=j;
 				
 				Predicate<Record> cond=rec->
-				new Region2D(xdef[itag]-bRad,ydef[jtag]-bRad,xdef[itag]+bRad,ydef[jtag]+bRad).inRange(rec.getXPos(),rec.getYPos());
+				new Region2D(xdef[itag]-bRad,ydef[jtag]-bRad,xdef[itag]+bRad,ydef[jtag]+bRad).inRange(rec.getDataValue(2),rec.getDataValue(3));
 				
-				ls.add(cs.submit(()->cStatisticsByDavisTheory3(cond,tRad).getMean(str,end,minTracks)));
+				if(ave)
+					ls.add(cs.submit(()->cStatisticsByDispersionTheory(cond,tRad).getMean(str,end,minTracks)));
+				else
+					ls.add(cs.submit(()->cStatisticsByDispersionTheory(cond,tRad).getMax(str,end,minTracks)));
 			}
 			
 			try{
@@ -392,7 +452,6 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 	}
 	
 	
-	/*** helper method and class ***/
 	private final class BinStatistics{
 		//
 		private int pseudoTracks=0;	// number of pseudo-tracks, i.e. observations at lag 0

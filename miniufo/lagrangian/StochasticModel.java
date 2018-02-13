@@ -167,7 +167,7 @@ public abstract class StochasticModel{
 		init.setData(2,rnds[2]);	// accX
 		init.setData(3,rnds[3]);	// accY
 		
-		Particle p=new Particle(id,initLen,4);
+		Particle p=new Particle(id,initLen,4,true);
 		p.setAttachedDataNames("velX","velY","accX","accY");
 		p.addRecord(init);
 		

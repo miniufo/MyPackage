@@ -69,12 +69,12 @@ public final class SphericalSpatialModel extends SpatialModel{
 	public boolean isGlobal(){
 		if(!periodicX) return false;
 		
-		float dlon=xdef.getIncrements()[0];
-		float dlat=ydef.getIncrements()[0];
+		double dlon=Math.toDegrees(xdef.getIncrements()[0]);
+		double dlat=Math.toDegrees(ydef.getIncrements()[0]);
 		
-		if(Math.abs(360/xdef.length()-dlon)/dlon>1e-2f) return false;
-		if(Math.abs(ydef.getFirst()+90)>=dlat) return false;
-		if(Math.abs(ydef.getLast ()-90)>=dlat) return false;
+		if(Math.abs(360.0/xdef.length()-dlon)/dlon>1e-2f) return false;
+		if(Math.abs(Math.toDegrees(ydef.getFirst())+90)>=dlat) return false;
+		if(Math.abs(Math.toDegrees(ydef.getLast ())-90)>=dlat) return false;
 		
 		return true;
 	}

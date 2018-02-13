@@ -365,8 +365,9 @@ public final class IndexInSC extends EquationInSphericalCoordinate{
 				CIDX[m]=dm.cEddyHeatHFC(th,vra).averageAlong(Dimension.Y,str,end);
 				
 			}else if(idxNames[m].equalsIgnoreCase("VWS")){
-				Variable[] uv =ct.reprojectToCylindrical(ct.transToCylindrical(u),ct.transToCylindrical(v));
-				Variable[] shr=dm.cVerticalWindShear(uv[0],uv[1]);
+				Variable uu=ct.transToCylindrical(u);
+				Variable vv=ct.transToCylindrical(v);
+				Variable[] shr=dm.cVerticalWindShear(uu,vv);
 				
 				Variable shrsum=dm.cRadialAverage(shr[0],0,str).anomalizeX();	// within str km
 				Variable shrsvm=dm.cRadialAverage(shr[1],0,str).anomalizeX();	// within str km

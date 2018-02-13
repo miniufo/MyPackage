@@ -14,6 +14,7 @@ import miniufo.diagnosis.CylindricalSpatialModel;
 import static java.lang.Math.sin;
 import static java.lang.Math.cos;
 import static miniufo.basic.InterpolationModel.bicubicPolynomialInterpolation;
+import static miniufo.basic.InterpolationModel.bilinearInterpolation;
 
 
 /**
@@ -201,7 +202,7 @@ public final class CoordinateTransformation{
 		return nv;
 	}
 	
-	
+
 	/**
      * transfered a given variable from lat/lon coordinates to cylindrical coordinates
      *
@@ -210,82 +211,7 @@ public final class CoordinateTransformation{
      * @return	result in cylindrical coordinates
      */
 	public Variable transToCylindrical(Variable v){
-		//if(!ssm.isGlobal())
-		//	throw new IllegalArgumentException("require a global model");
-		
-		if(!ssm.isAreaLike(v))
-			throw new IllegalArgumentException("require a variable covering the global");
-		
-		if(isBeyondRange()) throw new IllegalArgumentException("csm is beyond the range of ssm");
-		
-		int tt=v.getTCount(),yy=csm.getYCount();
-		int zz=v.getZCount(),xx=csm.getXCount();
-		
-		Variable re=new Variable(v.getName(),new Range(tt,zz,yy,xx));
-		re.setComment(v.getComment());
-		re.setUnit(v.getUnit());
-		re.setUndef(v.getUndef());
-		
-		float[][][] lons=csm.getLon();	// radians
-		float[][][] lats=csm.getLat();	// radians
-		
-		float[] xdef=ssm.getXDef().getSamples();
-		float[] ydef=ssm.getYDef().getSamples();
-		
-		float undef=v.getUndef();
-		float dlon=ssm.getXDef().getIncrements()[0];	// radians
-		float dlat=ssm.getYDef().getIncrements()[0];	// radians
-		
-		if(v.isTFirst()){
-			for(int l=0;l<tt;l++)
-			for(int k=0;k<zz;k++){
-				float[][] vdata= v.getData()[l][k];
-				float[][] rdata=re.getData()[l][k];
-				
-				for(int j=0;j<yy;j++)
-				for(int i=0;i<xx;i++){
-					int xtags=ArrayUtil.getLEIdxIncre(xdef,lons[l][j][i]);
-					int ytags=ArrayUtil.getLEIdxIncre(ydef,lats[l][j][i]);
-					
-					float disx=lons[l][j][i]-xdef[xtags];
-					float disy=lats[l][j][i]-ydef[ytags];
-					
-					rdata[j][i]=bicubicPolynomialInterpolation(
-						vdata[ytags-1][xtags-1],vdata[ytags-1][xtags],vdata[ytags-1][xtags+1],vdata[ytags-1][xtags+2],
-						vdata[ytags  ][xtags-1],vdata[ytags  ][xtags],vdata[ytags  ][xtags+1],vdata[ytags  ][xtags+2],
-						vdata[ytags+1][xtags-1],vdata[ytags+1][xtags],vdata[ytags+1][xtags+1],vdata[ytags+1][xtags+2],
-						vdata[ytags+2][xtags-1],vdata[ytags+2][xtags],vdata[ytags+2][xtags+1],vdata[ytags+2][xtags+2],
-						disx/dlon,disy/dlat,undef
-					);
-				}
-			}
-			
-		}else{
-			for(int k=0;k<zz;k++){
-				float[][][] vdata= v.getData()[k];
-				float[][][] rdata=re.getData()[k];
-				
-				for(int l=0;l<tt;l++)
-				for(int j=0;j<yy;j++)
-				for(int i=0;i<xx;i++){
-					int xtags=ArrayUtil.getLEIdxIncre(xdef,lons[l][j][i]);
-					int ytags=ArrayUtil.getLEIdxIncre(ydef,lats[l][j][i]);
-					
-					float disx=lons[l][j][i]-xdef[xtags];
-					float disy=lats[l][j][i]-ydef[ytags];
-					
-					rdata[j][i][l]=bicubicPolynomialInterpolation(
-						vdata[ytags-1][xtags-1][l],vdata[ytags-1][xtags][l],vdata[ytags-1][xtags+1][l],vdata[ytags-1][xtags+2][l],
-						vdata[ytags  ][xtags-1][l],vdata[ytags  ][xtags][l],vdata[ytags  ][xtags+1][l],vdata[ytags  ][xtags+2][l],
-						vdata[ytags+1][xtags-1][l],vdata[ytags+1][xtags][l],vdata[ytags+1][xtags+1][l],vdata[ytags+1][xtags+2][l],
-						vdata[ytags+2][xtags-1][l],vdata[ytags+2][xtags][l],vdata[ytags+2][xtags+1][l],vdata[ytags+2][xtags+2][l],
-						disx/dlon,disy/dlat,undef
-					);
-				}
-			}
-		}
-		
-		return re;
+		return transToCylindrical(v,-1);
 	}
 	
 	/**
@@ -297,16 +223,29 @@ public final class CoordinateTransformation{
      * @return	result in cylindrical coordinates
      */
 	public Variable transToCylindricalInvariantly(Variable v){
-		if(!ssm.isGlobal())
-			throw new IllegalArgumentException("require a global model");
+		return transToCylindrical(v,0);
+	}
+	
+	/**
+     * transfered a given variable from lat/lon coordinates to cylindrical coordinates
+     *
+     * @param	v	a given Variable
+     * @param	idx	temporal index if only want to transform that time step (start from 0)
+     * 			<0 means transform each time step
+     *
+     * @return	result in cylindrical coordinates
+     */
+	public Variable transToCylindrical(Variable v,int idx){
+		//if(!ssm.isGlobal())
+		//	throw new IllegalArgumentException("require a global model");
 		
 		if(!ssm.isAreaLike(v))
 			throw new IllegalArgumentException("require a variable covering the global");
 		
 		if(isBeyondRange()) throw new IllegalArgumentException("csm is beyond the range of ssm");
 		
-		int tt=csm.getTCount(),yy=csm.getYCount();
-		int zz=  v.getZCount(),xx=csm.getXCount();
+		int tt=v.getTCount(),yy=csm.getYCount(),yll=ssm.getYCount();
+		int zz=v.getZCount(),xx=csm.getXCount(),xll=ssm.getXCount();
 		
 		Variable re=new Variable(v.getName(),v.isTFirst(),new Range(tt,zz,yy,xx));
 		re.setComment(v.getComment());
@@ -326,7 +265,9 @@ public final class CoordinateTransformation{
 		if(v.isTFirst()){
 			for(int l=0;l<tt;l++)
 			for(int k=0;k<zz;k++){
-				float[][] vdata= v.getData()[0][k];
+				int tidx=idx<0?l:idx;
+				
+				float[][] vdata= v.getData()[tidx][k];
 				float[][] rdata=re.getData()[l][k];
 				
 				for(int j=0;j<yy;j++)
@@ -337,6 +278,12 @@ public final class CoordinateTransformation{
 					float disx=lons[l][j][i]-xdef[xtags];
 					float disy=lats[l][j][i]-ydef[ytags];
 					
+					if(xtags==0||ytags==0||xtags==xll-2||ytags==yll-2)
+					rdata[j][i]=bilinearInterpolation(
+						vdata[ytags][xtags],vdata[ytags][xtags+1],vdata[ytags+1][xtags],vdata[ytags+1][xtags+1],
+						disx/dlon,disy/dlat,undef
+					);
+					else
 					rdata[j][i]=bicubicPolynomialInterpolation(
 						vdata[ytags-1][xtags-1],vdata[ytags-1][xtags],vdata[ytags-1][xtags+1],vdata[ytags-1][xtags+2],
 						vdata[ytags  ][xtags-1],vdata[ytags  ][xtags],vdata[ytags  ][xtags+1],vdata[ytags  ][xtags+2],
@@ -352,7 +299,7 @@ public final class CoordinateTransformation{
 				float[][][] vdata= v.getData()[k];
 				float[][][] rdata=re.getData()[k];
 				
-				for(int l=0;l<tt;l++)
+				for(int l=0;l<tt;l++){ int tidx=idx<0?l:idx;
 				for(int j=0;j<yy;j++)
 				for(int i=0;i<xx;i++){
 					int xtags=ArrayUtil.getLEIdxIncre(xdef,lons[l][j][i]);
@@ -361,14 +308,20 @@ public final class CoordinateTransformation{
 					float disx=lons[l][j][i]-xdef[xtags];
 					float disy=lats[l][j][i]-ydef[ytags];
 					
-					rdata[j][i][l]=bicubicPolynomialInterpolation(
-						vdata[ytags-1][xtags-1][0],vdata[ytags-1][xtags][0],vdata[ytags-1][xtags+1][0],vdata[ytags-1][xtags+2][0],
-						vdata[ytags  ][xtags-1][0],vdata[ytags  ][xtags][0],vdata[ytags  ][xtags+1][0],vdata[ytags  ][xtags+2][0],
-						vdata[ytags+1][xtags-1][0],vdata[ytags+1][xtags][0],vdata[ytags+1][xtags+1][0],vdata[ytags+1][xtags+2][0],
-						vdata[ytags+2][xtags-1][0],vdata[ytags+2][xtags][0],vdata[ytags+2][xtags+1][0],vdata[ytags+2][xtags+2][0],
+					if(xtags==0||ytags==0||xtags==xll-2||ytags==yll-2)
+					rdata[j][i][l]=bilinearInterpolation(
+						vdata[ytags][xtags][tidx],vdata[ytags][xtags+1][tidx],vdata[ytags+1][xtags][tidx],vdata[ytags+1][xtags+1][tidx],
 						disx/dlon,disy/dlat,undef
 					);
-				}
+					else
+					rdata[j][i][l]=bicubicPolynomialInterpolation(
+						vdata[ytags-1][xtags-1][tidx],vdata[ytags-1][xtags][tidx],vdata[ytags-1][xtags+1][tidx],vdata[ytags-1][xtags+2][tidx],
+						vdata[ytags  ][xtags-1][tidx],vdata[ytags  ][xtags][tidx],vdata[ytags  ][xtags+1][tidx],vdata[ytags  ][xtags+2][tidx],
+						vdata[ytags+1][xtags-1][tidx],vdata[ytags+1][xtags][tidx],vdata[ytags+1][xtags+1][tidx],vdata[ytags+1][xtags+2][tidx],
+						vdata[ytags+2][xtags-1][tidx],vdata[ytags+2][xtags][tidx],vdata[ytags+2][xtags+1][tidx],vdata[ytags+2][xtags+2][tidx],
+						disx/dlon,disy/dlat,undef
+					);
+				}}
 			}
 		}
 		

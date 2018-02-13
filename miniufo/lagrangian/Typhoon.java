@@ -31,9 +31,9 @@ public final class Typhoon extends Particle{
 	/*** Constructors ***/
 	public Typhoon(String id,int attLen){ super(id,attLen);}
 	
-	public Typhoon(String id,int size,int attLen){ super(id,size,attLen);}
+	public Typhoon(String id,int size,int attLen){ super(id,size,attLen,true);}
 	
-	public Typhoon(String id,String name,int size,int attLen){ super(id,size,attLen); this.name=name;}
+	public Typhoon(String id,String name,int size,int attLen){ super(id,size,attLen,true); this.name=name;}
 	
 	public Typhoon(String id,String name,List<Record> recs){
 		super(id,recs.get(0).getDataLength());

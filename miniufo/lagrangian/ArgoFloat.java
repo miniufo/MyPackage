@@ -34,7 +34,7 @@ public final class ArgoFloat extends Particle{
 	 */
 	public ArgoFloat(String id,int attLen){ super(id,attLen);}
 	
-	public ArgoFloat(String id,int size,int attLen){ super(id,size,attLen);}
+	public ArgoFloat(String id,int size,int attLen){ super(id,size,attLen,true);}
 	
 	
 	/**

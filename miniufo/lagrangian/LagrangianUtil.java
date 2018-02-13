@@ -6,6 +6,11 @@
  */
 package miniufo.lagrangian;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -179,6 +184,35 @@ public final class LagrangianUtil{
 	
 	public static void removeLargeDeltaLat(List<? extends Particle> ls,float dlat){
 		removeByCond(ls,p->Math.abs(p.getRecord(0).getYPos()-p.getRecord(p.getTCount()-1).getYPos())>dlat);
+	}
+	
+	
+	/**
+	 * Write a list of Particle to binary file
+	 * 
+	 * @param	ls		a give list of Particle
+	 * @param	fname	file name
+	 */
+	public static void writeAsBinaryFile(List<Particle> ls,String fname){
+		try(ObjectOutputStream oos=new ObjectOutputStream(new FileOutputStream(fname))){
+			oos.writeObject(ls);
+			
+		}catch(IOException e){ e.printStackTrace(); System.exit(0);}
+	}
+	
+	/**
+	 * read a list of Particle from binary file
+	 * 
+	 * @param	fname	file name
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<Particle> readFromBinaryFile(String fname){
+		try(ObjectInputStream oos=new ObjectInputStream(new FileInputStream(fname))){
+			return (List<Particle>)oos.readObject();
+			
+		}catch(Exception e){ e.printStackTrace(); System.exit(0);}
+		
+		throw new IllegalArgumentException("should not reach here");
 	}
 	
 	
