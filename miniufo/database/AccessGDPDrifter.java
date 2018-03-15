@@ -67,7 +67,7 @@ public final class AccessGDPDrifter{
 					
 				}else{
 					curr=new GDPDrifter(newID,dataLen);
-					curr.setAttachedDataNames("uvel","vvel","temp","drogueState");
+					curr.setAttachedMeta(GDPDrifter.UVEL,GDPDrifter.VVEL,GDPDrifter.Temp,GDPDrifter.DrgOff);
 					curr.addRecord(constructRecord(oneline,dataLen));
 					
 					if(prev!=null&&inRange(prev,region)) drftrs.add(prev);
@@ -109,7 +109,7 @@ public final class AccessGDPDrifter{
 				
 				if(!inList){
 					GDPDrifter dfr=new GDPDrifter(newID,dataLen);
-					dfr.setAttachedDataNames("uvel","vvel","temp","drogueState");
+					dfr.setAttachedMeta(GDPDrifter.UVEL,GDPDrifter.VVEL,GDPDrifter.Temp,GDPDrifter.DrgOff);
 					dfr.addRecord(constructRecord(oneline,dataLen));
 					drftrs.add(dfr);
 				}
@@ -182,14 +182,14 @@ public final class AccessGDPDrifter{
 			for(MetaData md:mtlst)
 			if(id==md.getID()){
 				if(md.getUndroguedTime()==MetaData.undefinedTime){
-					for(int l=0,L=dr.getTCount();l<L;l++) dr.getRecord(l).setData(3,1);
+					for(int l=0,L=dr.getTCount();l<L;l++) dr.getRecord(l).setData(GDPDrifter.DrgOff,1);
 					
 				}else for(int l=0,L=dr.getTCount();l<L;l++){
 					long time=dr.getRecord(l).getTime();
 					
 					//if(time!=MetaData.undefinedTime){
-						if(time<md.getUndroguedTime()) dr.getRecord(l).setData(3,1);
-						else dr.getRecord(l).setData(3,-1);
+						if(time<md.getUndroguedTime()) dr.getRecord(l).setData(GDPDrifter.DrgOff,1);
+						else dr.getRecord(l).setData(GDPDrifter.DrgOff,-1);
 						/*
 						if(time>=(md.getDeployTime()-40000L)&&time<=(md.getEndTime()+50000L)){
 							if(time<md.getUndroguedTime()) dr.getRecord(l).setData(3,1);
@@ -348,9 +348,9 @@ public final class AccessGDPDrifter{
 		float v=Float.parseFloat(oneline.substring(67,75));
 		float t=Float.parseFloat(oneline.substring(47,56));
 		
-		r.setData(0,u==GDPUndef?Record.undef:u/100f);
-		r.setData(1,v==GDPUndef?Record.undef:v/100f);
-		r.setData(2,t==GDPUndef?Record.undef:t     );
+		r.setData(GDPDrifter.UVEL,u==GDPUndef?Record.undef:u/100f);
+		r.setData(GDPDrifter.VVEL,v==GDPUndef?Record.undef:v/100f);
+		r.setData(GDPDrifter.Temp,t==GDPUndef?Record.undef:t     );
 		
 		return r;
 	}

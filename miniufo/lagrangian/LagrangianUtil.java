@@ -51,7 +51,7 @@ public final class LagrangianUtil{
 		int count=0;
 		
 		for(Particle p:ls) for(int l=0,L=p.getTCount();l<L;l++)
-		if(p.getRecord(l).getDataValue(0)!=Record.undef) count++;
+		if(p.getRecord(l).getDataValue(Particle.UVEL)!=Record.undef) count++;
 		
 		return count;
 	}

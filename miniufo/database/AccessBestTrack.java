@@ -183,13 +183,13 @@ public final class AccessBestTrack{
 					
 					Record r=new Record(time,lon,lat,5);
 					
-					r.setData(0,0  );
-					r.setData(1,0  );
-					r.setData(2,wnd);
-					r.setData(3,prs);
-					r.setData(4,type.ordinal());
+					r.setData(Typhoon.UVEL,0  );
+					r.setData(Typhoon.VVEL,0  );
+					r.setData(Typhoon.Vmax,wnd);
+					r.setData(Typhoon.Pmin,prs);
+					r.setData(Typhoon.Type,type.ordinal());
 					
-					typhoon.setAttachedDataNames("uvel","vvel","maxwspd","minslp","type");
+					typhoon.setAttachedMeta(Typhoon.UVEL,Typhoon.VVEL,Typhoon.Vmax,Typhoon.Pmin,Typhoon.Type);
 					
 					typhoon.addRecord(r);
 				}
@@ -261,15 +261,16 @@ public final class AccessBestTrack{
 					if(i==0) id=tmp.substring(0,4)+linesplit[1].trim();
 					
 					Record r=new Record(time,lon,lat,3);
-					r.setData(0,0  );
-					r.setData(1,0  );
-					r.setData(2,wnd);
+					
+					r.setData(Typhoon.UVEL,0  );
+					r.setData(Typhoon.VVEL,0  );
+					r.setData(Typhoon.Vmax,wnd);
 					
 					ls.add(r);
 				}
 				
 				Typhoon ty=new Typhoon(id,"nameless",ls);
-				ty.setAttachedDataNames("uvel","vvel","maxwspd");
+				ty.setAttachedMeta(Typhoon.UVEL,Typhoon.VVEL,Typhoon.Vmax);
 				
 				all.add(ty);
 			}
@@ -364,13 +365,14 @@ public final class AccessBestTrack{
 					if(wind.length()!=0) wnd=Float.parseFloat(wind)*0.51444f;
 					
 					Record r=new Record(time,lon,lat,5);
-					r.setData(0,0  );
-					r.setData(1,0  );
-					r.setData(2,wnd);
-					r.setData(3,prs);
-					r.setData(4,type.ordinal());
 					
-					typhoon.setAttachedDataNames("uvel","vvel","maxwspd","minslp","type");
+					r.setData(Typhoon.UVEL,0  );
+					r.setData(Typhoon.VVEL,0  );
+					r.setData(Typhoon.Vmax,wnd);
+					r.setData(Typhoon.Pmin,prs);
+					r.setData(Typhoon.Type,type.ordinal());
+					
+					typhoon.setAttachedMeta(Typhoon.UVEL,Typhoon.VVEL,Typhoon.Vmax,Typhoon.Pmin,Typhoon.Type);
 					
 					typhoon.addRecord(r);
 				}
@@ -447,15 +449,16 @@ public final class AccessBestTrack{
 					if(i==0) id=oneline.substring(8 ,12)+String.format("%02d",num);
 					
 					Record r=new Record(time,lon,lat,4);
-					r.setData(0,0  );
-					r.setData(1,0  );
-					r.setData(2,wnd);
-					r.setData(3,prs);
+					
+					r.setData(Typhoon.UVEL,0  );
+					r.setData(Typhoon.VVEL,0  );
+					r.setData(Typhoon.Vmax,wnd);
+					r.setData(Typhoon.Pmin,prs);
 					ls.add(r);
 				}
 				
 				Typhoon ty=new Typhoon(id,"nameless",ls);
-				ty.setAttachedDataNames("uvel","vvel","maxwspd","minslp");
+				ty.setAttachedMeta(Typhoon.UVEL,Typhoon.VVEL,Typhoon.Vmax,Typhoon.Pmin);
 				
 				all.add(ty);
 				
@@ -517,10 +520,10 @@ public final class AccessBestTrack{
 					if(tmp.length()!=0) prs=Float.parseFloat(tmp);  else prs=0;
 					
 					Record r=new Record(Long.parseLong(year+month+day+"000000"),lon,lat,4);
-					r.setData(0,0  );
-					r.setData(1,0  );
-					r.setData(2,wnd);
-					r.setData(3,prs);
+					r.setData(Typhoon.UVEL,0  );
+					r.setData(Typhoon.VVEL,0  );
+					r.setData(Typhoon.Vmax,wnd);
+					r.setData(Typhoon.Pmin,prs);
 					typhoon.addRecord(r);
 					
 					tmp=oneline.substring(29,32).trim();
@@ -533,10 +536,10 @@ public final class AccessBestTrack{
 					if(tmp.length()!=0) prs=Float.parseFloat(tmp); else prs=0;
 					
 					r=new Record(Long.parseLong(year+month+day+"060000"),lon,lat,4);
-					r.setData(0,0  );
-					r.setData(1,0  );
-					r.setData(2,wnd);
-					r.setData(3,prs);
+					r.setData(Typhoon.UVEL,0  );
+					r.setData(Typhoon.VVEL,0  );
+					r.setData(Typhoon.Vmax,wnd);
+					r.setData(Typhoon.Pmin,prs);
 					typhoon.addRecord(r);
 					
 					tmp=oneline.substring(46,49).trim();
@@ -549,10 +552,10 @@ public final class AccessBestTrack{
 					if(tmp.length()!=0) prs=Float.parseFloat(tmp); else prs=0;
 					
 					r=new Record(Long.parseLong(year+month+day+"120000"),lon,lat,4);
-					r.setData(0,0  );
-					r.setData(1,0  );
-					r.setData(2,wnd);
-					r.setData(3,prs);
+					r.setData(Typhoon.UVEL,0  );
+					r.setData(Typhoon.VVEL,0  );
+					r.setData(Typhoon.Vmax,wnd);
+					r.setData(Typhoon.Pmin,prs);
 					typhoon.addRecord(r);
 					
 					tmp=oneline.substring(63,66).trim();
@@ -565,14 +568,14 @@ public final class AccessBestTrack{
 					if(tmp.length()!=0) prs=Float.parseFloat(tmp); else prs=0;
 					
 					r=new Record(Long.parseLong(year+month+day+"180000"),lon,lat,4);
-					r.setData(0,0  );
-					r.setData(1,0  );
-					r.setData(2,wnd);
-					r.setData(3,prs);
+					r.setData(Typhoon.UVEL,0  );
+					r.setData(Typhoon.VVEL,0  );
+					r.setData(Typhoon.Vmax,wnd);
+					r.setData(Typhoon.Pmin,prs);
 					typhoon.addRecord(r);
 				}
 				
-				typhoon.setAttachedDataNames("uvel","vvel","maxwspd","minslp");
+				typhoon.setAttachedMeta(Typhoon.UVEL,Typhoon.VVEL,Typhoon.Vmax,Typhoon.Pmin);
 				
 				all.add(typhoon);
 				
@@ -588,7 +591,7 @@ public final class AccessBestTrack{
 		// to select the records which meet the requires
 		List<Typhoon> res=getTyphoons(all,cond);
 		
-		validate(res,r->r.getDataValue(2)==0);
+		validate(res,r->r.getDataValue(Typhoon.Vmax)==0);
 		
 		return res;
 	}
@@ -678,13 +681,13 @@ public final class AccessBestTrack{
 	 *						records of wind < threshold will be removed
      */
 	public static void maxWindFilter(List<Typhoon> res,float threshold){
-		if(res.get(0).getDataNames().length<=2) throw new IllegalArgumentException("no maximum wind");
+		if(res.get(0).getAttachedMeta().length<=2) throw new IllegalArgumentException("no maximum wind");
 		
 		for(int l=0;l<res.size();l++){
 			Typhoon tr=res.get(l);
 			
 			// delete records do not reach the threshold
-			if(tr.removeRecords(r->r.getDataValue(2)<threshold).getTCount()==0){
+			if(tr.removeRecords(r->r.getDataValue(Typhoon.Vmax)<threshold).getTCount()==0){
 				res.remove(l);
 				System.out.println("remove the "+l+"(th) record");
 				l--;
@@ -700,12 +703,12 @@ public final class AccessBestTrack{
 	 *						records of wind < threshold will be removed
      */
 	public static void minPressFilter(List<Typhoon> res,float threshold){
-		if(res.get(0).getDataNames().length<=3) throw new IllegalArgumentException("no minimum pressure");
+		if(res.get(0).getAttachedMeta().length<=3) throw new IllegalArgumentException("no minimum pressure");
 		
 		for(int l=0;l<res.size();l++){
 			Typhoon tr=res.get(l);
 			
-			if(tr.removeRecords(r->r.getDataValue(3)>threshold).getTCount()==0){
+			if(tr.removeRecords(r->r.getDataValue(Typhoon.Pmin)>threshold).getTCount()==0){
 				res.remove(l);
 				System.out.println("remove the "+l+"(th) record");
 				l--;

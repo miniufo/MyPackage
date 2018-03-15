@@ -27,6 +27,9 @@ public final class GDPDrifter extends Particle{
 	
 	public static enum TYPE{SVP,SVPB,SVPBS,SVPBW,SVPC,SVPI,SVPW}
 	
+	public static final AttachedMeta Temp  =new AttachedMeta("temp"   ,2);
+	public static final AttachedMeta DrgOff=new AttachedMeta("drogOff",3);
+	
 	
 	/**
 	 * constructor
@@ -66,9 +69,9 @@ public final class GDPDrifter extends Particle{
 	 * 
 	 * @param	idx		the index of AttachedData to be checked
 	 */
-	public boolean hasUndefRecords(int idx){
+	public boolean hasUndefRecords(AttachedMeta meta){
 		for(Record r:records)
-		if(r.getDataValue(idx)==undef) return true;
+		if(r.getDataValue(meta)==undef) return true;
 		
 		return false;
 	}
@@ -78,8 +81,8 @@ public final class GDPDrifter extends Particle{
 	 */
 	public boolean hasLargeVelocityRecords(float thre){
 		for(Record r:records){
-			float u=r.getDataValue(0);
-			float v=r.getDataValue(1);
+			float u=r.getDataValue(UVEL);
+			float v=r.getDataValue(VVEL);
 			
 			if((u!=undef&&Math.abs(u)>thre)||(v!=undef&&Math.abs(v)>thre)) return true;
 		}
@@ -117,18 +120,18 @@ public final class GDPDrifter extends Particle{
 		int ptr=0;
 		
 		for(int i=0,I=(lef!=0?len-1:len);i<I;i++){
-			re[i]=new GDPDrifter(id+"_"+i,size,attachedVars.length);
+			re[i]=new GDPDrifter(id+"_"+i,size,meta.length);
 			
-			re[i].setAttachedDataNames(attachedVars);
+			re[i].setAttachedMeta(meta);
 			
 			for(int j=0;j<size;j++)
 			re[i].addRecord(records.get(ptr++));
 		}
 		
 		if(lef!=0){
-			re[len-1]=new GDPDrifter(id+"_"+(len-1),lef,attachedVars.length);
+			re[len-1]=new GDPDrifter(id+"_"+(len-1),lef,meta.length);
 			
-			re[len-1].setAttachedDataNames(attachedVars);
+			re[len-1].setAttachedMeta(meta);
 			
 			for(int j=0,J=lef;j<J;j++)
 			re[len-1].addRecord(records.get(ptr++));
@@ -145,15 +148,15 @@ public final class GDPDrifter extends Particle{
 		List<int[]> ls=new ArrayList<int[]>(10);
 		
 		Record r=records.get(0);
-		if(r.getDataValue(0)!=undef&&r.getDataValue(1)!=undef){
+		if(r.getDataValue(UVEL)!=undef&&r.getDataValue(VVEL)!=undef){
 			hasStr=true; str=0;
 		}
 		
 		for(int l=1,L=getTCount();l<L;l++){
 			r=records.get(l);
-			boolean currDef=r.getDataValue(0)!=undef&&r.getDataValue(1)!=undef;
+			boolean currDef=r.getDataValue(UVEL)!=undef&&r.getDataValue(VVEL)!=undef;
 			r=records.get(l-1);
-			boolean prevDef=r.getDataValue(0)!=undef&&r.getDataValue(1)!=undef;
+			boolean prevDef=r.getDataValue(UVEL)!=undef&&r.getDataValue(VVEL)!=undef;
 			
 			if(prevDef&&!currDef&&hasStr){
 				hasEnd=true; end=l-1;
@@ -181,11 +184,11 @@ public final class GDPDrifter extends Particle{
 		return re;
 	}
 	
-	public GDPDrifter[] splitByDrogueOffDate(int idx){
+	public GDPDrifter[] splitByDrogueOffDate(AttachedMeta meta){
 		int dc=0,uc=0;
 		
 		for(int l=0,L=records.size();l<L;l++){
-			float drogueState=records.get(l).getDataValue(idx);
+			float drogueState=records.get(l).getDataValue(meta);
 			
 			if(drogueState==1) dc++;
 			else if(drogueState==-1) uc++;
@@ -206,13 +209,13 @@ public final class GDPDrifter extends Particle{
 	 * sharing the same memory
 	 */
 	public GDPDrifter subRecord(String newID,int str,int len){
-		GDPDrifter p=new GDPDrifter(newID,len,attachedVars.length);
+		GDPDrifter p=new GDPDrifter(newID,len,meta.length);
 		
 		for(int l=str,L=str+len;l<L;l++) p.records.add(records.get(l));
 		
 		//p.records=records.subList(str,str+len);
 		
-		p.setAttachedDataNames(attachedVars);
+		p.setAttachedMeta(meta);
 		
 		return p;
 	}

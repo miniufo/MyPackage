@@ -7,7 +7,6 @@
 package miniufo.application.contour;
 
 import miniufo.basic.ArrayUtil;
-import static miniufo.application.statisticsModel.StatisticsApplication.cArithmeticMean;
 
 
 /**
@@ -39,14 +38,15 @@ public final class Contours{
 	 * Whether contours are increasing from south to north is determined by
 	 * the data themselves.
 	 * 
-	 * @param	data	an 2D array data
-	 * @param	undef	undefined value
-	 * @param	numOfC	number of contours
+	 * @param	data		an 2D array data
+	 * @param	undef		undefined value
+	 * @param	numOfC		number of contours
+	 * @param	increSToN	the contours are defined increasing from south to north
 	 */
-	public Contours(float[][] data,float undef,int numOfC){
+	public Contours(float[][] data,float undef,int numOfC,boolean increSToN){
 		float[] ex=ArrayUtil.getExtrema(data,undef);
 		
-		increSToN=cArithmeticMean(data[0],undef)<cArithmeticMean(data[data.length-1],undef);
+		this.increSToN=increSToN;
 		
 		if(increSToN){ southVal=ex[0]; northVal=ex[1];}
 		else         { southVal=ex[1]; northVal=ex[0];}
@@ -88,8 +88,7 @@ public final class Contours{
 	}
 	
 	/**
-	 * Compute the contours by specifying all the values
-	 * from south to north
+	 * Compute the contours by specifying all the values from south to north
 	 * 
 	 * @param	cs	contours from south to north
 	 */
@@ -110,8 +109,7 @@ public final class Contours{
 	}
 	
 	/**
-	 * Compute the contours by specifying all the values
-	 * from south to north
+	 * Compute the contours by specifying all the values from south to north
 	 * 
 	 * @param	cs	contours from south to north
 	 */

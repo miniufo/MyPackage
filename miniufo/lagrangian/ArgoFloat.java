@@ -9,9 +9,6 @@ package miniufo.lagrangian;
 import java.util.ArrayList;
 import miniufo.diagnosis.MDate;
 import miniufo.mathsphysics.Spline;
-import static java.lang.Math.cos;
-import static java.lang.Math.toRadians;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
 import static miniufo.lagrangian.Record.undef;
 
 
@@ -36,50 +33,6 @@ public final class ArgoFloat extends Particle{
 	
 	public ArgoFloat(String id,int size,int attLen){ super(id,size,attLen,true);}
 	
-	
-	/**
-	 * compute daily current speed using lon/lat coordinates
-	 */
-	public void cDailyCurrentSpeed(){
-		int len=records.size();
-		
-		if(len<2) return;
-		
-		float[] uc=new float[len];
-		float[] vc=new float[len];
-		
-		for(int i=1,I=len-1;i<I;i++){
-			Record r1=records.get(i-1);
-			Record r2=records.get(i+1);
-			
-			float lon1=r1.getXPos(),lon2=r2.getXPos();
-			float lat1=r1.getYPos(),lat2=r2.getYPos();
-			
-			uc[i]=(float)toRadians(lon2-lon1)*(EARTH_RADIUS*(float)cos(toRadians((lat1+lat2)/2)))/(86400f*2);
-			vc[i]=(float)toRadians(lat2-lat1)*(EARTH_RADIUS)/(86400f*2);
-		}
-		
-		Record r1=records.get(0);
-		Record r2=records.get(1);
-		float lon1=r1.getXPos(),lon2=r2.getXPos();
-		float lat1=r1.getYPos(),lat2=r2.getYPos();
-		uc[0]=(float)toRadians(lon2-lon1)*(EARTH_RADIUS*(float)cos(toRadians((lat1+lat2)/2)))/86400f;
-		vc[0]=(float)toRadians(lat2-lat1)*(EARTH_RADIUS)/86400f;
-		
-		r1=records.get(len-2);
-		r2=records.get(len-1);
-		lon1=r1.getXPos();lon2=r2.getXPos();
-		lat1=r1.getYPos();lat2=r2.getYPos();
-		uc[len-1]=(float)toRadians(lon2-lon1)*(EARTH_RADIUS*(float)cos(toRadians((lat1+lat2)/2)))/86400f;
-		vc[len-1]=(float)toRadians(lat2-lat1)*(EARTH_RADIUS)/86400f;
-		
-		for(int i=0;i<len;i++){
-			Record p=records.get(i);
-			
-			p.setData(0,uc[i]);
-			p.setData(1,vc[i]);
-		}
-	}
 	
 	/**
 	 * Interpolate the daily-mean data using spline
@@ -218,7 +171,7 @@ public final class ArgoFloat extends Particle{
 	 * convert the float data to daily-mean data filled by undef
 	 */
 	public ArgoFloat toDailyData(){
-		ArgoFloat re=new ArgoFloat(id,attachedVars.length);
+		ArgoFloat re=new ArgoFloat(id,meta.length);
 		
 		if(records.size()<1){
 			System.out.println(String.format("%10s has no record",id));

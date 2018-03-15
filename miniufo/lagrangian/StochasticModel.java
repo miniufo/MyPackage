@@ -58,6 +58,11 @@ public abstract class StochasticModel{
 	
 	protected final Random rnd=new Random();
 	
+	public static final AttachedMeta VelX=new AttachedMeta("VelX",0);
+	public static final AttachedMeta VelY=new AttachedMeta("VelY",1);
+	public static final AttachedMeta AccX=new AttachedMeta("AccX",2);
+	public static final AttachedMeta AccY=new AttachedMeta("AccY",3);
+	
 	public enum BCType{Periodic,Reflected,Landing}
 	
 	
@@ -162,13 +167,16 @@ public abstract class StochasticModel{
 		
 		float[] rnds=spinupRandom(init,200);
 		
-		init.setData(0,U+rnds[0]);	// velX+resX
-		init.setData(1,V+rnds[1]);	// velY+resY
-		init.setData(2,rnds[2]);	// accX
-		init.setData(3,rnds[3]);	// accY
+		init.setData(VelX,U+rnds[0]);	// velX+resX
+		init.setData(VelY,V+rnds[1]);	// velY+resY
+		init.setData(AccX,rnds[2]);	// accX
+		init.setData(AccY,rnds[3]);	// accY
 		
 		Particle p=new Particle(id,initLen,4,true);
-		p.setAttachedDataNames("velX","velY","accX","accY");
+		p.setAttachedMeta(
+			new AttachedMeta("velX",0),new AttachedMeta("velY",1),
+			new AttachedMeta("accX",2),new AttachedMeta("accY",3)
+		);
 		p.addRecord(init);
 		
 		return p;
@@ -354,8 +362,8 @@ public abstract class StochasticModel{
 		if(vel1==null) return null;
 		
 		re.setTime(tim1);
-		re.setXPos(res1[0]); re.setData(0,vel1[0]);
-		re.setYPos(res1[1]); re.setData(1,vel1[1]);
+		re.setXPos(res1[0]); re.setData(VelX,vel1[0]);
+		re.setYPos(res1[1]); re.setData(VelY,vel1[1]);
 		
 		return re;
 	}
@@ -366,10 +374,10 @@ public abstract class StochasticModel{
 		float lon0=init.getXPos();
 		float lat0=init.getYPos();
 		
-		float velXe=esti.getDataValue(0);
-		float velYe=esti.getDataValue(1);
-		float accXe=esti.getDataValue(2);
-		float accYe=esti.getDataValue(3);
+		float velXe=esti.getDataValue(VelX);
+		float velYe=esti.getDataValue(VelY);
+		float accXe=esti.getDataValue(AccX);
+		float accYe=esti.getDataValue(AccY);
 		
 		float dlon=(float)toDegrees(velXe*dt/(EARTH_RADIUS*cos(toRadians(lat0))));
 		float dlat=(float)toDegrees(velYe*dt/EARTH_RADIUS);
@@ -392,8 +400,8 @@ public abstract class StochasticModel{
 			if(vel1==null) return null;
 			
 			re.setTime(tim1);
-			re.setData(0,vel1[0]+res1[2]); re.setData(2,res1[4]);
-			re.setData(1,vel1[1]+res1[3]); re.setData(3,res1[5]);
+			re.setData(VelX,vel1[0]+res1[2]); re.setData(AccX,res1[4]);
+			re.setData(VelY,vel1[1]+res1[3]); re.setData(AccY,res1[5]);
 		}
 		
 		return re;

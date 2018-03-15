@@ -18,6 +18,7 @@ import miniufo.descriptor.DataDescriptor;
 import miniufo.diagnosis.Range;
 import miniufo.diagnosis.SpatialModel;
 import miniufo.diagnosis.Variable;
+import miniufo.lagrangian.AttachedMeta;
 import miniufo.lagrangian.LagrangianUtil;
 import miniufo.lagrangian.Particle;
 import miniufo.lagrangian.Record;
@@ -79,7 +80,7 @@ public final class BinningStatistics{
 			TYPE t=types[i];
 			
 			ToDoubleFunction<Record> RcToD=r->1.0;
-			Predicate<Record> isType=r->Typhoon.getType(r.getDataValue(4))==t;
+			Predicate<Record> isType=r->Typhoon.getType(r.getDataValue(Typhoon.Type))==t;
 			
 			re[i]=binningDataMeanByCondition(LagrangianUtil.asRecordStream(ls),RcToD,isType.and(cond));
 			re[i].setName(t.name());
@@ -98,7 +99,7 @@ public final class BinningStatistics{
      * @param	types	types that need to be binned
      */
 	public Variable binningTCACE(List<Typhoon> ls,Predicate<Record> cond){
-		ToDoubleFunction<Record> RcToD=r->r.getDataValue(2)*r.getDataValue(2);
+		ToDoubleFunction<Record> RcToD=r->r.getDataValue(Typhoon.Vmax)*r.getDataValue(Typhoon.Vmax);
 		
 		Variable re=binningDataMeanByCondition(LagrangianUtil.asRecordStream(ls),RcToD,cond);
 		re.setName("ace");
@@ -123,7 +124,7 @@ public final class BinningStatistics{
 			
 			for(int l=0,L=ty.getTCount();l<L;l++){
 				Record r=ty.getRecord(l);
-				if(r.getDataValue(2)>=wthre){ re=r; break;}
+				if(r.getDataValue(Typhoon.Vmax)>=wthre){ re=r; break;}
 			}
 			
 			return Optional.ofNullable(re);
@@ -147,22 +148,22 @@ public final class BinningStatistics{
      * @param	maskUndef	mask the field with undef
      * @param	idx			indices of AttachedData
      */
-	public Variable[] binningData(List<? extends Particle> ls,int... idx){
-		if(idx==null||idx.length==0) throw new IllegalArgumentException("specify some indices of AttachedData");
+	public Variable[] binningData(List<? extends Particle> ls,AttachedMeta... meta){
+		if(meta==null||meta.length==0) throw new IllegalArgumentException("specify some AttachedMeta");
 		
-		Variable[] re=new Variable[idx.length];
+		int len=meta.length;
 		
-		String[] ads=ls.get(0).getDataNames();
+		Variable[] re=new Variable[len];
 		
-		for(int i=0,I=idx.length;i<I;i++){
-			int tag=idx[i];
+		for(int i=0;i<len;i++){
+			final int ii=i;
 			
-			ToDoubleFunction<Record> RcToD=r->r.getDataValue(tag);
-			Predicate<Record> cond=r->r.getDataValue(tag)!=undef;
+			ToDoubleFunction<Record> RcToD=r->r.getDataValue(meta[ii]);
+			Predicate<Record> cond=r->r.getDataValue(meta[ii])!=undef;
 			
 			re[i]=binningDataMeanByCondition(LagrangianUtil.asRecordStream(ls),RcToD,cond);
 			re[i].setName("data"+i);
-			re[i].setCommentAndUnit(ads[i]);
+			re[i].setCommentAndUnit(meta[i].name);
 			re[i].setUndef(undef);
 		}
 		
@@ -178,19 +179,19 @@ public final class BinningStatistics{
      * @param	part		part of date in String form: ["year","month","date"]
      * @param	values		values of the date that would be binned
      */
-	public Variable[] binningDataByDate(List<? extends Particle> ls,int[] idx,String part,int... values){
+	public Variable[] binningDataByDate(List<? extends Particle> ls,AttachedMeta[] meta,String part,int... values){
 		if(dd.getTCount()!=1) throw new IllegalArgumentException("T-count should be 1");
-		if(idx==null||idx.length==0) throw new IllegalArgumentException("specify some indices of AttachedData");
+		if(meta==null||meta.length==0) throw new IllegalArgumentException("specify some indices of AttachedData");
 		if(values==null||values.length==0) throw new IllegalArgumentException("specify some values of date");
 		
-		Variable[] re=new Variable[idx.length];
+		Variable[] re=new Variable[meta.length];
 		
-		String[] ads=ls.get(0).getDataNames();
-		
-		for(int vi:idx){
-			ToDoubleFunction<Record> RcToD=r->r.getDataValue(vi);
+		for(int i=0,I=meta.length;i<I;i++){
+			final int ii=i;
+			
+			ToDoubleFunction<Record> RcToD=r->r.getDataValue(meta[ii]);
 			Predicate<Record> cond=r->{
-				if(r.getDataValue(vi)==undef) return false;
+				if(r.getDataValue(meta[ii])==undef) return false;
 				
 				int value=getPartValue(r.getTime(),part);
 				
@@ -199,10 +200,10 @@ public final class BinningStatistics{
 				return false;
 			};
 			
-			re[vi]=binningDataMeanByCondition(LagrangianUtil.asRecordStream(ls),RcToD,cond);
-			re[vi].setName("data");
-			re[vi].setCommentAndUnit(ads[vi]);
-			re[vi].setUndef(undef);
+			re[i]=binningDataMeanByCondition(LagrangianUtil.asRecordStream(ls),RcToD,cond);
+			re[i].setName("data");
+			re[i].setCommentAndUnit(meta[i].name);
+			re[i].setUndef(undef);
 		}
 		
 		return re;
@@ -221,19 +222,19 @@ public final class BinningStatistics{
      * 
      * @return	re			means of different data of different seasons, [seasons][AttachedData]
      */
-	public Variable[][] binningSeasonalData(List<? extends Particle> ls,int[][] seasons,int... idx){
+	public Variable[][] binningSeasonalData(List<? extends Particle> ls,int[][] seasons,AttachedMeta... meta){
 		int season=seasons.length;
 		int sealen=seasons[0].length;
 		
 		for(int[] s:seasons)
 		if(s.length!=sealen) throw new IllegalArgumentException("season lengths not equal");
 		
-		if(idx.length==0) throw new IllegalArgumentException("no idx specified");
+		if(meta.length==0) throw new IllegalArgumentException("no idx specified");
 		
-		Variable[][] re=new Variable[season][idx.length];
+		Variable[][] re=new Variable[season][meta.length];
 		
 		for(int i=0;i<season;i++){
-			Variable[] tmp=binningDataByDate(ls,idx,"month",seasons[i]);
+			Variable[] tmp=binningDataByDate(ls,meta,"month",seasons[i]);
 			
 			for(int j=0,J=tmp.length;j<J;j++){
 				re[i][j]=tmp[j];

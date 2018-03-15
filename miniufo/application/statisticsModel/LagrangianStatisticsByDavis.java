@@ -23,6 +23,7 @@ import miniufo.diagnosis.SpatialModel;
 import miniufo.diagnosis.Variable;
 import miniufo.lagrangian.Particle;
 import miniufo.lagrangian.Record;
+import miniufo.lagrangian.StochasticModel;
 import miniufo.util.Region2D;
 import miniufo.util.TicToc;
 
@@ -209,7 +210,7 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 				final int jtag=j;
 				
 				Predicate<Record> cond=rec->
-				new Region2D(lons[itag]-bRad,lats[jtag]-bRad,lons[itag]+bRad,lats[jtag]+bRad).inRange(rec.getDataValue(2),rec.getDataValue(3));
+				new Region2D(lons[itag]-bRad,lats[jtag]-bRad,lons[itag]+bRad,lats[jtag]+bRad).inRange(rec.getXPos(),rec.getYPos());
 				
 				if(ave)
 					ls.add(cs.submit(()->cStatisticsByDavisTheory(cond,tRad).getMean(str,end,minTracks)));
@@ -308,7 +309,7 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 				final int jtag=j;
 				
 				Predicate<Record> cond=rec->
-				new Region2D(lons[itag]-bRad,lats[jtag]-bRad,lons[itag]+bRad,lats[jtag]+bRad).inRange(rec.getDataValue(2),rec.getDataValue(3));
+				new Region2D(lons[itag]-bRad,lats[jtag]-bRad,lons[itag]+bRad,lats[jtag]+bRad).inRange(rec.getXPos(),rec.getYPos());
 				
 				if(ave)
 					ls.add(cs.submit(()->cStatisticsByTaylorTheory(cond,tRad).getMean(str,end,minTracks)));
@@ -407,7 +408,7 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 				final int jtag=j;
 				
 				Predicate<Record> cond=rec->
-				new Region2D(xdef[itag]-bRad,ydef[jtag]-bRad,xdef[itag]+bRad,ydef[jtag]+bRad).inRange(rec.getDataValue(2),rec.getDataValue(3));
+				new Region2D(xdef[itag]-bRad,ydef[jtag]-bRad,xdef[itag]+bRad,ydef[jtag]+bRad).inRange(rec.getXPos(),rec.getYPos());
 				
 				if(ave)
 					ls.add(cs.submit(()->cStatisticsByDispersionTheory(cond,tRad).getMean(str,end,minTracks)));
@@ -559,8 +560,8 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 			for(Particle p:ls){
 				float[] uspd=p.getUVel();
 				float[] vspd=p.getVVel();
-				float[] accx=hasAcc?p.getAttachedData(2):null;
-				float[] accy=hasAcc?p.getAttachedData(3):null;
+				float[] accx=hasAcc?p.getAttachedData(StochasticModel.AccX):null;
+				float[] accy=hasAcc?p.getAttachedData(StochasticModel.AccY):null;
 				
 				for(int l=0,L=p.getTCount();l<L;l++){
 					// meet condition to be an origin of pseudo-track

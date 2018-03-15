@@ -67,13 +67,14 @@ public abstract class ContourSpatialModel{
      * @param	trace		a given tracer variable
      * @param	numOfC		number of contours
      * @param	resRatio	resolution ratio (>=1) for on-the-fly interpolation
+     * @param	increSToN	whether contours are defined increasing from south to north
      * @param	adjCtr		adjust contours or not
      */
-	public void initContourByTracer(Variable tracer,int numOfC,int resRatio,boolean adjCtr){
+	public void initContourByTracer(Variable tracer,int numOfC,int resRatio,boolean increSToN,boolean adjCtr){
 		setResolutionRatio(resRatio);
 		
 		this.tracer=tracer;
-		this.cntrs =newContours(numOfC);
+		this.cntrs =newContours(numOfC,increSToN);
 		this.grdxy2=cSquaredTracerGradient();
 		
 		// to compute the area within each contour and check
@@ -83,8 +84,8 @@ public abstract class ContourSpatialModel{
 		this.tr   =toTracerVariable();
 	}
 	
-	public void initContourByTracer(Variable tracer,int numOfC){
-		initContourByTracer(tracer,numOfC,1,false);
+	public void initContourByTracer(Variable tracer,int numOfC,boolean increSToN){
+		initContourByTracer(tracer,numOfC,1,increSToN,false);
 	}
 	
 	/**
@@ -124,7 +125,7 @@ public abstract class ContourSpatialModel{
      * @param	cVals		contour values
      * @param	resRatio	resolution ratio (>=1) for on-the-fly interpolation
      */
-	public double[] computeEquivalentYs(Variable tracer,double[] cVals,int resRation){
+	public double[] computeEquivalentYs(Variable tracer,double[] cVals,int resRation,boolean increSToN){
 		if(tracer.getTCount()!=1) throw new IllegalArgumentException("tcount should be 1 only");
 		if(tracer.getZCount()!=1) throw new IllegalArgumentException("zcount should be 1 only");
 		
@@ -133,7 +134,7 @@ public abstract class ContourSpatialModel{
 		this.tracer=tracer;
 		
 		// to compute the area within each contour
-		return cEquivalentYs(integrateWithinContour1(cVals,true,0,0),tracer.getUndef());
+		return cEquivalentYs(integrateWithinContour1(cVals,increSToN,0,0),tracer.getUndef());
 	}
 	
 	
@@ -792,7 +793,7 @@ public abstract class ContourSpatialModel{
      * Get contours information from a given variable by specifying
      * number of contour, equally spaced between cmin(z,t) and cmax(z,t)
      */
-	private Contours[][] newContours(int numOfC){
+	private Contours[][] newContours(int numOfC,boolean increSToN){
 		float undef=tracer.getUndef();
 		
 		int t=tracer.getTCount(),z=tracer.getZCount();
@@ -805,7 +806,7 @@ public abstract class ContourSpatialModel{
 			for(int k=0;k<z;k++){
 				float[][] vdata=tracer.getData()[l][k];
 				
-				ctss[k][l]=new Contours(vdata,undef,numOfC);
+				ctss[k][l]=new Contours(vdata,undef,numOfC,increSToN);
 			}
 			
 		}else{
@@ -817,7 +818,7 @@ public abstract class ContourSpatialModel{
 				for(int j=0;j<y;j++)
 				for(int i=0;i<x;i++) bdata[j][i]=vdata[j][i][l];
 				
-				ctss[k][l]=new Contours(bdata,undef,numOfC);
+				ctss[k][l]=new Contours(bdata,undef,numOfC,increSToN);
 			}
 		}
 		

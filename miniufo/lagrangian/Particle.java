@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import miniufo.diagnosis.MDate;
+import miniufo.diagnosis.SpatialModel;
+
 import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;
@@ -39,9 +41,12 @@ public class Particle implements Cloneable,Serializable{
 	
 	protected String id=null;
 	
-	protected String[] attachedVars=null;	// names for attached data
+	protected AttachedMeta[] meta=null;	// names and indices for attached data
 	
 	protected List<Record> records=null;
+	
+	public static final AttachedMeta UVEL=new AttachedMeta("uvel",0);
+	public static final AttachedMeta VVEL=new AttachedMeta("vvel",1);
 	
 	
 	/**
@@ -56,7 +61,7 @@ public class Particle implements Cloneable,Serializable{
 	public Particle(String id,int initSize,int attLen,boolean llpos){
 		this.id=id;
 		
-		attachedVars=new String[attLen];
+		meta=new AttachedMeta[attLen];
 		
 		records=new ArrayList<>(initSize);
 		
@@ -76,10 +81,10 @@ public class Particle implements Cloneable,Serializable{
 	public int getMedianIndex(){ return (int)((records.size()+0.5f)/2);}
 	
 	public int getDataIndex(String name){
-		for(int i=0,I=attachedVars.length;i<I;i++)
-		if(name.equalsIgnoreCase(attachedVars[i])) return i;
+		for(int i=0,I=meta.length;i<I;i++)
+		if(name.equalsIgnoreCase(meta[i].name)) return meta[i].index;
 		
-		throw new IllegalArgumentException("cannot find attached data: "+name);
+		throw new IllegalArgumentException("cannot find attachedMeta: "+name);
 	}
 	
 	public boolean isFinished(){ return finished;}
@@ -136,32 +141,61 @@ public class Particle implements Cloneable,Serializable{
 		return lats;
 	}
 	
-	public float[] getUVel(){ return getAttachedData(0);}
+	public float[] getUVel(){ return getAttachedData(UVEL);}
 	
-	public float[] getVVel(){ return getAttachedData(1);}
+	public float[] getVVel(){ return getAttachedData(VVEL);}
 	
-	public float[] getAttachedData(int idx){
+	public float[] getSpeeds(){
+		int len=records.size();
+		
+		float[] xpos=getXPositions();
+		float[] ypos=getYPositions();
+		
+		if(len>1){
+			float dt=getDT(records.get(0).getTime(),records.get(1).getTime());
+			
+			float[] spds=new float[len];
+			
+			if(llpos){
+				spds[0    ]=SpatialModel.cSphericalDistanceByDegree(xpos[0    ],ypos[0    ],xpos[1    ],ypos[1    ])/dt;
+				for(int l=1,L=len-1;l<L;l++)
+				spds[l    ]=SpatialModel.cSphericalDistanceByDegree(xpos[l-1  ],ypos[l-1  ],xpos[l+1  ],ypos[l+1  ])/(2f*dt);
+				spds[len-1]=SpatialModel.cSphericalDistanceByDegree(xpos[len-2],ypos[len-2],xpos[len-1],ypos[len-1])/dt;
+				
+				return spds;
+				
+			}else{
+				spds[0    ]=(float)(Math.hypot(xpos[0    ]-xpos[1    ],ypos[0    ]-ypos[1    ])/dt);
+				for(int l=1,L=len-1;l<L;l++)
+				spds[l    ]=(float)(Math.hypot(xpos[l-1  ]-xpos[l+1  ],ypos[l-1  ]-ypos[l+1  ])/(2f*dt));
+				spds[len-1]=(float)(Math.hypot(xpos[len-2]-xpos[len-1],ypos[len-2]-ypos[len-1])/dt);
+				
+				return spds;
+			}
+			
+		}else return new float[len];
+	}
+	
+	public float[] getAttachedData(AttachedMeta meta){
 		int size=records.size();
 		
 		float[] dr=new float[size];
 		
-		for(int i=0;i<size;i++) dr[i]=records.get(i).getDataValues()[idx];
+		for(int i=0;i<size;i++) dr[i]=records.get(i).getDataValues()[meta.index];
 		
 		return dr;
 	}
 	
-	public float[] getAttachedData(String name){ return getAttachedData(getDataIndex(name));}
-	
 	public String getID(){ return id;}
-	
-	public String[] getDataNames(){ return attachedVars;}
 	
 	public Record remove(int i){ return records.remove(i);}
 	
 	public Record getRecord(int idx){ return records.get(idx);}
 	
-	public void setAttachedDataNames(String... names){
-		for(int i=0,I=names.length;i<I;i++) attachedVars[i]=names[i];
+	public AttachedMeta[] getAttachedMeta(){ return meta;}
+	
+	public void setAttachedMeta(AttachedMeta... meta){
+		for(int i=0,I=meta.length;i<I;i++) this.meta[i]=meta[i];
 	}
 	
 	public Record setRecord(int idx,Record r){ return records.set(idx,r);}
@@ -223,12 +257,12 @@ public class Particle implements Cloneable,Serializable{
 			llpos=isLatLonPosition();
 			
 			if(llpos){
-				pres.setData(0,(float)(dX/180.0*PI*EARTH_RADIUS/dt*cos(toRadians(mY))));
-				pres.setData(1,(float)(dY/180.0*PI*EARTH_RADIUS/dt));
+				pres.setData(UVEL,(float)(dX/180.0*PI*EARTH_RADIUS/dt*cos(toRadians(mY))));
+				pres.setData(VVEL,(float)(dY/180.0*PI*EARTH_RADIUS/dt));
 				
 			}else{
-				pres.setData(0,dX/dt);
-				pres.setData(1,dY/dt);
+				pres.setData(UVEL,dX/dt);
+				pres.setData(VVEL,dY/dt);
 			}
 			
 			// for all records between
@@ -242,12 +276,12 @@ public class Particle implements Cloneable,Serializable{
 				mY=(next.getYPos()+prev.getYPos())/2f;
 				
 				if(llpos){
-					pres.setData(0,(float)(dX/180.0*PI*EARTH_RADIUS/(dt*2.0)*cos(toRadians(mY))));
-					pres.setData(1,(float)(dY/180.0*PI*EARTH_RADIUS/(dt*2.0)));
+					pres.setData(UVEL,(float)(dX/180.0*PI*EARTH_RADIUS/(dt*2.0)*cos(toRadians(mY))));
+					pres.setData(VVEL,(float)(dY/180.0*PI*EARTH_RADIUS/(dt*2.0)));
 					
 				}else{
-					pres.setData(0,dX/dt/2f);
-					pres.setData(1,dY/dt/2f);
+					pres.setData(UVEL,dX/dt/2f);
+					pres.setData(VVEL,dY/dt/2f);
 				}
 			}
 			
@@ -261,12 +295,12 @@ public class Particle implements Cloneable,Serializable{
 			mY=(next.getYPos()+prev.getYPos())/2f;
 			
 			if(llpos){
-				pres.setData(0,(float)(dX/180.0*PI*EARTH_RADIUS/dt*cos(toRadians(mY))));
-				pres.setData(1,(float)(dY/180.0*PI*EARTH_RADIUS/dt));
+				pres.setData(UVEL,(float)(dX/180.0*PI*EARTH_RADIUS/dt*cos(toRadians(mY))));
+				pres.setData(VVEL,(float)(dY/180.0*PI*EARTH_RADIUS/dt));
 				
 			}else{
-				pres.setData(0,dX/dt);
-				pres.setData(1,dY/dt);
+				pres.setData(UVEL,dX/dt);
+				pres.setData(VVEL,dY/dt);
 			}
 		}
 	}
@@ -386,6 +420,12 @@ public class Particle implements Cloneable,Serializable{
 		}
 		
 		return buf.toString();
+	}
+	
+	
+	/*** helper methods ***/
+	private static int getDT(long t1,long t2){
+		return new MDate(t1).getDT(new MDate(t2));
 	}
 	
 	

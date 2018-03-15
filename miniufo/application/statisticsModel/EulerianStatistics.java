@@ -28,6 +28,7 @@ import miniufo.diagnosis.MDate;
 import miniufo.diagnosis.Range;
 import miniufo.diagnosis.SphericalSpatialModel;
 import miniufo.diagnosis.Variable;
+import miniufo.lagrangian.AttachedMeta;
 import miniufo.lagrangian.Particle;
 import miniufo.lagrangian.Record;
 import miniufo.mathsphysics.Complex;
@@ -347,8 +348,8 @@ public final class EulerianStatistics extends SingleParticleStatistics{
      *
      * @return	re	means of different data of different seasons, [seasons][AttachedData]
      */
-	public Variable[][] cSeasonalMeans(int[][] seasons,int... idx){
-		return new BinningStatistics(dd).binningSeasonalData(ls,seasons,idx);
+	public Variable[][] cSeasonalMeans(int[][] seasons,AttachedMeta... meta){
+		return new BinningStatistics(dd).binningSeasonalData(ls,seasons,meta);
 	}
 	
 	/**
@@ -508,11 +509,11 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 	public void removeMeansOfBins(){ bs.removeMeansOfBins();}
 	
 	public void removeSeasonalBinMean(int[][] seasons){
-		int[] idx=new int[attachedLen];
+		AttachedMeta[] meta=new AttachedMeta[attachedLen];
 		
-		for(int i=0;i<attachedLen;i++) idx[i]=i;
+		for(int i=0;i<attachedLen;i++) meta[i]=new AttachedMeta("",i);
 		
-		Variable[][] sm=cSeasonalMeans(seasons,idx);
+		Variable[][] sm=cSeasonalMeans(seasons,meta);
 		
 		float[][][][] data=new float[seasons.length][attachedLen][][];
 		
@@ -532,7 +533,7 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 			for(int m=0,M=seasons[s].length;m<M;m++)
 			if(mon==seasons[s][m]){
 				for(int i=0;i<attachedLen;i++)
-				rec.setData(i,rec.getDataValue(i)-data[s][i][tagY][tagX]);
+				rec.setData(meta[i],rec.getDataValue(meta[i])-data[s][i][tagY][tagX]);
 			}
 		}
 	}
@@ -549,7 +550,17 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 	public void normalizeByGM(float[] freqs,float TL){ bs.normalizeByGM(freqs,TL);}
 	
 	
-	public void projectCurrentInAlongAndCrossStream(Variable umean,Variable vmean){
+	/**
+	 * Project the current in along- and cross-stream components.
+	 * 
+	 * @param	umean	time-mean u flow
+	 * @param	vmean	time-mean v flow
+	 * @param	us		along-stream component
+	 * @param	vn		cross-stream component
+	 */
+	public void projectCurrentAlongAndCrossStream(Variable umean,Variable vmean,AttachedMeta us,AttachedMeta vn){
+		float undef=umean.getUndef();
+		
 		float[][] udata=umean.getData()[0][0];
 		float[][] vdata=vmean.getData()[0][0];
 		
@@ -560,16 +571,22 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 			int itag=dd.getXNum(r.getXPos());
 			int jtag=dd.getYNum(r.getYPos());
 			
-			float u=r.getDataValue(0);
-			float v=r.getDataValue(1);
+			float u=r.getDataValue(Particle.UVEL);
+			float v=r.getDataValue(Particle.VVEL);
 			
 			float um=udata[jtag][itag];
 			float vm=vdata[jtag][itag];
 			
-			float[] ac=CoordinateTransformation.projectToNaturalCoords(u,v,um,vm);
-			
-			r.setData(3,ac[0]);
-			r.setData(4,ac[1]);
+			if(um!=undef&&vm!=undef){
+				float[] ac=CoordinateTransformation.projectToNaturalCoords(u,v,um,vm);
+				
+				r.setData(us,ac[0]);
+				r.setData(vn,ac[1]);
+				
+			}else{
+				r.setData(us,Record.undef);
+				r.setData(vn,Record.undef);
+			}
 		}
 	}
 	
@@ -586,8 +603,8 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 			int tagY=dd.getYNum(rec.getYPos());
 			
 			if(cdata[tagY][tagX]<threshold){
-				rec.setData(0,Record.undef);
-				rec.setData(1,Record.undef);
+				rec.setData(Particle.UVEL,Record.undef);
+				rec.setData(Particle.VVEL,Record.undef);
 			}
 		}
 		
@@ -678,6 +695,8 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 		
 		private DataDescriptor dd=null;
 		
+		private AttachedMeta[] meta=null;
+		
 		private List<? extends Particle> ls=null;
 		
 		
@@ -696,6 +715,7 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 			float[][] data=count.getData()[0][0];
 			
 			attachedLen=ls.get(0).getRecord(0).getDataLength();
+			meta=ls.get(0).getAttachedMeta();
 			
 			ptrs=new  int[y][x];
 			tims=new long[y][x][];
@@ -1256,7 +1276,7 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 				int jtag=dd.getYNum(r.getYPos());
 				
 				for(int m=0;m<attachedLen;m++)
-				r.setData(m,ad[m][jtag][itag][tmpPtrs[jtag][itag]]);
+				r.setData(meta[m],ad[m][jtag][itag][tmpPtrs[jtag][itag]]);
 				
 				tmpPtrs[jtag][itag]++;
 			}
@@ -1275,7 +1295,7 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 				int ltag=ptrs[jtag][itag];
 				
 				for(int m=0;m<attachedLen;m++)
-				ad[m][jtag][itag][ltag]=r.getDataValue(m);
+				ad[m][jtag][itag][ltag]=r.getDataValue(meta[m]);
 				
 				tims[jtag][itag][ltag]=r.getTime();
 				

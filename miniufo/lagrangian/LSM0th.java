@@ -61,30 +61,30 @@ public final class LSM0th extends StochasticModel{
 		
 		float velXk1=velm[0];
 		float velYk1=velm[1];
-		float velXk2=  r2.getDataValue(0);
-		float velYk2=  r2.getDataValue(1);
-		float velXk3=  r3.getDataValue(0);
-		float velYk3=  r3.getDataValue(1);
-		float velXk4=  r4.getDataValue(0);
-		float velYk4=  r4.getDataValue(1);
+		float velXk2=  r2.getDataValue(VelX);
+		float velYk2=  r2.getDataValue(VelY);
+		float velXk3=  r3.getDataValue(VelX);
+		float velYk3=  r3.getDataValue(VelY);
+		float velXk4=  r4.getDataValue(VelX);
+		float velYk4=  r4.getDataValue(VelY);
 		
 		float velXRK4=(velXk1+2*velXk2+2*velXk3+velXk4)/6;
 		float velYRK4=(velYk1+2*velYk2+2*velYk3+velYk4)/6;
 		
 		//// compute estimated position using mean background and previous random velocity ////
-		float resX0=init.getDataValue(0)-velXk1;
-		float resY0=init.getDataValue(1)-velYk1;
+		float resX0=init.getDataValue(VelX)-velXk1;
+		float resY0=init.getDataValue(VelY)-velYk1;
 		
-		r4.setData(0,velXRK4+resX0);
-		r4.setData(1,velYRK4+resY0);
+		r4.setData(VelX,velXRK4+resX0);
+		r4.setData(VelY,velYRK4+resY0);
 		
 		Record esti=forwardByAll(init,r4,resX0,resY0,dt,false);
 		
 		//// compute final position using mean background and averaged random velocity ////
 		float[] res1=getRandom(esti,null);
 		
-		r4.setData(0,velXRK4+res1[0]);
-		r4.setData(1,velYRK4+res1[1]);
+		r4.setData(VelX,velXRK4+res1[0]);
+		r4.setData(VelY,velYRK4+res1[1]);
 		
 		r4=forwardByAll(init,r4,res1[0],res1[1],dt,true);
 		

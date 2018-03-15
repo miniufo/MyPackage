@@ -85,7 +85,7 @@ public final class AccessArgoNC{
 				
 				if(!inList){
 					ArgoFloat af=new ArgoFloat(ids[i],dataLen);
-					af.setAttachedDataNames("uvel","vvel");
+					af.setAttachedMeta(ArgoFloat.UVEL,ArgoFloat.VVEL);
 					
 					if(lons[i]!=ArgoUndef&&lats[i]!=ArgoUndef)
 					af.addRecord(new Record(tims[i],lons[i],lats[i],dataLen));
@@ -113,7 +113,7 @@ public final class AccessArgoNC{
 			
 			if(!inList){
 				ArgoFloat af=new ArgoFloat(ids[0],dataLen);
-				af.setAttachedDataNames("uvel","vvel");
+				af.setAttachedMeta(ArgoFloat.UVEL,ArgoFloat.VVEL);
 				
 				for(int i=0,I=lons.length;i<I;i++)
 				if(tims[i]!=undefLongTime&&lons[i]!=ArgoUndef){

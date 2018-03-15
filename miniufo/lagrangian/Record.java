@@ -143,7 +143,7 @@ public final class Record implements Serializable{
 	
 	public float getYPos(){ return ypos;}
 	
-	public float getDataValue(int idx){ return data[idx];}
+	public float getDataValue(AttachedMeta meta){ return data[meta.index];}
 	
 	public float[] getDataValues(){ return data;}
 	
@@ -155,9 +155,9 @@ public final class Record implements Serializable{
 	
 	public void setTime(long time){ this.time=time;}
 	
-	public void setData(int idx,float value){ data[idx]=value;}
+	public void setData(AttachedMeta meta,float value){ data[meta.index]=value;}
 	
-	public void addData(int idx,float value){ data[idx]+=value;}
+	public void addData(AttachedMeta meta,float value){ data[meta.index]+=value;}
 	
 	
 	/**

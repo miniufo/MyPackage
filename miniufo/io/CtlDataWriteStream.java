@@ -246,7 +246,7 @@ public class CtlDataWriteStream extends DataWrite{
 				is_skip=false;
 				
 				switch(fwi.getFlag()){
-				case RENAME: fw=new FileWriter(fwi.getParent()+fwi.getNewName()); break;
+				case RENAME: fw=new FileWriter(fwi.getParent()+"/"+fwi.getNewName()); break;
 				case OVERWRITE: fw=new FileWriter(ctlpath); break;
 				case APPEND:
 					System.out.println("Ctl file does not support appending");
