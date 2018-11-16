@@ -51,7 +51,7 @@ public final class BinningStatistics{
 	public BinningStatistics(DataDescriptor dd){
 		this.dd=dd;
 		
-		gridSize=(float)Math.toRadians(StatisticsUtil.cArithmeticMean(dd.getDYDef()))*SpatialModel.EARTH_RADIUS;
+		gridSize=(float)Math.toRadians(StatisticsUtil.cArithmeticMean(dd.getDYDef()))*SpatialModel.REarth;
 	}
 	
 	
@@ -80,7 +80,7 @@ public final class BinningStatistics{
 			TYPE t=types[i];
 			
 			ToDoubleFunction<Record> RcToD=r->1.0;
-			Predicate<Record> isType=r->Typhoon.getType(r.getDataValue(Typhoon.Type))==t;
+			Predicate<Record> isType=r->Typhoon.getType(r.getData(Typhoon.Type))==t;
 			
 			re[i]=binningDataMeanByCondition(LagrangianUtil.asRecordStream(ls),RcToD,isType.and(cond));
 			re[i].setName(t.name());
@@ -99,7 +99,7 @@ public final class BinningStatistics{
      * @param	types	types that need to be binned
      */
 	public Variable binningTCACE(List<Typhoon> ls,Predicate<Record> cond){
-		ToDoubleFunction<Record> RcToD=r->r.getDataValue(Typhoon.Vmax)*r.getDataValue(Typhoon.Vmax);
+		ToDoubleFunction<Record> RcToD=r->r.getData(Typhoon.Vmax)*r.getData(Typhoon.Vmax);
 		
 		Variable re=binningDataMeanByCondition(LagrangianUtil.asRecordStream(ls),RcToD,cond);
 		re.setName("ace");
@@ -124,7 +124,7 @@ public final class BinningStatistics{
 			
 			for(int l=0,L=ty.getTCount();l<L;l++){
 				Record r=ty.getRecord(l);
-				if(r.getDataValue(Typhoon.Vmax)>=wthre){ re=r; break;}
+				if(r.getData(Typhoon.Vmax)>=wthre){ re=r; break;}
 			}
 			
 			return Optional.ofNullable(re);
@@ -158,8 +158,8 @@ public final class BinningStatistics{
 		for(int i=0;i<len;i++){
 			final int ii=i;
 			
-			ToDoubleFunction<Record> RcToD=r->r.getDataValue(meta[ii]);
-			Predicate<Record> cond=r->r.getDataValue(meta[ii])!=undef;
+			ToDoubleFunction<Record> RcToD=r->r.getData(meta[ii]);
+			Predicate<Record> cond=r->r.getData(meta[ii])!=undef;
 			
 			re[i]=binningDataMeanByCondition(LagrangianUtil.asRecordStream(ls),RcToD,cond);
 			re[i].setName("data"+i);
@@ -189,9 +189,9 @@ public final class BinningStatistics{
 		for(int i=0,I=meta.length;i<I;i++){
 			final int ii=i;
 			
-			ToDoubleFunction<Record> RcToD=r->r.getDataValue(meta[ii]);
+			ToDoubleFunction<Record> RcToD=r->r.getData(meta[ii]);
 			Predicate<Record> cond=r->{
-				if(r.getDataValue(meta[ii])==undef) return false;
+				if(r.getData(meta[ii])==undef) return false;
 				
 				int value=getPartValue(r.getTime(),part);
 				

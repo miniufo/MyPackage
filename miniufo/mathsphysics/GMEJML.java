@@ -85,6 +85,8 @@ public final class GMEJML extends GaussMarkovEstimator{
 		DMatrixRMaj RAT=new DMatrixRMaj(N,len);
 		DMatrixRMaj BLK=new DMatrixRMaj(len,len);
 		
+		cycles=new DMatrixRMaj(N,1);
+		
 		// RAT=Rxx*AT;
 		// BLK=A*RAT+Rnn;
 		// tmp=BLK^-1*Y;
@@ -92,7 +94,7 @@ public final class GMEJML extends GaussMarkovEstimator{
 		mult(Rxx,AT,RAT);
 		mult(A,RAT,BLK);
 		addEquals(BLK,Rnn);
-		solve(BLK,Y,tmp);
+		solve(BLK,Y,tmp);System.out.println("A*Rxx*AT+Rnn matrix");BLK.print("%9.5f");System.out.println("Y matrix"); Y.print("%9.5f");
 		mult(RAT,tmp,cycles);
 		
 		if(computeError){
@@ -388,6 +390,7 @@ public final class GMEJML extends GaussMarkovEstimator{
 		
 		for(int j=0;j<tlen;j++){
 			double tmp=2.0*Math.PI*ntimes[j];
+			System.out.println("ntimes: "+ntimes[j]);
 			
 			Aform.set(j,0,1);
 			
@@ -413,19 +416,39 @@ public final class GMEJML extends GaussMarkovEstimator{
 	
 	/** test
 	public static void main(String[] args){
-		float[][] data=TextReader.readColumn("d:/data.txt",808,false,1,2,3,4,5);
+		float[][] data=TextReader.readColumnsF("d:/T.txt",false,1,2,3,4,5,6);
 		float[] yy=data[0];
-		float[] dx=data[1];
-		float[] dy=data[2];
-		float[] tt=data[3];
-		float[] soi=data[4];
+		float[] mm=data[1];
+		float[] dd=data[2];
+		float[] TT=data[3];
+		float[] dx=data[4];
+		float[] dy=data[5];
+		
+		long[] tt=new long[yy.length];
+		
+		for(int l=0;l<tt.length;l++){
+			int di=(int)Math.floor(dd[l]);
+			int hr=Math.round((dd[l]-di)*24);
+			System.out.println(dd[l]+" "+di+" "+hr);
+			tt[l]=Long.parseLong(String.format("%4d%02d%02d%02d0000",Math.round(yy[l]),Math.round(mm[l]),di,hr));
+		}
 		
 		long str=System.nanoTime();
-		GaussMarkovEstimator2 gme=new GaussMarkovEstimator2(yy,tt,dx,dy);
-		gme.setFrequenciesAndTL(2,0.0137f);
-		gme.estimateCycles();
+		GMEJML gme=new GMEJML(TT,tt,dx,dy);
+		gme.setFrequenciesAndTimescales(AutoCorrType.TCosExp,new float[]{1,2},0.0137f);
+		System.out.println("A matrix");gme.A.print("%9.5f");
+		System.out.println("Rnn matrix");gme.Rnn.print("%9.5f");
+		System.out.println("Rxx matrix");gme.Rxx.print("%9.5f");
+		gme.estimateCycles(false);
+		
+		float[] coef=gme.getCoefficients(true);
+		float[] amp=gme.getCycleAmplitudes();
 		System.out.println("using: "+(System.nanoTime()-str)/1000000+" times");
 		
 		System.out.println(gme.mean+"\t"+gme.dmn);
+		System.out.println();
+		for(float f:coef) System.out.println(f);
+		System.out.println();
+		for(float f:amp) System.out.println(f);
 	}*/
 }

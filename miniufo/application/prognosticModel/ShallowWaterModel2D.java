@@ -14,8 +14,8 @@ import miniufo.visualize.VisualizeData;
 import static java.lang.Math.pow;
 import static java.lang.Math.sin;
 import static java.lang.Math.cos;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
-import static miniufo.diagnosis.SpatialModel.EARTH_ROTATE_SPEED;
+import static miniufo.diagnosis.SpatialModel.REarth;
+import static miniufo.diagnosis.SpatialModel.omegaEarth;
 
 
 /**
@@ -87,7 +87,7 @@ public abstract class ShallowWaterModel2D{
 	
 	
 	public void initialRossbyHaurwitz(){
-		float a=EARTH_RADIUS,o=7.848e-6f,K=7.848e-6f,fai0=9.8f*8000;
+		float a=REarth,o=7.848e-6f,K=7.848e-6f,fai0=9.8f*8000;
 		float dlon=360f/x,dlat=180f/(y-1);
 		
 		for(int j=1;j<=y;j++){
@@ -96,11 +96,11 @@ public abstract class ShallowWaterModel2D{
 			for(int i=1;i<=x;i++){
 				double lamda=Math.toRadians(i*dlon);
 				
-				double A=o*(2*EARTH_ROTATE_SPEED+o)*pow(cos(fai),2)/2+K*K*pow(cos(fai),8)*(
+				double A=o*(2*omegaEarth+o)*pow(cos(fai),2)/2+K*K*pow(cos(fai),8)*(
 					5*pow(cos(fai),2)+26-32*pow(cos(fai),-2)
 				)/4;
 				
-				double B=(EARTH_ROTATE_SPEED+o)*K/15*pow(cos(fai),4)*(26-25*pow(cos(fai),2));
+				double B=(omegaEarth+o)*K/15*pow(cos(fai),4)*(26-25*pow(cos(fai),2));
 				
 				double C=K*K*pow(cos(fai),8)*(5*pow(cos(fai),2)-6)/4;
 				

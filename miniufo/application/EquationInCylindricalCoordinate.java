@@ -14,7 +14,7 @@ import static java.lang.Math.PI;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 import static java.lang.Math.tan;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
+import static miniufo.diagnosis.SpatialModel.REarth;
 
 
 /**
@@ -46,7 +46,7 @@ public abstract class EquationInCylindricalCoordinate extends GeoFluidApplicatio
 		
 		rs=new float[csm.getYCount()];
 		
-		for(int j=0,J=csm.getYCount();j<J;j++) rs[j]=EARTH_RADIUS*bsin[j];
+		for(int j=0,J=csm.getYCount();j<J;j++) rs[j]=REarth*bsin[j];
 		
 		BCx=BoundaryCondition.Periodic;
 	}
@@ -546,15 +546,15 @@ public abstract class EquationInCylindricalCoordinate extends GeoFluidApplicatio
 		for(int j=0;j<y;j++)
 		for(int i=0;i<x;i++){
 			for(int l=1;l<t-1;l++){
-				udata[j][i][l]=(float)((lon[l+1][j][i]-lon[l-1][j][i])*EARTH_RADIUS*cos(lat[l][j][i])/(dt*2));
-				vdata[j][i][l]=(float)((lat[l+1][j][i]-lat[l-1][j][i])*EARTH_RADIUS/(dt*2));
+				udata[j][i][l]=(float)((lon[l+1][j][i]-lon[l-1][j][i])*REarth*cos(lat[l][j][i])/(dt*2));
+				vdata[j][i][l]=(float)((lat[l+1][j][i]-lat[l-1][j][i])*REarth/(dt*2));
 			}
 			
-			udata[j][i][0]=(float)((lon[1][j][i]-lon[0][j][i])*EARTH_RADIUS*cos(lat[0][j][i])/dt);
-			vdata[j][i][0]=(float)((lat[1][j][i]-lat[0][j][i])*EARTH_RADIUS/dt);
+			udata[j][i][0]=(float)((lon[1][j][i]-lon[0][j][i])*REarth*cos(lat[0][j][i])/dt);
+			vdata[j][i][0]=(float)((lat[1][j][i]-lat[0][j][i])*REarth/dt);
 			
-			udata[j][i][t-1]=(float)((lon[t-1][j][i]-lon[t-2][j][i])*EARTH_RADIUS*cos(lat[t-2][j][i])/dt);
-			vdata[j][i][t-1]=(float)((lat[t-1][j][i]-lat[t-2][j][i])*EARTH_RADIUS/dt);
+			udata[j][i][t-1]=(float)((lon[t-1][j][i]-lon[t-2][j][i])*REarth*cos(lat[t-2][j][i])/dt);
+			vdata[j][i][t-1]=(float)((lat[t-1][j][i]-lat[t-2][j][i])*REarth/dt);
 		}
 		
 		return re;

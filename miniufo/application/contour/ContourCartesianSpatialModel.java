@@ -99,7 +99,7 @@ public final class ContourCartesianSpatialModel extends ContourSpatialModel{
 	 */
 	protected double cEquivalentY(double area,float undef){
 		if(area==undef) return undef;
-		else return rngY-area/rngX;
+		else return rngY-area/rngX+dd.getYDef().getFirst();
 	}
 	
 	/**

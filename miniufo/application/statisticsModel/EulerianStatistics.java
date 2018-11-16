@@ -533,7 +533,7 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 			for(int m=0,M=seasons[s].length;m<M;m++)
 			if(mon==seasons[s][m]){
 				for(int i=0;i<attachedLen;i++)
-				rec.setData(meta[i],rec.getDataValue(meta[i])-data[s][i][tagY][tagX]);
+				rec.setData(meta[i],rec.getData(meta[i])-data[s][i][tagY][tagX]);
 			}
 		}
 	}
@@ -571,8 +571,8 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 			int itag=dd.getXNum(r.getXPos());
 			int jtag=dd.getYNum(r.getYPos());
 			
-			float u=r.getDataValue(Particle.UVEL);
-			float v=r.getDataValue(Particle.VVEL);
+			float u=r.getData(Particle.UVEL);
+			float v=r.getData(Particle.VVEL);
 			
 			float um=udata[jtag][itag];
 			float vm=vdata[jtag][itag];
@@ -1295,7 +1295,7 @@ public final class EulerianStatistics extends SingleParticleStatistics{
 				int ltag=ptrs[jtag][itag];
 				
 				for(int m=0;m<attachedLen;m++)
-				ad[m][jtag][itag][ltag]=r.getDataValue(meta[m]);
+				ad[m][jtag][itag][ltag]=r.getData(meta[m]);
 				
 				tims[jtag][itag][ltag]=r.getTime();
 				

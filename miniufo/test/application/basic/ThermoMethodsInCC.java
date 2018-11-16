@@ -677,7 +677,7 @@ public final class ThermoMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++)
-			if(Qdata[l][k][j][i]!=undef) Qdata[l][k][j][i]*=Cp*Math.pow(zdef[k]/100000,kp);
+			if(Qdata[l][k][j][i]!=undef) Qdata[l][k][j][i]*=Cp*Math.pow(zdef[k]/100000,kappa);
 					
 			
 		}else{
@@ -786,7 +786,7 @@ public final class ThermoMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++)
-			if(Qdata[k][j][i][l]!=undef) Qdata[k][j][i][l]*=Cp*Math.pow(zdef[k]/100000,kp);
+			if(Qdata[k][j][i][l]!=undef) Qdata[k][j][i][l]*=Cp*Math.pow(zdef[k]/100000,kappa);
 		}
 		
 		return Q;
@@ -926,7 +926,7 @@ public final class ThermoMethodsInCC extends EquationInCylindricalCoordinate{
 				for(int i=0;i<x;i++){
 					if(Tdata[l][k+1][j][i]!=undef&&Tdata[l][k-1][j][i]!=undef)
 						sigmadata[l][k][j][i]=
-							-tmp*(float)pow(zdef[zstart-1+k]/100000f,kp)*
+							-tmp*(float)pow(zdef[zstart-1+k]/100000f,kappa)*
 							(Tdata[l][k+1][j][i]-Tdata[l][k-1][j][i])/(dz+dz);
 						
 					else sigmadata[l][k][j][i]=undef;
@@ -941,7 +941,7 @@ public final class ThermoMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int i=0;i<x;i++){
 				if(Tdata[l][0][j][i]!=undef&&Tdata[l][1][j][i]!=undef)
 					sigmadata[l][0][j][i]=
-						-tmp*(float)pow(zdef[zstart-1]/100000f,kp)*
+						-tmp*(float)pow(zdef[zstart-1]/100000f,kappa)*
 						(Tdata[l][1][j][i]-Tdata[l][0][j][i])/dz;
 					
 				else sigmadata[l][0][j][i]=undef;
@@ -955,7 +955,7 @@ public final class ThermoMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int i=0;i<x;i++){
 				if(Tdata[l][z-1][j][i]!=undef&&Tdata[l][z-2][j][i]!=undef)
 					sigmadata[l][z-1][j][i]=
-						-tmp*(float)pow(zdef[zstart-2+z]/100000f,kp)*
+						-tmp*(float)pow(zdef[zstart-2+z]/100000f,kappa)*
 						(Tdata[l][z-1][j][i]-Tdata[l][z-2][j][i])/dz;
 					
 				else sigmadata[l][z-1][j][i]=undef;
@@ -970,7 +970,7 @@ public final class ThermoMethodsInCC extends EquationInCylindricalCoordinate{
 				for(int i=0;i<x;i++){
 					if(Tdata[k+1][j][i][l]!=undef&&Tdata[k-1][j][i][l]!=undef)
 						sigmadata[k][j][i][l]=
-							-tmp*(float)pow(zdef[zstart-1+k]/100000f,kp)*
+							-tmp*(float)pow(zdef[zstart-1+k]/100000f,kappa)*
 							(Tdata[k+1][j][i][l]-Tdata[k-1][j][i][l])/(dz+dz);
 						
 					else sigmadata[k][j][i][l]=undef;
@@ -985,7 +985,7 @@ public final class ThermoMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int i=0;i<x;i++){
 				if(Tdata[0][j][i][l]!=undef&&Tdata[1][j][i][l]!=undef)
 					sigmadata[0][j][i][l]=
-						-tmp*(float)pow(zdef[zstart-1]/100000f,kp)*
+						-tmp*(float)pow(zdef[zstart-1]/100000f,kappa)*
 						(Tdata[1][j][i][l]-Tdata[0][j][i][l])/dz;
 					
 				else sigmadata[0][j][i][l]=undef;
@@ -999,7 +999,7 @@ public final class ThermoMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int i=0;i<x;i++){
 				if(Tdata[z-1][j][i][l]!=undef&&Tdata[z-2][j][i][l]!=undef)
 					sigmadata[z-1][j][i][l]=
-						-tmp*(float)pow(zdef[zstart-2+z]/100000f,kp)*
+						-tmp*(float)pow(zdef[zstart-2+z]/100000f,kappa)*
 						(Tdata[z-1][j][i][l]-Tdata[z-2][j][i][l])/dz;
 					
 				else sigmadata[z-1][j][i][l]=undef;

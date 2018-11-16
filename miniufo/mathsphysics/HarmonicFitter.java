@@ -70,7 +70,7 @@ public final class HarmonicFitter extends Fitter{
 		}
 	}
 	
-	public HarmonicFitter(int len,float... Ts){ this(ArrayUtil.newMonotonousArray(len,1),Ts);}
+	public HarmonicFitter(int len,float... Ts){ this(ArrayUtil.newMonotonicArray(len,1),Ts);}
 	
 	
 	/**

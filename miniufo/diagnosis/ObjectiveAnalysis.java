@@ -81,7 +81,7 @@ public class ObjectiveAnalysis{
 		
 		for(float rad:radii){
 			float radInGridUnit=
-			(float)Math.toDegrees(rad/SpatialModel.EARTH_RADIUS)/(grd[1][1][0]-grd[1][0][0]);
+			(float)Math.toDegrees(rad/SpatialModel.REarth)/(grd[1][1][0]-grd[1][0][0]);
 			System.out.println("start analyzing for rad = "+Math.round(radInGridUnit)+" grid space");
 			
 			/*** compute the observation increment ***/
@@ -173,7 +173,7 @@ public class ObjectiveAnalysis{
 		stntag.clear();	stndis.clear();
 		
 		// scanning the stations in the radius
-		float radDegree=(float)Math.toDegrees(rad/SpatialModel.EARTH_RADIUS);
+		float radDegree=(float)Math.toDegrees(rad/SpatialModel.REarth);
 		for(int i=0;i<stncount;i++)
 		if(abs(lon-stn[0][i])<radDegree&&abs(lat-stn[1][i])<radDegree){
 			float sdis=cSphericalDistanceByDegree(stn[0][i],stn[1][i],lon,lat);
@@ -193,7 +193,7 @@ public class ObjectiveAnalysis{
 		grdtag.clear();	grddis.clear();
 		
 		// scanning the stations in the radius
-		float radDegree=(float)Math.toDegrees(rad/SpatialModel.EARTH_RADIUS);
+		float radDegree=(float)Math.toDegrees(rad/SpatialModel.REarth);
 		for(int j=0;j<ycount;j++)
 		for(int i=0;i<xcount;i++)
 		if(abs(lon-grd[0][j][i])<radDegree&&abs(lat-grd[1][j][i])<radDegree){

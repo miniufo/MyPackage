@@ -71,42 +71,52 @@ public abstract class EquationInSphericalCoordinate extends GeoFluidApplication{
 				for(int l=0;l<t;l++)
 				for(int k=0;k<z;k++)
 				for(int j=0;j<y;j++){
-					if(BCx==BoundaryCondition.Periodic){
-						if(vdata[l][k][j][1]!=undef&&vdata[l][k][j][x-1]!=undef)
-						ddata[l][k][j][0  ]=(vdata[l][k][j][1]-vdata[l][k][j][x-1])/(dxs[ystart-1+j]*2);
-						if(vdata[l][k][j][0]!=undef&&vdata[l][k][j][x-2]!=undef)
-						ddata[l][k][j][x-1]=(vdata[l][k][j][0]-vdata[l][k][j][x-2])/(dxs[ystart-1+j]*2);
+					if(dxs[ystart-1+j]!=0){
+						if(BCx==BoundaryCondition.Periodic){
+							if(vdata[l][k][j][1]!=undef&&vdata[l][k][j][x-1]!=undef)
+							ddata[l][k][j][0  ]=(vdata[l][k][j][1]-vdata[l][k][j][x-1])/(dxs[ystart-1+j]*2);
+							if(vdata[l][k][j][0]!=undef&&vdata[l][k][j][x-2]!=undef)
+							ddata[l][k][j][x-1]=(vdata[l][k][j][0]-vdata[l][k][j][x-2])/(dxs[ystart-1+j]*2);
+							
+						}else if(BCx==BoundaryCondition.Fixed){
+							if(vdata[l][k][j][1  ]!=undef&&vdata[l][k][j][0  ]!=undef)
+							ddata[l][k][j][0  ]=(vdata[l][k][j][1  ]-vdata[l][k][j][0  ])/dxs[ystart-1+j];
+							if(vdata[l][k][j][x-1]!=undef&&vdata[l][k][j][x-2]!=undef)
+							ddata[l][k][j][x-1]=(vdata[l][k][j][x-1]-vdata[l][k][j][x-2])/dxs[ystart-1+j];
+						}
 						
-					}else if(BCx==BoundaryCondition.Fixed){
-						if(vdata[l][k][j][1  ]!=undef&&vdata[l][k][j][0  ]!=undef)
-						ddata[l][k][j][0  ]=(vdata[l][k][j][1  ]-vdata[l][k][j][0  ])/dxs[ystart-1+j];
-						if(vdata[l][k][j][x-1]!=undef&&vdata[l][k][j][x-2]!=undef)
-						ddata[l][k][j][x-1]=(vdata[l][k][j][x-1]-vdata[l][k][j][x-2])/dxs[ystart-1+j];
+						for(int i=1;i<x-1;i++) if(vdata[l][k][j][i+1]!=undef&&vdata[l][k][j][i-1]!=undef)
+						ddata[l][k][j][i]=(vdata[l][k][j][i+1]-vdata[l][k][j][i-1])/(dxs[ystart-1+j]*2);
+						
+					}else{
+						for(int i=0;i<x;i++) ddata[l][k][j][i]=0f;
 					}
-					
-					for(int i=1;i<x-1;i++) if(vdata[l][k][j][i+1]!=undef&&vdata[l][k][j][i-1]!=undef)
-					ddata[l][k][j][i]=(vdata[l][k][j][i+1]-vdata[l][k][j][i-1])/(dxs[ystart-1+j]*2);
 				}
 				
 			}else{
 				for(int l=0;l<t;l++)
 				for(int k=0;k<z;k++)
 				for(int j=0;j<y;j++){
-					if(BCx==BoundaryCondition.Periodic){
-						if(vdata[k][j][1][l]!=undef&&vdata[k][j][x-1][l]!=undef)
-						ddata[k][j][0  ][l]=(vdata[k][j][1][l]-vdata[k][j][x-1][l])/(dxs[ystart-1+j]*2);
-						if(vdata[k][j][0][l]!=undef&&vdata[k][j][x-2][l]!=undef)
-						ddata[k][j][x-1][l]=(vdata[k][j][0][l]-vdata[k][j][x-2][l])/(dxs[ystart-1+j]*2);
+					if(dxs[ystart-1+j]!=0){
+						if(BCx==BoundaryCondition.Periodic){
+							if(vdata[k][j][1][l]!=undef&&vdata[k][j][x-1][l]!=undef)
+							ddata[k][j][0  ][l]=(vdata[k][j][1][l]-vdata[k][j][x-1][l])/(dxs[ystart-1+j]*2);
+							if(vdata[k][j][0][l]!=undef&&vdata[k][j][x-2][l]!=undef)
+							ddata[k][j][x-1][l]=(vdata[k][j][0][l]-vdata[k][j][x-2][l])/(dxs[ystart-1+j]*2);
+							
+						}else if(BCx==BoundaryCondition.Fixed){
+							if(vdata[k][j][1  ][l]!=undef&&vdata[k][j][0  ][l]!=undef)
+							ddata[k][j][0  ][l]=(vdata[k][j][1  ][l]-vdata[k][j][0  ][l])/dxs[ystart-1+j];
+							if(vdata[k][j][x-1][l]!=undef&&vdata[k][j][x-2][l]!=undef)
+							ddata[k][j][x-1][l]=(vdata[k][j][x-1][l]-vdata[k][j][x-2][l])/dxs[ystart-1+j];
+						}
 						
-					}else if(BCx==BoundaryCondition.Fixed){
-						if(vdata[k][j][1  ][l]!=undef&&vdata[k][j][0  ][l]!=undef)
-						ddata[k][j][0  ][l]=(vdata[k][j][1  ][l]-vdata[k][j][0  ][l])/dxs[ystart-1+j];
-						if(vdata[k][j][x-1][l]!=undef&&vdata[k][j][x-2][l]!=undef)
-						ddata[k][j][x-1][l]=(vdata[k][j][x-1][l]-vdata[k][j][x-2][l])/dxs[ystart-1+j];
+						for(int i=1;i<x-1;i++) if(vdata[k][j][i+1][l]!=undef&&vdata[k][j][i-1][l]!=undef)
+						ddata[k][j][i][l]=(vdata[k][j][i+1][l]-vdata[k][j][i-1][l])/(dxs[ystart-1+j]*2);
+						
+					}else{
+						for(int i=0;i<x;i++) ddata[k][j][i][l]=0f;
 					}
-					
-					for(int i=1;i<x-1;i++) if(vdata[k][j][i+1][l]!=undef&&vdata[k][j][i-1][l]!=undef)
-					ddata[k][j][i][l]=(vdata[k][j][i+1][l]-vdata[k][j][i-1][l])/(dxs[ystart-1+j]*2);
 				}
 			}
 			break;

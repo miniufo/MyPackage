@@ -103,7 +103,7 @@ public final class Typhoon extends Particle{
 		for(int l=0,L=records.size();l<L;l++){
 			Record r=records.get(l);
 			
-			if(r.getDataValue(Vmax)>=windthreshold) return r.getTime();
+			if(r.getData(Vmax)>=windthreshold) return r.getTime();
 		}
 		
 		throw new IllegalArgumentException("Typhoon never get stronger than: "+windthreshold+" m/s");
@@ -115,7 +115,7 @@ public final class Typhoon extends Particle{
 		TYPE[] types=new TYPE[len];
 		
 		for(int l=0;l<len;l++)
-		types[l]=ordinalToType(Math.round(records.get(l).getDataValue(Type)));
+		types[l]=ordinalToType(Math.round(records.get(l).getData(Type)));
 		
 		return types;
 	}
@@ -212,14 +212,14 @@ public final class Typhoon extends Particle{
 			float lonstr=rstr.getXPos();	float lonend=rend.getXPos();
 			float latstr=rstr.getYPos();	float latend=rend.getYPos();
 			
-			float uvelstr=rstr.getDataValue(UVEL);	float uvelend=rend.getDataValue(UVEL);
-			float vvelstr=rstr.getDataValue(VVEL);	float vvelend=rend.getDataValue(VVEL);
+			float uvelstr=rstr.getData(UVEL);	float uvelend=rend.getData(UVEL);
+			float vvelstr=rstr.getData(VVEL);	float vvelend=rend.getData(VVEL);
 			
 			float windstr=0;	float windend=0;
 			float presstr=0;	float presend=0;
 			
-			if(dlen>2){ windstr=rstr.getDataValue(Vmax); windend=rend.getDataValue(Vmax);}
-			if(dlen>3){ presstr=rstr.getDataValue(Pmin); presend=rend.getDataValue(Pmin);}
+			if(dlen>2){ windstr=rstr.getData(Vmax); windend=rend.getData(Vmax);}
+			if(dlen>3){ presstr=rstr.getData(Pmin); presend=rend.getData(Pmin);}
 			
 			for(int i=1;i<=insertNum;i++){
 				long time=tmp.getLongTime();
@@ -354,7 +354,7 @@ public final class Typhoon extends Particle{
 			
 			sb.append(String.format(
 				"%6.2f  %5.2f %6.3f  %5.3f  %14d",
-				r.getXPos(),r.getYPos(),r.getDataValue(UVEL),r.getDataValue(VVEL),r.getTime()
+				r.getXPos(),r.getYPos(),r.getData(UVEL),r.getData(VVEL),r.getTime()
 			));
 			
 			if(len==5)      sb.append(String.format(" %7.3f  %5.1f  %s\n",wnds[l],pres[l],type[l]));

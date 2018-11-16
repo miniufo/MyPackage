@@ -37,7 +37,7 @@ import static java.lang.Math.sqrt;
  * @author  MiniUFO
  * @since   MDK1.0
  */
-public final class EllipticEqSORSolver extends GeoFluidApplication implements Print{
+public final class EllipticEqSORSolver2D extends GeoFluidApplication implements Print{
 	//
 	private int mxLoopCount=5000;	// max loop of the iteration
 	
@@ -59,7 +59,7 @@ public final class EllipticEqSORSolver extends GeoFluidApplication implements Pr
 	/**
 	 * constructor
 	 */
-	public EllipticEqSORSolver(SpatialModel sm){ super(sm);}
+	public EllipticEqSORSolver2D(SpatialModel sm){ super(sm);}
 	
 	
 	/*** getor and setor ***/
@@ -183,7 +183,7 @@ public final class EllipticEqSORSolver extends GeoFluidApplication implements Pr
 				}
 				break;
 			}	
-			default: throw new IllegalArgumentException("unsupported dimention combinaiton: "+dimComb);
+			default: throw new IllegalArgumentException("unsupported dimension combinaiton: "+dimComb);
 			}
 			
 	    }else{
@@ -263,7 +263,7 @@ public final class EllipticEqSORSolver extends GeoFluidApplication implements Pr
 				}
 				break;
 				
-			}default: throw new IllegalArgumentException("unsupported dimention combinaiton: "+dimComb);
+			}default: throw new IllegalArgumentException("unsupported dimension combinaiton: "+dimComb);
 			}
 		}
 	    
@@ -300,7 +300,7 @@ public final class EllipticEqSORSolver extends GeoFluidApplication implements Pr
 			catch(InterruptedException|ExecutionException e){ e.printStackTrace(); System.exit(0);}
 			break;
 			
-		default: throw new IllegalArgumentException("unsupported dimention combinaiton: "+dimComb);
+		default: throw new IllegalArgumentException("unsupported dimension combinaiton: "+dimComb);
 		}
 	    
 		if(print) System.out.println("Finished.");

@@ -30,6 +30,12 @@ import miniufo.diagnosis.SpatialModel;
 public final class LagrangianUtil{
 	
 	/**
+	 * Prevent from instantiation
+	 */
+	private LagrangianUtil(){}
+	
+	
+	/**
 	 * count all the records in the list
 	 * 
 	 * @param	ls	a give list
@@ -51,7 +57,7 @@ public final class LagrangianUtil{
 		int count=0;
 		
 		for(Particle p:ls) for(int l=0,L=p.getTCount();l<L;l++)
-		if(p.getRecord(l).getDataValue(Particle.UVEL)!=Record.undef) count++;
+		if(p.getRecord(l).getData(Particle.UVEL)!=Record.undef) count++;
 		
 		return count;
 	}

@@ -21,9 +21,51 @@ import java.util.Random;
 public final class ArrayUtil{
 	
 	/**
-	 * prevent from instantiate
+	 * prevent from instantiation
 	 */
 	private ArrayUtil(){}
+	
+	
+	/**
+     * Whether an array is monotonic increasing or decreasing.
+     *
+     * @param	array	an array
+     */
+	public static int nonMonoIncreIdx(float[] array){
+		int len=array.length;
+		
+		for(int i=1;i<len;i++)
+		if(array[i]<=array[i-1]) return i;
+		
+		return -1;
+	}
+	
+	public static int nonMonoIncreIdx(double[] array){
+		int len=array.length;
+		
+		for(int i=1;i<len;i++)
+		if(array[i]<=array[i-1]) return i;
+		
+		return -1;
+	}
+	
+	public static int nonMonoDecreIdx(float[] array){
+		int len=array.length;
+		
+		for(int i=1;i<len;i++)
+		if(array[i]>=array[i-1]) return i;
+		
+		return -1;
+	}
+	
+	public static int nonMonoDecreIdx(double[] array){
+		int len=array.length;
+		
+		for(int i=1;i<len;i++)
+		if(array[i]>=array[i-1]) return i;
+		
+		return -1;
+	}
 	
 	
 	/**
@@ -65,18 +107,21 @@ public final class ArrayUtil{
 	
 	
 	/**
-     * return a monotonous array
+     * Return a monotonic array.
      *
      * @param	len		array length
+     * @param	intCpt	intercept
      * @param	slope	slope
      */
-	public static float[] newMonotonousArray(int len,float slope){
+	public static float[] newMonotonicArray(int len,float intCpt,float slope){
 		float[] re=new float[len];
 		
-		for(int l=0;l<len;l++) re[l]=slope*l;
+		for(int l=0;l<len;l++) re[l]=intCpt+slope*l;
 		
 		return re;
 	}
+	
+	public static float[] newMonotonicArray(int len,float slope){ return newMonotonicArray(len,0,slope);}
 	
 	/**
      * return an array filled with a given value
@@ -2140,8 +2185,8 @@ public final class ArrayUtil{
 		
 		float[] re=new float[2];
 		
-		re[0]=Float.MAX_VALUE;
-		re[1]=Float.MIN_VALUE;
+		re[0]= Float.MAX_VALUE;
+		re[1]=-Float.MAX_VALUE;
 		
 		for(float ei:array){
 			if(ei<re[0]) re[0]=ei;
@@ -2157,8 +2202,8 @@ public final class ArrayUtil{
 		
 		float[] re=new float[2];
 		
-		re[0]=Float.MAX_VALUE;
-		re[1]=Float.MIN_VALUE;
+		re[0]= Float.MAX_VALUE;
+		re[1]=-Float.MAX_VALUE;
 		
 		for(float[] ej:array)
 		for(float ei:ej){
@@ -2176,8 +2221,8 @@ public final class ArrayUtil{
 		
 		float[] re=new float[2];
 		
-		re[0]=Float.MAX_VALUE;
-		re[1]=Float.MIN_VALUE;
+		re[0]= Float.MAX_VALUE;
+		re[1]=-Float.MAX_VALUE;
 		
 		for(float[][] ek:array)
 		for(float[] ej:ek)
@@ -2197,8 +2242,8 @@ public final class ArrayUtil{
 		
 		float[] re=new float[2];
 		
-		re[0]=Float.MAX_VALUE;
-		re[1]=Float.MIN_VALUE;
+		re[0]= Float.MAX_VALUE;
+		re[1]=-Float.MAX_VALUE;
 		
 		for(float[][][] el:array)
 		for(float[][] ek:el)
@@ -2217,8 +2262,8 @@ public final class ArrayUtil{
 		
 		float[] re=new float[2];
 		
-		re[0]=Float.MAX_VALUE;
-		re[1]=Float.MIN_VALUE;
+		re[0]= Float.MAX_VALUE;
+		re[1]=-Float.MAX_VALUE;
 		
 		for(float ei:array) if(ei!=undef){
 			if(ei<re[0]) re[0]=ei;
@@ -2234,8 +2279,8 @@ public final class ArrayUtil{
 		
 		float[] re=new float[2];
 		
-		re[0]=Float.MAX_VALUE;
-		re[1]=Float.MIN_VALUE;
+		re[0]= Float.MAX_VALUE;
+		re[1]=-Float.MAX_VALUE;
 		
 		for(float[] ej:array)
 		for(float ei:ej) if(ei!=undef){
@@ -2253,8 +2298,8 @@ public final class ArrayUtil{
 		
 		float[] re=new float[2];
 		
-		re[0]=Float.MAX_VALUE;
-		re[1]=Float.MIN_VALUE;
+		re[0]= Float.MAX_VALUE;
+		re[1]=-Float.MAX_VALUE;
 		
 		for(float[][] ek:array)
 		for(float[] ej:ek)
@@ -2274,8 +2319,8 @@ public final class ArrayUtil{
 		
 		float[] re=new float[2];
 		
-		re[0]=Float.MAX_VALUE;
-		re[1]=Float.MIN_VALUE;
+		re[0]= Float.MAX_VALUE;
+		re[1]=-Float.MAX_VALUE;
 		
 		for(float[][][] el:array)
 		for(float[][] ek:el)
@@ -2294,8 +2339,8 @@ public final class ArrayUtil{
 		
 		double[] re=new double[2];
 		
-		re[0]=Double.MAX_VALUE;
-		re[1]=Double.MIN_VALUE;
+		re[0]= Double.MAX_VALUE;
+		re[1]=-Double.MAX_VALUE;
 		
 		for(double ei:array){
 			if(ei<re[0]) re[0]=ei;
@@ -2311,8 +2356,8 @@ public final class ArrayUtil{
 		
 		double[] re=new double[2];
 		
-		re[0]=Double.MAX_VALUE;
-		re[1]=Double.MIN_VALUE;
+		re[0]= Double.MAX_VALUE;
+		re[1]=-Double.MAX_VALUE;
 		
 		for(double[] ej:array)
 		for(double ei:ej){
@@ -2330,8 +2375,8 @@ public final class ArrayUtil{
 		
 		double[] re=new double[2];
 		
-		re[0]=Double.MAX_VALUE;
-		re[1]=Double.MIN_VALUE;
+		re[0]= Double.MAX_VALUE;
+		re[1]=-Double.MAX_VALUE;
 		
 		for(double[][] ek:array)
 		for(double[] ej:ek)
@@ -2351,8 +2396,8 @@ public final class ArrayUtil{
 		
 		double[] re=new double[2];
 		
-		re[0]=Double.MAX_VALUE;
-		re[1]=Double.MIN_VALUE;
+		re[0]= Double.MAX_VALUE;
+		re[1]=-Double.MAX_VALUE;
 		
 		for(double[][][] el:array)
 		for(double[][] ek:el)

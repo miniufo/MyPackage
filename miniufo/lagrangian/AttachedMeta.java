@@ -6,6 +6,8 @@
  */
 package miniufo.lagrangian;
 
+import java.io.Serializable;
+
 
 /**
  * Used to describe the Meta-info of the attached Lagrangian data
@@ -14,8 +16,10 @@ package miniufo.lagrangian;
  * @author  MiniUFO
  * @since   MDK1.0
  */
-public final class AttachedMeta{
+public final class AttachedMeta implements Serializable{
 	//
+	private static final long serialVersionUID=4544576332702305821L;
+	
 	public final  int  index;	// attached index
 	public final String name;	// descriptive name
 	

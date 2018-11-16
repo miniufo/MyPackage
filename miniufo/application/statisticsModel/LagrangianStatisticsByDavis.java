@@ -21,6 +21,7 @@ import miniufo.diagnosis.MDate;
 import miniufo.diagnosis.Range;
 import miniufo.diagnosis.SpatialModel;
 import miniufo.diagnosis.Variable;
+import miniufo.lagrangian.AttachedMeta;
 import miniufo.lagrangian.Particle;
 import miniufo.lagrangian.Record;
 import miniufo.lagrangian.StochasticModel;
@@ -61,7 +62,7 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 	}
 	
 	/**
-     * Compute the Lagrangian diffusivity using Taylor's theory: <v'v'>.
+     * Compute the Lagrangian diffusivity using Taylor's (1922) theory: <v'v'>.
      *
      * @param	cond	condition for a record to be the origin of pseudo-track
      * @param	tRad	maximum lead or lag count
@@ -70,6 +71,7 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 		BinStatistics bd=new BinStatistics(tRad);
 		
 		bd.computeMean(cond);
+		bd.computeAutoCovariance(cond);
 		bd.computeDispersion(cond);
 		bd.computeDiffByVV(cond);
 		
@@ -87,9 +89,33 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 		
 		bd.computeMean(cond);
 		bd.computeAutoCovariance(cond);
+		bd.computeDispersion(cond);
 		bd.computeDiffByDispDT(cond);
 		
 		return bd.lsr;
+	}
+	
+	/**
+     * Compute the Lagrangian diffusivity using three methods: <v'd'>, integral of <v'v'>, and 0.5*d<d'd'>/dt.
+     *
+     * @param	cond	condition for a record to be the origin of pseudo-track
+     * @param	tRad	maximum lead or lag count
+     */
+	public SingleParticleStatResult[] cStatistics(Predicate<Record> cond,int tRad){
+		BinStatistics bd1=new BinStatistics(tRad);
+		
+		bd1.computeMean(cond);
+		bd1.computeAutoCovariance(cond);
+		bd1.computeDispersion(cond);
+		
+		BinStatistics bd2=bd1.copy();
+		BinStatistics bd3=bd1.copy();
+		
+		bd1.computeDiffByVD(cond);
+		bd2.computeDiffByVV(cond);
+		bd3.computeDiffByDispDT(cond);
+		
+		return new SingleParticleStatResult[]{bd1.lsr,bd2.lsr,bd3.lsr};
 	}
 	
 	
@@ -116,6 +142,10 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 		return cStatisticsMapByDispersionTheory(tRad,bRad,str,end,minTracks,true);
 	}
 	
+	public Variable[][] cMeanStatisticsMap(int tRad,float bRad,int str,int end,int minTracks,AttachedMeta ypos){
+		return cStatisticsMap(tRad,bRad,str,end,minTracks,true,ypos);
+	}
+	
 	
 	/**
      * Compute Lagrangian statistics maps using time mean within the given time lags [str, end].
@@ -138,6 +168,10 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 	
 	public Variable[] cMaxStatisticsMapByDispersionTheory(int tRad,float bRad,int str,int end,int minTracks){
 		return cStatisticsMapByDispersionTheory(tRad,bRad,str,end,minTracks,false);
+	}
+	
+	public Variable[][] cMaxStatisticsMap(int tRad,float bRad,int str,int end,int minTracks,AttachedMeta ypos){
+		return cStatisticsMap(tRad,bRad,str,end,minTracks,false,ypos);
 	}
 	
 	
@@ -452,6 +486,131 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 		return stats;
 	}
 	
+	private Variable[][] cStatisticsMap(int tRad,float bRad,int str,int end,int minTracks,boolean ave,AttachedMeta ypos){
+		float undef=dd.getUndef(null);
+		
+		Variable[][] stats=new Variable[3][9];
+		
+		Range r=new Range("",dd);
+		
+		float[][][] kxdata=new float[3][][];
+		float[][][] kydata=new float[3][][];
+		float[][][] txdata=new float[3][][];
+		float[][][] tydata=new float[3][][];
+		float[][][] lxdata=new float[3][][];
+		float[][][] lydata=new float[3][][];
+		float[][][] k1data=new float[3][][];
+		float[][][] k2data=new float[3][][];
+		float[][][] agdata=new float[3][][];
+		
+		for(int i=0;i<3;i++){
+			stats[i][0]=new Variable("Kxx"+(i+1),r);	stats[i][0].setUndef(undef);
+			stats[i][1]=new Variable("Kyy"+(i+1),r);	stats[i][1].setUndef(undef);
+			stats[i][2]=new Variable("Tx" +(i+1),r);	stats[i][2].setUndef(undef);
+			stats[i][3]=new Variable("Ty" +(i+1),r);	stats[i][3].setUndef(undef);
+			stats[i][4]=new Variable("Lx" +(i+1),r);	stats[i][4].setUndef(undef);
+			stats[i][5]=new Variable("Ly" +(i+1),r);	stats[i][5].setUndef(undef);
+			stats[i][6]=new Variable("K11"+(i+1),r);	stats[i][6].setUndef(undef);
+			stats[i][7]=new Variable("K22"+(i+1),r);	stats[i][7].setUndef(undef);
+			stats[i][8]=new Variable("ang"+(i+1),r);	stats[i][8].setUndef(undef);
+			
+			stats[i][0].setCommentAndUnit("zonal component of diffusivity (10^7 cm^2/s)");
+			stats[i][1].setCommentAndUnit("meridional component of diffusivity (10^7 cm^2/s)");
+			stats[i][2].setCommentAndUnit("zonal component of Lagrangian integral timescale (day)");
+			stats[i][3].setCommentAndUnit("meridional component of Lagrangian integral timescale (day)");
+			stats[i][4].setCommentAndUnit("zonal component of Lagrangian length scale (km)");
+			stats[i][5].setCommentAndUnit("meridional component of Lagrangian length scale (km)");
+			stats[i][6].setCommentAndUnit("major component of diffusivity (10^7 cm^2/s)");
+			stats[i][7].setCommentAndUnit("minor component of diffusivity (10^7 cm^2/s)");
+			stats[i][8].setCommentAndUnit("angle of major component (radian)");
+			
+			kxdata[i]=stats[i][0].getData()[0][0];
+			kydata[i]=stats[i][1].getData()[0][0];
+			txdata[i]=stats[i][2].getData()[0][0];
+			tydata[i]=stats[i][3].getData()[0][0];
+			lxdata[i]=stats[i][4].getData()[0][0];
+			lydata[i]=stats[i][5].getData()[0][0];
+			k1data[i]=stats[i][6].getData()[0][0];
+			k2data[i]=stats[i][7].getData()[0][0];
+			agdata[i]=stats[i][8].getData()[0][0];
+		}
+		
+		float[] xdef=dd.getXDef().getSamples();
+		float[] ydef=dd.getYDef().getSamples();
+		
+		List<Future<float[][]>> ls=new ArrayList<>(dd.getXCount()-1);
+		ExecutorService es=ConcurrentUtil.defaultExecutor();
+		CompletionService<float[][]> cs=new ExecutorCompletionService<>(es);
+		
+		TicToc.tic("start computing statistics grid by grid");
+		
+		float per=dd.getYCount()/20f;
+		float curr=0;
+		
+		for(int j=0,J=dd.getYCount()-1;j<J;j++){
+			for(int i=0,I=dd.getXCount()-1;i<I;i++){
+				final int itag=i;
+				final int jtag=j;
+				
+				Predicate<Record> cond=rec->
+				new Region2D(xdef[itag]-bRad,ydef[jtag]-bRad,xdef[itag]+bRad,ydef[jtag]+bRad).inRange(rec.getXPos(),rec.getData(ypos));
+				
+				if(ave)
+					ls.add(cs.submit(()->{
+						SingleParticleStatResult[] re=cStatistics(cond,tRad);
+						return new float[][]{
+							re[0].getMean(str,end,minTracks),
+							re[1].getMean(str,end,minTracks),
+							re[2].getMean(str,end,minTracks)
+						};
+					}));
+				else
+					ls.add(cs.submit(()->{
+						SingleParticleStatResult[] re=cStatistics(cond,tRad);
+						return new float[][]{
+							re[0].getMax(str,end,minTracks),
+							re[1].getMax(str,end,minTracks),
+							re[2].getMax(str,end,minTracks)
+						};
+					}));
+			}
+			
+			try{
+				for(int m=0;m<3;m++)
+				for(int i=0,ptr=0,I=dd.getXCount()-1;i<I;i++){
+					float[][] mean=ls.get(ptr++).get();
+					
+					if(mean[m]!=null){
+						kxdata[m][j][i]=mean[m][0];	kydata[m][j][i]=mean[m][1];
+						txdata[m][j][i]=mean[m][2];	tydata[m][j][i]=mean[m][3];
+						lxdata[m][j][i]=mean[m][4];	lydata[m][j][i]=mean[m][5];
+						k1data[m][j][i]=mean[m][6];	k2data[m][j][i]=mean[m][7];
+						agdata[m][j][i]=mean[m][8];
+						
+					}else{
+						kxdata[m][j][i]=undef;	kydata[m][j][i]=undef;
+						txdata[m][j][i]=undef;	tydata[m][j][i]=undef;
+						lxdata[m][j][i]=undef;	lydata[m][j][i]=undef;
+						k1data[m][j][i]=undef;	k2data[m][j][i]=undef;
+						agdata[m][j][i]=undef;
+					}
+				}
+			}
+			catch(InterruptedException|ExecutionException e){ e.printStackTrace(); System.exit(0);}
+			
+			if(j-curr>=per){
+				curr=j;
+				System.out.print(".");
+			}
+			
+			ls.clear();
+		}
+		
+		TicToc.toc(TimeUnit.MINUTES);
+		
+		return stats;
+	}
+	
 	
 	private final class BinStatistics{
 		//
@@ -463,7 +622,7 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 		
 		
 		/**
-		 * constructor
+		 * Constructor.
 		 */
 		BinStatistics(int tRad){
 			lsr=new SingleParticleStatResult(tRad);
@@ -477,6 +636,21 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 			lsr.dt=new MDate(p1.getTime(1)).getDT(new MDate(p1.getTime(0)));
 			
 			//writeTracks("/lustre/home/qianyk/Data/GDP/Track/diff9regions/"+lon1+lat1);
+		}
+		
+		
+		/**
+		 * Copy the current BinStatistics to a new one.
+		 */
+		BinStatistics copy(){
+			BinStatistics bs=new BinStatistics();
+			
+			bs.pseudoTracks=pseudoTracks;
+			bs.noOfMaxLag=noOfMaxLag;
+			bs.noOfMinLag=noOfMinLag;
+			bs.lsr=lsr.copy();
+			
+			return bs;
 		}
 		
 		
@@ -518,8 +692,8 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 							float dlon=(float)Math.toRadians(p.getXPosition(ll)-oX);
 							float dlat=(float)Math.toRadians(p.getYPosition(ll)-oY);
 							
-							float disX=SpatialModel.EARTH_RADIUS*dlon*(float)Math.cos(oY*Math.PI/180.0);
-							float disY=SpatialModel.EARTH_RADIUS*dlat;
+							float disX=SpatialModel.REarth*dlon*(float)Math.cos(oY*Math.PI/180.0);
+							float disY=SpatialModel.REarth*dlat;
 							
 							av.addSample(tau,uspd[ll],vspd[ll],disX,disY);
 							
@@ -568,8 +742,8 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 					if(!cond.test(p.getRecord(l))) continue;
 					if(uspd[l]==Record.undef) continue;
 					
-					float ua0=uspd[l];//-um[tRad];	// u'(tau=0)
-					float va0=vspd[l];//-vm[tRad];	// v'(tau=0)
+					float ua0=uspd[l]-lsr.um[tRad];	// u'(tau=0)
+					float va0=vspd[l]-lsr.vm[tRad];	// v'(tau=0)
 					
 					for(int ll=0;ll<L;ll++){
 						int tau=ll-l;
@@ -577,8 +751,8 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 						if(tau>tRad||tau<-tRad) continue;
 						if(uspd[ll]==Record.undef) continue;
 						
-						float ua=uspd[ll];	// u'(tau)
-						float va=vspd[ll];	// v'(tau)
+						float ua=uspd[ll]-lsr.um[tRad+tau];	// u'(tau)
+						float va=vspd[ll]-lsr.vm[tRad+tau];	// v'(tau)
 						
 						float Pxx=ua0*ua;	// u'(0)*u'(tau)
 						float Pyy=va0*va;	// v'(0)*v'(tau)
@@ -647,9 +821,9 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 							float dlat=(float)Math.toRadians(p.getYPosition(ll)-oY);
 							
 							// dx'(tau)
-							float disX=SpatialModel.EARTH_RADIUS*dlon*(float)Math.cos(oY*Math.PI/180.0)-lsr.DXm[tRad+tau];
+							float disX=SpatialModel.REarth*dlon*(float)Math.cos(oY*Math.PI/180.0)-lsr.DXm[tRad+tau];
 							// dy'(tau)
-							float disY=SpatialModel.EARTH_RADIUS*dlat-lsr.DYm[tRad+tau];
+							float disY=SpatialModel.REarth*dlat-lsr.DYm[tRad+tau];
 							
 							float Dxx=disX*disX;	// dx'(tau)*dx'(tau)
 							float Dyy=disY*disY;	// dy'(tau)*dy'(tau)
@@ -710,8 +884,8 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 					if(!cond.test(p.getRecord(l))) continue;
 					if(uspd[l]==Record.undef) continue;
 					
-					float ua0=uspd[l];//-um[tRad];	// u'(tau=0)
-					float va0=vspd[l];//-vm[tRad];	// v'(tau=0)
+					float ua0=uspd[l]-lsr.um[tRad];	// u'(tau=0)
+					float va0=vspd[l]-lsr.vm[tRad];	// v'(tau=0)
 					
 					usqr+=ua0*ua0;
 					vsqr+=va0*va0;	count++;
@@ -727,9 +901,9 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 							float dlat=(float)Math.toRadians(p.getYPosition(ll)-oY);
 							
 							// dx'(tau)
-							float disX=SpatialModel.EARTH_RADIUS*dlon*(float)Math.cos(oY*Math.PI/180.0)-lsr.DXm[tRad+tau];
+							float disX=SpatialModel.REarth*dlon*(float)Math.cos(oY*Math.PI/180.0)-lsr.DXm[tRad+tau];
 							// dy'(tau)
-							float disY=SpatialModel.EARTH_RADIUS*dlat-lsr.DYm[tRad+tau];
+							float disY=SpatialModel.REarth*dlat-lsr.DYm[tRad+tau];
 							
 							float Kxx=-ua0*disX;	// -u'(0)*dx'(tau)
 							float Kyy=-va0*disY;	// -v'(0)*dy'(tau)
@@ -795,8 +969,6 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 			
 			float ucfd=0,vcfd=0;
 			
-			computeAutoCovariance(cond);
-			
 			for(int l=0,half=len/2;l<half;l++){
 				lsr.Kxx[l]=0;
 				lsr.Kyy[l]=0;
@@ -859,13 +1031,44 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 			lsr.vcfd*=2f/Math.sqrt(lsr.pseudoTracks/(2f*lsr.Tv*4f));
 		}
 		
-		// compute diffusivity by differencing dispersion
+		/*// compute diffusivity by differencing dispersion
 		void computeDiffByDispDT(Predicate<Record> cond){
 			int tRad=lsr.tRad,len=2*tRad+1;
 			
 			float ucfd=0,vcfd=0;
 			
 			computeDispersion(cond);
+			
+			for(int l=0;l<tRad;l++){ // negative time lags
+				lsr.Kxx[l]=(lsr.Dxx[l+1]-lsr.Dxx[l])/lsr.dt/2f;
+				lsr.Kyy[l]=(lsr.Dyy[l+1]-lsr.Dyy[l])/lsr.dt/2f;
+				lsr.Kxy[l]=(lsr.Dxy[l+1]-lsr.Dxy[l])/lsr.dt/2f;
+				lsr.Kyx[l]=(lsr.Dyx[l+1]-lsr.Dyx[l])/lsr.dt/2f;
+			}
+			
+			for(int l=tRad+1;l<len;l++){ // positive time lags
+				lsr.Kxx[l]=(lsr.Dxx[l]-lsr.Dxx[l-1])/lsr.dt/2f;
+				lsr.Kyy[l]=(lsr.Dyy[l]-lsr.Dyy[l-1])/lsr.dt/2f;
+				lsr.Kxy[l]=(lsr.Dxy[l]-lsr.Dxy[l-1])/lsr.dt/2f;
+				lsr.Kyx[l]=(lsr.Dyx[l]-lsr.Dyx[l-1])/lsr.dt/2f;
+			}
+			
+			principalAxeDecomp();
+			
+			float[] scales=cScales();
+			
+			lsr.Tu=scales[0];	lsr.Lu=scales[2];	lsr.Ku=scales[4];
+			lsr.Tv=scales[1];	lsr.Lv=scales[3];	lsr.Kv=scales[5];
+			
+			ucfd/=(lsr.pseudoTracks-1);	ucfd=(float)Math.sqrt(ucfd);
+			vcfd/=(lsr.pseudoTracks-1);	vcfd=(float)Math.sqrt(vcfd);
+		}
+		
+		*/
+		void computeDiffByDispDT(Predicate<Record> cond){
+			int tRad=lsr.tRad,len=2*tRad+1;
+			
+			float ucfd=0,vcfd=0;
 			
 			lsr.Kxx[0]=(lsr.Dxx[1]-lsr.Dxx[0])/lsr.dt/2f;
 			lsr.Kyy[0]=(lsr.Dyy[1]-lsr.Dyy[0])/lsr.dt/2f;
@@ -968,7 +1171,7 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 			for(int l=0,L=len;l<L;l++){
 				double KxxS=lsr.Kxx[l];
 				double KyyS=lsr.Kyy[l];
-				double KxyS=(lsr.Kxy[l]+lsr.Kyx[l])/2f;
+				double KxyS=(lsr.Kxy[l]+lsr.Kyx[l])/2.0;
 				double tmp=(KxxS+KyyS+Math.sqrt((KxxS-KyyS)*(KxxS-KyyS)+4.0*KxyS*KxyS))/2.0;
 				
 				lsr.K11[l]=(float)tmp;
@@ -1006,6 +1209,8 @@ public final class LagrangianStatisticsByDavis extends SingleParticleStatistics{
 				lsr.K11[l]=tmp;
 			}
 		}
+		
+		private BinStatistics(){}
 	}
 	
 	private static final class Averager{

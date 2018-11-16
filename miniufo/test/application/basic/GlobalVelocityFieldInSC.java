@@ -9,7 +9,7 @@ package miniufo.test.application.basic;
 import miniufo.application.basic.VelocityFieldInSC;
 import miniufo.diagnosis.Variable;
 import miniufo.diagnosis.SphericalSpatialModel;
-import static miniufo.diagnosis.SpatialModel.GRAVITY_ACCERLERATION;
+import static miniufo.diagnosis.SpatialModel.gEarth;
 
 
 /**
@@ -65,20 +65,20 @@ public final class GlobalVelocityFieldInSC extends VelocityFieldInSC{
 					for(int j=1;j<y-1;j++){
 						if(hgtdata[l][k][j+1][i]!=undef&&hgtdata[l][k][j-1][i]!=undef)
 							Ugdata[l][k][j][i]=-(hgtdata[l][k][j+1][i]-hgtdata[l][k][j-1][i])*
-							GRAVITY_ACCERLERATION/(dy*2*f1[j]);
+							gEarth/(dy*2*f1[j]);
 							
 						else Ugdata[l][k][j][i]=undef;
 					}
 					
 					if(hgtdata[l][k][1][i]!=undef&&hgtdata[l][k][0][i]!=undef)
 						Ugdata[l][k][0][i]=-(hgtdata[l][k][1][i]-hgtdata[l][k][0][i])*
-						GRAVITY_ACCERLERATION/(dy*f1[0]);
+						gEarth/(dy*f1[0]);
 						
 					else Ugdata[l][k][0][i]=undef;
 					
 					if(hgtdata[l][k][y-1][i]!=undef&&hgtdata[l][k][y-2][i]!=undef)
 						Ugdata[l][k][y-1][i]=-(hgtdata[l][k][y-1][i]-hgtdata[l][k][y-2][i])*
-						GRAVITY_ACCERLERATION/(dy*f1[y-1]);
+						gEarth/(dy*f1[y-1]);
 						
 					else Ugdata[l][k][y-1][i]=undef;
 				}
@@ -88,20 +88,20 @@ public final class GlobalVelocityFieldInSC extends VelocityFieldInSC{
 					for(int i=1;i<x-1;i++){
 						if(hgtdata[l][k][j][i+1]!=undef&&hgtdata[l][k][j][i-1]!=undef)
 							Vgdata[l][k][j][i]=(hgtdata[l][k][j][i+1]-hgtdata[l][k][j][i-1])*
-							GRAVITY_ACCERLERATION/(dxs[j]*2*f1[j]);
+							gEarth/(dxs[j]*2*f1[j]);
 						
 						else Vgdata[l][k][j][i]=undef;
 					}
 					
 					if(hgtdata[l][k][j][1]!=undef&&hgtdata[l][k][j][x-1]!=undef)
 						Vgdata[l][k][j][0]=(hgtdata[l][k][j][1]-hgtdata[l][k][j][x-1])*
-						GRAVITY_ACCERLERATION/(dxs[j]*2*f1[j]);
+						gEarth/(dxs[j]*2*f1[j]);
 					
 					else Vgdata[l][k][j][0]=undef;
 					
 					if(hgtdata[l][k][j][0]!=undef&&hgtdata[l][k][j][x-2]!=undef)
 						Vgdata[l][k][j][x-1]=(hgtdata[l][k][j][0]-hgtdata[l][k][j][x-2])*
-						GRAVITY_ACCERLERATION/(dxs[j]*2*f1[j]);
+						gEarth/(dxs[j]*2*f1[j]);
 					
 					else Vgdata[l][k][j][x-1]=undef;
 				}
@@ -115,20 +115,20 @@ public final class GlobalVelocityFieldInSC extends VelocityFieldInSC{
 					for(int j=1;j<y-1;j++){
 						if(hgtdata[k][j+1][i][l]!=undef&&hgtdata[k][j-1][i][l]!=undef)
 							Ugdata[k][j][i][l]=-(hgtdata[k][j+1][i][l]-hgtdata[k][j-1][i][l])*
-							GRAVITY_ACCERLERATION/(dy*2*f1[j]);
+							gEarth/(dy*2*f1[j]);
 							
 						else Ugdata[k][j][i][l]=undef;
 					}
 					
 					if(hgtdata[k][1][i][l]!=undef&&hgtdata[k][0][i][l]!=undef)
 						Ugdata[k][0][i][l]=-(hgtdata[k][1][i][l]-hgtdata[k][0][i][l])*
-						GRAVITY_ACCERLERATION/(dy*f1[0]);
+						gEarth/(dy*f1[0]);
 						
 					else Ugdata[k][0][i][l]=undef;
 					
 					if(hgtdata[k][y-1][i][l]!=undef&&hgtdata[k][y-2][i][l]!=undef)
 						Ugdata[k][y-1][i][l]=-(hgtdata[k][y-1][i][l]-hgtdata[k][y-2][i][l])*
-						GRAVITY_ACCERLERATION/(dy*f1[y-1]);
+						gEarth/(dy*f1[y-1]);
 						
 					else Ugdata[k][y-1][i][l]=undef;
 				}
@@ -138,20 +138,20 @@ public final class GlobalVelocityFieldInSC extends VelocityFieldInSC{
 					for(int i=1;i<x-1;i++){
 						if(hgtdata[k][j][i+1][l]!=undef&&hgtdata[k][j][i-1][l]!=undef)
 							Vgdata[k][j][i][l]=(hgtdata[k][j][i+1][l]-hgtdata[k][j][i-1][l])*
-							GRAVITY_ACCERLERATION/(dxs[j]*2*f1[j]);
+							gEarth/(dxs[j]*2*f1[j]);
 						
 						else Vgdata[k][j][i][l]=undef;
 					}
 					
 					if(hgtdata[k][j][1][l]!=undef&&hgtdata[k][j][x-1][l]!=undef)
 						Vgdata[k][j][0][l]=(hgtdata[k][j][1][l]-hgtdata[k][j][x-1][l])*
-						GRAVITY_ACCERLERATION/(dxs[j]*2*f1[j]);
+						gEarth/(dxs[j]*2*f1[j]);
 					
 					else Vgdata[k][j][0][l]=undef;
 					
 					if(hgtdata[k][j][0][l]!=undef&&hgtdata[k][j][x-2][l]!=undef)
 						Vgdata[k][j][x-1][l]=(hgtdata[k][j][0][l]-hgtdata[k][j][x-2][l])*
-						GRAVITY_ACCERLERATION/(dxs[j]*2*f1[j]);
+						gEarth/(dxs[j]*2*f1[j]);
 					
 					else Vgdata[k][j][x-1][l]=undef;
 				}

@@ -12,7 +12,7 @@ import miniufo.diagnosis.Variable;
 import miniufo.diagnosis.SphericalSpatialModel;
 import miniufo.mathsphysics.AssociatedLegendre;
 import miniufo.mathsphysics.FastFourier;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
+import static miniufo.diagnosis.SpatialModel.REarth;
 
 
 /**
@@ -338,7 +338,7 @@ public final class SphericalHarmonicExpansion extends GeoFluidApplication{
 				for(int m=0;m<=M;m++)
 				for(int n=m;n<=M;n++)
 				if(n!=0){	// skip n==0
-					float co=-n*(n+1)/EARTH_RADIUS/EARTH_RADIUS;
+					float co=-n*(n+1)/REarth/REarth;
 					float rr=rdata[l][k][n][m];
 					float ii=idata[l][k][n][m];
 					
@@ -381,7 +381,7 @@ public final class SphericalHarmonicExpansion extends GeoFluidApplication{
 				for(int m=0;m<=M;m++)
 				for(int n=m;n<=M;n++)
 				if(n!=0){	// skip n==0
-					float co=-n*(n+1)/EARTH_RADIUS/EARTH_RADIUS;
+					float co=-n*(n+1)/REarth/REarth;
 					float rr=rdata[k][n][m][l];
 					float ii=idata[k][n][m][l];
 					

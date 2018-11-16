@@ -9,10 +9,10 @@ package miniufo.application.basic;
 import miniufo.diagnosis.Variable;
 import miniufo.diagnosis.SphericalSpatialModel;
 import miniufo.application.EquationInSphericalCoordinate;
-import miniufo.application.advanced.EllipticEqSORSolver.DimCombination;
+import miniufo.application.advanced.EllipticEqSORSolver2D.DimCombination;
 import static java.lang.Math.abs;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
-import static miniufo.diagnosis.SpatialModel.GRAVITY_ACCERLERATION;
+import static miniufo.diagnosis.SpatialModel.REarth;
+import static miniufo.diagnosis.SpatialModel.gEarth;
 
 
 /**
@@ -82,9 +82,9 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 					for(int i=1,I=x-1;i<I;i++){
 						if(hgtdata[l][k][j+1][i]!=undef&&hgtdata[l][k][j-1][i]!=undef&&hgtdata[l][k][j][i]!=undef){
 							float uf=-(hgtdata[l][k][j+1][i]-hgtdata[l][k][j-1][i])
-									 *GRAVITY_ACCERLERATION/(dy*2*f1[ystart-1+j]);
+									 *gEarth/(dy*2*f1[ystart-1+j]);
 							float ub=-(hgtdata[l][k][j+1][i]+hgtdata[l][k][j-1][i]-2*hgtdata[l][k][j][i])
-									 *GRAVITY_ACCERLERATION/(dy*dy*Beta[ystart-1+j]);
+									 *gEarth/(dy*dy*Beta[ystart-1+j]);
 							
 							uf=Float.isInfinite(uf)?0:uf;
 							Ugdata[l][k][j][i]=uf*Wf+ub*Wb;
@@ -92,9 +92,9 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 						
 						if(hgtdata[l][k][j+1][i+1]!=undef&&hgtdata[l][k][j+1][i-1]!=undef&&hgtdata[l][k][j-1][i+1]!=undef&&hgtdata[l][k][j-1][i-1]!=undef){
 							float vf=(hgtdata[l][k][j][i+1]-hgtdata[l][k][j][i-1])
-									*GRAVITY_ACCERLERATION/(dxs[ystart-1+j]*2*f1[ystart-1+j]);
+									*gEarth/(dxs[ystart-1+j]*2*f1[ystart-1+j]);
 							float vb=((hgtdata[l][k][j+1][i+1]-hgtdata[l][k][j+1][i-1])-(hgtdata[l][k][j-1][i+1]-hgtdata[l][k][j-1][i-1]))
-									*GRAVITY_ACCERLERATION/(dxs[ystart-1+j]*2*dy*2*Beta[ystart-1+j]);
+									*gEarth/(dxs[ystart-1+j]*2*dy*2*Beta[ystart-1+j]);
 							
 							vf=Float.isInfinite(vf)?0:vf;
 							Vgdata[l][k][j][i]=vf*Wf+vb*Wb;
@@ -103,10 +103,10 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 					
 				}else for(int i=1,I=x-1;i<I;i++){ // outside equatorial band
 					if(hgtdata[l][k][j+1][i]!=undef&&hgtdata[l][k][j-1][i]!=undef)
-					Ugdata[l][k][j][i]=-(hgtdata[l][k][j+1][i]-hgtdata[l][k][j-1][i])*GRAVITY_ACCERLERATION/(dy*2*f1[ystart-1+j]);
+					Ugdata[l][k][j][i]=-(hgtdata[l][k][j+1][i]-hgtdata[l][k][j-1][i])*gEarth/(dy*2*f1[ystart-1+j]);
 					
 					if(hgtdata[l][k][j][i+1]!=undef&&hgtdata[l][k][j][i-1]!=undef)
-					Vgdata[l][k][j][i]=(hgtdata[l][k][j][i+1]-hgtdata[l][k][j][i-1])*GRAVITY_ACCERLERATION/(dxs[ystart-1+j]*2*f1[ystart-1+j]);
+					Vgdata[l][k][j][i]=(hgtdata[l][k][j][i+1]-hgtdata[l][k][j][i-1])*gEarth/(dxs[ystart-1+j]*2*f1[ystart-1+j]);
 				}
 			}
 			
@@ -124,9 +124,9 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 					for(int i=1,I=x-1;i<I;i++){
 						if(hgtdata[k][j+1][i][l]!=undef&&hgtdata[k][j-1][i][l]!=undef&&hgtdata[k][j][i][l]!=undef){
 							float uf=-(hgtdata[k][j+1][i][l]-hgtdata[k][j-1][i][l])
-									 *GRAVITY_ACCERLERATION/(dy*2*f1[ystart-1+j]);
+									 *gEarth/(dy*2*f1[ystart-1+j]);
 							float ub=-(hgtdata[k][j+1][i][l]+hgtdata[k][j-1][i][l]-2*hgtdata[k][j][i][l])
-									 *GRAVITY_ACCERLERATION/(dy*dy*Beta[ystart-1+j]);
+									 *gEarth/(dy*dy*Beta[ystart-1+j]);
 							
 							uf=Float.isInfinite(uf)?0:uf;
 							Ugdata[k][j][i][l]=uf*Wf+ub*Wb;
@@ -134,9 +134,9 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 						
 						if(hgtdata[k][j+1][i+1][l]!=undef&&hgtdata[k][j+1][i-1][l]!=undef&&hgtdata[k][j-1][i+1][l]!=undef&&hgtdata[k][j-1][i-1][l]!=undef){
 							float vf=(hgtdata[k][j][i+1][l]-hgtdata[k][j][i-1][l])
-									*GRAVITY_ACCERLERATION/(dxs[ystart-1+j]*2*f1[ystart-1+j]);
+									*gEarth/(dxs[ystart-1+j]*2*f1[ystart-1+j]);
 							float vb=((hgtdata[k][j+1][i+1][l]-hgtdata[k][j+1][i-1][l])-(hgtdata[k][j-1][i+1][l]-hgtdata[k][j-1][i-1][l]))
-									*GRAVITY_ACCERLERATION/(dxs[ystart-1+j]*2*dy*2*Beta[ystart-1+j]);
+									*gEarth/(dxs[ystart-1+j]*2*dy*2*Beta[ystart-1+j]);
 							
 							vf=Float.isInfinite(vf)?0:vf;
 							Vgdata[k][j][i][l]=vf*Wf+vb*Wb;
@@ -145,10 +145,10 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 					
 				}else for(int i=1,I=x-1;i<I;i++){ // outside equatorial band
 					if(hgtdata[k][j+1][i][l]!=undef&&hgtdata[k][j-1][i][l]!=undef)
-					Ugdata[k][j][i][l]=-(hgtdata[k][j+1][i][l]-hgtdata[k][j-1][i][l])*GRAVITY_ACCERLERATION/(dy*2*f1[ystart-1+j]);
+					Ugdata[k][j][i][l]=-(hgtdata[k][j+1][i][l]-hgtdata[k][j-1][i][l])*gEarth/(dy*2*f1[ystart-1+j]);
 					
 					if(hgtdata[k][j][i+1][l]!=undef&&hgtdata[k][j][i-1][l]!=undef)
-					Vgdata[k][j][i][l]=(hgtdata[k][j][i+1][l]-hgtdata[k][j][i-1][l])*GRAVITY_ACCERLERATION/(dxs[ystart-1+j]*2*f1[ystart-1+j]);
+					Vgdata[k][j][i][l]=(hgtdata[k][j][i+1][l]-hgtdata[k][j][i-1][l])*gEarth/(dxs[ystart-1+j]*2*f1[ystart-1+j]);
 				}
 			}
 		}
@@ -446,7 +446,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 	
 	
 	/**
-     * Endrich's method for calculating rotational velocity.
+     * Endlich's method for calculating rotational velocity.
      *
      * @param	uu	zonal velocity (m s^-1)
      * @param	vv	meridional velocity (m s^-1)
@@ -493,7 +493,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 					vordata[j-1][i-1]=
 						(vvdata[l][k][j][i+1]-vvdata[l][k][j][i-1])/(dxs[ystart-1+j]*2)-
 						(uudata[l][k][j+1][i]-uudata[l][k][j-1][i])/(dy*2)+
-						(uudata[l][k][j][i]/EARTH_RADIUS)*ltan[ystart-1+j];
+						(uudata[l][k][j][i]/REarth)*ltan[ystart-1+j];
 					
 					else vordata[j-1][i-1]=undef;
 				}
@@ -507,7 +507,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 							float tmpdiv=
 							(udata[l][k][j][i+1]-udata[l][k][j][i-1])/(dxs[ystart-1+j]*2)+
 							(vdata[l][k][j+1][i]-vdata[l][k][j-1][i])/(dy*2)-
-							(vdata[l][k][j][i]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(vdata[l][k][j][i]/REarth)*ltan[ystart-1+j];
 							
 							// calculate the correct value according to the divergence
 							// multiplied by lcos to ensure the convergence of iteration
@@ -524,7 +524,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 							float tmpvor=
 							(vdata[l][k][j][i+1]-vdata[l][k][j][i-1])/(dxs[ystart-1+j]*2)-
 							(udata[l][k][j+1][i]-udata[l][k][j-1][i])/(dy*2)+
-							(udata[l][k][j][i]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(udata[l][k][j][i]/REarth)*ltan[ystart-1+j];
 							
 							// calculate the correct value according to the new vorticity
 							// multiplied by lcos to ensure the convergence of iteration
@@ -541,7 +541,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 							tmpdiv=
 							(udata[l][k][j][i+1]-udata[l][k][j][i-1])/(dxs[ystart-1+j]*2)+
 							(vdata[l][k][j+1][i]-vdata[l][k][j-1][i])/(dy*2)-
-							(vdata[l][k][j][i]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(vdata[l][k][j][i]/REarth)*ltan[ystart-1+j];
 							
 							float tmp=abs(tmpdiv);
 							if(tmp>tmpmax) tmpmax=tmp;
@@ -597,7 +597,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 					vordata[j-1][i-1]=
 						(vvdata[k][j][i+1][l]-vvdata[k][j][i-1][l])/(dxs[ystart-1+j]*2)-
 						(uudata[k][j+1][i][l]-uudata[k][j-1][i][l])/(dy*2)+
-						(uudata[k][j][i][l]/EARTH_RADIUS)*ltan[ystart-1+j];
+						(uudata[k][j][i][l]/REarth)*ltan[ystart-1+j];
 					
 					else vordata[j-1][i-1]=undef;
 				}
@@ -611,7 +611,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 							float tmpdiv=
 							(udata[k][j][i+1][l]-udata[k][j][i-1][l])/(dxs[ystart-1+j]*2)+
 							(vdata[k][j+1][i][l]-vdata[k][j-1][i][l])/(dy*2)-
-							(vdata[k][j][i][l]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(vdata[k][j][i][l]/REarth)*ltan[ystart-1+j];
 							
 							// calculate the correct value according to the divergence
 							// multiplied by lcos to ensure the convergence of iteration
@@ -628,7 +628,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 							float tmpvor=
 							(vdata[k][j][i+1][l]-vdata[k][j][i-1][l])/(dxs[ystart-1+j]*2)-
 							(udata[k][j+1][i][l]-udata[k][j-1][i][l])/(dy*2)+
-							(udata[k][j][i][l]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(udata[k][j][i][l]/REarth)*ltan[ystart-1+j];
 							
 							// calculate the correct value according to the new vorticity
 							// multiplied by lcos to ensure the convergence of iteration
@@ -645,7 +645,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 							tmpdiv=
 							(udata[k][j][i+1][l]-udata[k][j][i-1][l])/(dxs[ystart-1+j]*2)+
 							(vdata[k][j+1][i][l]-vdata[k][j-1][i][l])/(dy*2)-
-							(vdata[k][j][i][l]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(vdata[k][j][i][l]/REarth)*ltan[ystart-1+j];
 							
 							float tmp=abs(tmpdiv);
 							if(tmp>tmpmax) tmpmax=tmp;
@@ -735,7 +735,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 							float tmpdiv=
 							(udata[l][k][j][i+1]-udata[l][k][j][i-1])/(dxs[ystart-1+j]*2)+
 							(vdata[l][k][j+1][i]-vdata[l][k][j-1][i])/(dy*2)-
-							(vdata[l][k][j][i]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(vdata[l][k][j][i]/REarth)*ltan[ystart-1+j];
 							
 							// calculate the correct value according to the divergence
 							float tmpu=-dxs[ystart-1+j]*tmpdiv/2;
@@ -751,7 +751,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 							float tmpvor=
 							(vdata[l][k][j][i+1]-vdata[l][k][j][i-1])/(dxs[ystart-1+j]*2)-
 							(udata[l][k][j+1][i]-udata[l][k][j-1][i])/(dy*2)+
-							(udata[l][k][j][i]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(udata[l][k][j][i]/REarth)*ltan[ystart-1+j];
 							
 							// calculate the correct value according to the new vorticity
 							tmpu=dy*(tmpvor-vordata[l][k][j][i])/2;
@@ -767,7 +767,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 							tmpdiv=
 							(udata[l][k][j][i+1]-udata[l][k][j][i-1])/(dxs[ystart-1+j]*2)+
 							(vdata[l][k][j+1][i]-vdata[l][k][j-1][i])/(dy*2)-
-							(vdata[l][k][j][i]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(vdata[l][k][j][i]/REarth)*ltan[ystart-1+j];
 							
 							float tmp=abs(tmpdiv);
 							if(tmp>tmpmax) tmpmax=tmp;
@@ -825,7 +825,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 							float tmpdiv=
 							(udata[k][j][i+1][l]-udata[k][j][i-1][l])/(dxs[ystart-1+j]*2)+
 							(vdata[k][j+1][i][l]-vdata[k][j-1][i][l])/(dy*2)-
-							(vdata[k][j][i][l]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(vdata[k][j][i][l]/REarth)*ltan[ystart-1+j];
 							
 							// calculate the correct value according to the divergence
 							float tmpu=-dxs[ystart-1+j]*tmpdiv/2;
@@ -841,7 +841,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 							float tmpvor=
 							(vdata[k][j][i+1][l]-vdata[k][j][i-1][l])/(dxs[ystart-1+j]*2)-
 							(udata[k][j+1][i][l]-udata[k][j-1][i][l])/(dy*2)+
-							(udata[k][j][i][l]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(udata[k][j][i][l]/REarth)*ltan[ystart-1+j];
 							
 							// calculate the correct value according to the new vorticity
 							tmpu=dy*(tmpvor-vordata[l][k][j][i])/2;
@@ -857,7 +857,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 							tmpdiv=
 							(udata[k][j][i+1][l]-udata[k][j][i-1][l])/(dxs[ystart-1+j]*2)+
 							(vdata[k][j+1][i][l]-vdata[k][j-1][i][l])/(dy*2)-
-							(vdata[k][j][i][l]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(vdata[k][j][i][l]/REarth)*ltan[ystart-1+j];
 							
 							float tmp=abs(tmpdiv);
 							if(tmp>tmpmax) tmpmax=tmp;
@@ -899,7 +899,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 	}
 	
 	/**
-     * Endrich's method for calculating divergent velocity.
+     * Endlich's method for calculating divergent velocity.
      * 
      * @param	u	original u-velocity (m s^-1)
      * @param	v	original v-velocity (m s^-1)
@@ -931,7 +931,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 						divdata[j-1][i-1]=
 							(uudata[l][k][j][i+1]-uudata[l][k][j][i-1])/(dxs[ystart-1+j]*2)+
 							(vvdata[l][k][j+1][i]-vvdata[l][k][j-1][i])/(dy*2)-
-							(vvdata[l][k][j][i]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(vvdata[l][k][j][i]/REarth)*ltan[ystart-1+j];
 						
 					else divdata[j-1][i-1]=undef;
 				}
@@ -947,7 +947,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 							float tmpvor=
 							(vdata[l][k][j][i+1]-vdata[l][k][j][i-1])/(dxs[ystart-1+j]*2)-
 							(udata[l][k][j+1][i]-udata[l][k][j-1][i])/(dy*2)+
-							(udata[l][k][j][i]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(udata[l][k][j][i]/REarth)*ltan[ystart-1+j];
 							
 							// calculate the correct value according to the new vorticity
 							// multiplied by lcos to ensure the convergence of iteration
@@ -964,7 +964,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 							float tmpdiv=
 							(udata[l][k][j][i+1]-udata[l][k][j][i-1])/(dxs[ystart-1+j]*2)+
 							(vdata[l][k][j+1][i]-vdata[l][k][j-1][i])/(dy*2)-
-							(vdata[l][k][j][i]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(vdata[l][k][j][i]/REarth)*ltan[ystart-1+j];
 							
 							// calculate the correct value according to the divergence
 							// multiplied by lcos to ensure the convergence of iteration
@@ -981,7 +981,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 							tmpvor=
 							(vdata[l][k][j][i+1]-vdata[l][k][j][i-1])/(dxs[ystart-1+j]*2)-
 							(udata[l][k][j+1][i]-udata[l][k][j-1][i])/(dy*2)+
-							(udata[l][k][j][i]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(udata[l][k][j][i]/REarth)*ltan[ystart-1+j];
 							
 							float tmp=abs(tmpvor);
 							if(tmp>tmpmax) tmpmax=tmp;
@@ -1026,7 +1026,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 						divdata[j-1][i-1]=
 							(uudata[k][j][i+1][l]-uudata[k][j][i-1][l])/(dxs[ystart-1+j]*2)+
 							(vvdata[k][j+1][i][l]-vvdata[k][j-1][i][l])/(dy*2)-
-							(vvdata[k][j][i][l]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(vvdata[k][j][i][l]/REarth)*ltan[ystart-1+j];
 						
 					else divdata[j-1][i-1]=undef;
 				}
@@ -1042,7 +1042,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 							float tmpvor=
 							(vdata[k][j][i+1][l]-vdata[k][j][i-1][l])/(dxs[ystart-1+j]*2)-
 							(udata[k][j+1][i][l]-udata[k][j-1][i][l])/(dy*2)+
-							(udata[k][j][i][l]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(udata[k][j][i][l]/REarth)*ltan[ystart-1+j];
 							
 							// calculate the correct value according to the new vorticity
 							// multiplied by lcos to ensure the convergence of iteration
@@ -1059,7 +1059,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 							float tmpdiv=
 							(udata[k][j][i+1][l]-udata[k][j][i-1][l])/(dxs[ystart-1+j]*2)+
 							(vdata[k][j+1][i][l]-vdata[k][j-1][i][l])/(dy*2)-
-							(vdata[k][j][i][l]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(vdata[k][j][i][l]/REarth)*ltan[ystart-1+j];
 							
 							// calculate the correct value according to the divergence
 							// multiplied by lcos to ensure the convergence of iteration
@@ -1077,7 +1077,7 @@ public class VelocityFieldInSC extends EquationInSphericalCoordinate{
 							tmpdiv=
 							(udata[k][j][i+1][l]-udata[k][j][i-1][l])/(dxs[ystart-1+j]*2)+
 							(vdata[k][j+1][i][l]-vdata[k][j-1][i][l])/(dy*2)-
-							(vdata[k][j][i][l]/EARTH_RADIUS)*ltan[ystart-1+j];
+							(vdata[k][j][i][l]/REarth)*ltan[ystart-1+j];
 							
 							float tmp=abs(tmpdiv);
 							if(tmp>tmpmax) tmpmax=tmp;

@@ -7,7 +7,7 @@
 package miniufo.application.contour;
 
 import miniufo.diagnosis.Variable;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
+import static miniufo.diagnosis.SpatialModel.REarth;
 
 
 /**
@@ -46,10 +46,10 @@ public final class KeffInSC extends Keffective{
 			for(int k=0;k<z;k++){
 				float[] ldata=Lmin2.getData()[l][k][0];
 				
-				double[] Ys=cntrs[k][l].getEquivalentYs();
+				double[] Ys=cntrs[k][l].getMappedEquivalentYs();
 				
 				for(int c=0;c<C;c++){
-					double tmp=Math.toRadians(dlon)*EARTH_RADIUS*Math.cos(Math.toRadians(Ys[c]));
+					double tmp=Math.toRadians(dlon)*REarth*Math.cos(Math.toRadians(Ys[c]));
 					ldata[c]=(float)(tmp*tmp);
 				}
 			}
@@ -59,10 +59,10 @@ public final class KeffInSC extends Keffective{
 			for(int k=0;k<z;k++){
 				float[][] ldata=Lmin2.getData()[k][0];
 				
-				double[] Ys=cntrs[k][l].getEquivalentYs();
+				double[] Ys=cntrs[k][l].getMappedEquivalentYs();
 				
 				for(int c=0;c<C;c++){
-					double tmp=Math.toRadians(dlon)*EARTH_RADIUS*Math.cos(Math.toRadians(Ys[c]));
+					double tmp=Math.toRadians(dlon)*REarth*Math.cos(Math.toRadians(Ys[c]));
 					ldata[c][l]=(float)(tmp*tmp);
 				}
 			}
@@ -73,7 +73,7 @@ public final class KeffInSC extends Keffective{
 	
 	
 	/*** helper methods ***/
-	protected double ydefTransform(double ydef){ return Math.toRadians(ydef)*EARTH_RADIUS;}
+	protected double ydefTransform(double ydef){ return Math.toRadians(ydef)*REarth;}
 	
 	
 	/*** test **

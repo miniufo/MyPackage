@@ -53,11 +53,11 @@ public final class GDPDrifter extends Particle{
 		float[] ad=null;
 		
 		r=records.get(0);
-		ad=r.getDataValues();
+		ad=r.getData();
 		if(ad[0]==undef||ad[1]==undef) removes.add(r);
 		
 		r=records.get(records.size()-1);
-		ad=r.getDataValues();
+		ad=r.getData();
 		if(ad[0]==undef||ad[1]==undef) removes.add(r);
 		
 		records.removeAll(removes);
@@ -71,7 +71,7 @@ public final class GDPDrifter extends Particle{
 	 */
 	public boolean hasUndefRecords(AttachedMeta meta){
 		for(Record r:records)
-		if(r.getDataValue(meta)==undef) return true;
+		if(r.getData(meta)==undef) return true;
 		
 		return false;
 	}
@@ -81,8 +81,8 @@ public final class GDPDrifter extends Particle{
 	 */
 	public boolean hasLargeVelocityRecords(float thre){
 		for(Record r:records){
-			float u=r.getDataValue(UVEL);
-			float v=r.getDataValue(VVEL);
+			float u=r.getData(UVEL);
+			float v=r.getData(VVEL);
 			
 			if((u!=undef&&Math.abs(u)>thre)||(v!=undef&&Math.abs(v)>thre)) return true;
 		}
@@ -148,15 +148,15 @@ public final class GDPDrifter extends Particle{
 		List<int[]> ls=new ArrayList<int[]>(10);
 		
 		Record r=records.get(0);
-		if(r.getDataValue(UVEL)!=undef&&r.getDataValue(VVEL)!=undef){
+		if(r.getData(UVEL)!=undef&&r.getData(VVEL)!=undef){
 			hasStr=true; str=0;
 		}
 		
 		for(int l=1,L=getTCount();l<L;l++){
 			r=records.get(l);
-			boolean currDef=r.getDataValue(UVEL)!=undef&&r.getDataValue(VVEL)!=undef;
+			boolean currDef=r.getData(UVEL)!=undef&&r.getData(VVEL)!=undef;
 			r=records.get(l-1);
-			boolean prevDef=r.getDataValue(UVEL)!=undef&&r.getDataValue(VVEL)!=undef;
+			boolean prevDef=r.getData(UVEL)!=undef&&r.getData(VVEL)!=undef;
 			
 			if(prevDef&&!currDef&&hasStr){
 				hasEnd=true; end=l-1;
@@ -188,7 +188,7 @@ public final class GDPDrifter extends Particle{
 		int dc=0,uc=0;
 		
 		for(int l=0,L=records.size();l<L;l++){
-			float drogueState=records.get(l).getDataValue(meta);
+			float drogueState=records.get(l).getData(meta);
 			
 			if(drogueState==1) dc++;
 			else if(drogueState==-1) uc++;

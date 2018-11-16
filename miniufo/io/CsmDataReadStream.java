@@ -131,17 +131,21 @@ public final class CsmDataReadStream implements DataRead,Print{
 			trange[0]=trange[1]=ctl.getTNum(cd.getTDef().getSamples()[vtstart-1+l])+1;
 			
 			/*** set x-y range ***/
-			xrange[0]=ctl.getXLENum(ArrayUtil.getMin(cd.getLon()[vtstart-1+l][y-1]))-1;
-			yrange[0]=ctl.getYLENum(ArrayUtil.getMin(cd.getLat()[vtstart-1+l][y-1]))-1;
+			xrange[0]=ctl.getXLENum(ArrayUtil.getMin(cd.getLon()[vtstart-1+l][y-1]));
+			yrange[0]=ctl.getYLENum(ArrayUtil.getMin(cd.getLat()[vtstart-1+l][y-1]));
 			
 			xrange[1]=xrange[2]+xrange[0]-1;
 			yrange[1]=yrange[2]+yrange[0]-1;
 			
-			if(!ctl.isPeriodicX()&&(xrange[0]<0||xrange[1]>ctl.getXCount()))
-				throw new IllegalArgumentException("csm is beyond ctl xrange, olon = "+cd.getOLon()[l]);
+			if(!ctl.isPeriodicX()&&(xrange[0]<1||xrange[1]>ctl.getXCount())) throw new IllegalArgumentException(
+				"csm is beyond ctl xrange, olon = "+cd.getOLon()[l]+" at t="+l+" lon within ["+
+				ArrayUtil.getMin(cd.getLon()[vtstart-1+l][y-1])+", "+ArrayUtil.getMax(cd.getLon()[vtstart-1+l][y-1])+"]"
+			);
 			
-			if(!ctl.isPeriodicY()&&(yrange[0]<0||yrange[1]>ctl.getYCount()))
-				throw new IllegalArgumentException("csm is beyond ctl yrange, olat = "+cd.getOLat()[l]);
+			if(!ctl.isPeriodicY()&&(yrange[0]<1||yrange[1]>ctl.getYCount())) throw new IllegalArgumentException(
+				"csm is beyond ctl yrange, olat = "+cd.getOLat()[l]+" at t="+l+" lat within ["+
+				ArrayUtil.getMin(cd.getLat()[vtstart-1+l][y-1])+", "+ArrayUtil.getMax(cd.getLat()[vtstart-1+l][y-1])+"]"
+			);
 			
 			for(int k=0;k<z;k++){
 				/*** set zrange ***/
@@ -340,7 +344,7 @@ public final class CsmDataReadStream implements DataRead,Print{
 		float[][] lats=cd.getLat()[maxLatT];
 		
 		int ymax=ctl.getYNum  (ArrayUtil.getMax(lats));
-		int ymin=ctl.getYLENum(ArrayUtil.getMin(lats));
+		int ymin=ctl.getYLENum(ArrayUtil.getMin(cd.getLat()));
 		int xmax=ctl.getXNum  (ArrayUtil.getMax(lons));
 		int xmin=ctl.getXLENum(ArrayUtil.getMin(lons));
 		
@@ -349,7 +353,7 @@ public final class CsmDataReadStream implements DataRead,Print{
 		if(xmax==-1) throw new IllegalArgumentException(ArrayUtil.getMax(lons)+" out of X-range ["+ctl.getXDef().getFirst()+","+ctl.getXDef().getLast()+"]");
 		if(xmin==-1) throw new IllegalArgumentException(ArrayUtil.getMin(lons)+" out of X-range ["+ctl.getXDef().getFirst()+","+ctl.getXDef().getLast()+"]");
 		
-		Range brange=new Range(1,1,ymax-ymin+6,xmax-xmin+6);
+		Range brange=new Range(1,1,ymax-ymin+4,xmax-xmin+4);
 		
 		buf=new Variable(vname,true,brange);
 	}

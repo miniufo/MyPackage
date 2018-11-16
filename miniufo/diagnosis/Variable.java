@@ -6,9 +6,11 @@
  */
 package miniufo.diagnosis;
 
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import miniufo.basic.Operatable;
+import miniufo.basic.Indexing;
 import miniufo.basic.InterpolationModel;
 import miniufo.basic.InterpolationModel.Type;
 
@@ -1160,6 +1162,157 @@ public final class Variable implements Operatable<Variable>{
 	
 	
 	/**
+     * Extract a specific portion of data from the Variable using Indexing.
+     *
+     * @param	index	a given index e.g. "1,2,0,:" indicate data[1][2][0][:]
+     * 					are all extract into a 1D data.
+     */
+	public float[] extract1D(String index){
+		String[] tokens=Indexing.comma.split(Indexing.space.matcher(index).replaceAll(""));
+		
+		if(tokens.length!=4) throw new IllegalArgumentException("index ("+index+") should contain three commas");
+		
+		int[] idx1=Indexing.getIndices(data[0][0][0].length,tokens[3]);
+		int[] idx2=Indexing.getIndices(data[0][0].length,tokens[2]);
+		int[] idx3=Indexing.getIndices(data[0].length,tokens[1]);
+		int[] idx4=Indexing.getIndices(data.length,tokens[0]);
+		
+		boolean dim1=false;
+		boolean dim2=false;
+		boolean dim3=false;
+		boolean dim4=false;
+		
+		int cc=0;
+		if(idx1.length==1){ dim1=true; cc++;}
+		if(idx2.length==1){ dim2=true; cc++;}
+		if(idx3.length==1){ dim3=true; cc++;}
+		if(idx4.length==1){ dim4=true; cc++;}
+		
+		if(cc!=3) throw new IllegalArgumentException("three dimensions are required to have only one index");
+		
+		if(!dim1){
+			float[] re=new float[idx1.length];
+			
+			for(int i=0,I=idx1.length;i<I;i++) re[i]=data[idx4[0]][idx3[0]][idx2[0]][idx1[i]];
+			
+			return re;
+		}
+		
+		if(!dim2){
+			float[] re=new float[idx2.length];
+			
+			for(int i=0,I=idx2.length;i<I;i++) re[i]=data[idx4[0]][idx3[0]][idx2[i]][idx1[0]];
+			
+			return re;
+		}
+		
+		if(!dim3){
+			float[] re=new float[idx3.length];
+			
+			for(int i=0,I=idx3.length;i<I;i++) re[i]=data[idx4[0]][idx3[i]][idx2[0]][idx1[0]];
+			
+			return re;
+		}
+		
+		if(!dim4){
+			float[] re=new float[idx4.length];
+			
+			for(int i=0,I=idx4.length;i<I;i++) re[i]=data[idx4[i]][idx3[0]][idx2[0]][idx1[0]];
+			
+			return re;
+		}
+		
+		throw new IllegalArgumentException("this should not happen");
+	}
+	
+	/**
+     * Extract a specific portion of data from the Variable using Indexing.
+     *
+     * @param	index	a given index e.g. "1,2,1:end,:" indicate data[1][2][:][:]
+     * 					are all extract into a 2D data.
+     */
+	public float[][] extract2D(String index){
+		String[] tokens=Indexing.comma.split(Indexing.space.matcher(index).replaceAll(""));
+		
+		if(tokens.length!=4) throw new IllegalArgumentException("index ("+index+") should contain three commas");
+		
+		int[] idx1=Indexing.getIndices(data[0][0][0].length,tokens[3]);
+		int[] idx2=Indexing.getIndices(data[0][0].length,tokens[2]);
+		int[] idx3=Indexing.getIndices(data[0].length,tokens[1]);
+		int[] idx4=Indexing.getIndices(data.length,tokens[0]);
+		
+		boolean dim1=false;
+		boolean dim2=false;
+		boolean dim3=false;
+		boolean dim4=false;
+		
+		int cc=0;
+		if(idx1.length==1){ dim1=true; cc++;}
+		if(idx2.length==1){ dim2=true; cc++;}
+		if(idx3.length==1){ dim3=true; cc++;}
+		if(idx4.length==1){ dim4=true; cc++;}
+		
+		if(cc!=2) throw new IllegalArgumentException("two dimensions are required to have only one index");
+		
+		if(!dim1&&!dim2){
+			float[][] re=new float[idx2.length][idx1.length];
+			
+			for(int j=0,J=idx2.length;j<J;j++)
+			for(int i=0,I=idx1.length;i<I;i++) re[j][i]=data[idx4[0]][idx3[0]][idx2[j]][idx1[i]];
+			
+			return re;
+		}
+		
+		if(!dim1&&!dim3){
+			float[][] re=new float[idx3.length][idx1.length];
+			
+			for(int j=0,J=idx3.length;j<J;j++)
+			for(int i=0,I=idx1.length;i<I;i++) re[j][i]=data[idx4[0]][idx3[j]][idx2[0]][idx1[i]];
+			
+			return re;
+		}
+		
+		if(!dim1&&!dim4){
+			float[][] re=new float[idx4.length][idx1.length];
+			
+			for(int j=0,J=idx4.length;j<J;j++)
+			for(int i=0,I=idx1.length;i<I;i++) re[j][i]=data[idx4[j]][idx3[0]][idx2[0]][idx1[i]];
+			
+			return re;
+		}
+		
+		if(!dim2&&!dim3){
+			float[][] re=new float[idx3.length][idx2.length];
+			
+			for(int j=0,J=idx3.length;j<J;j++)
+			for(int i=0,I=idx2.length;i<I;i++) re[j][i]=data[idx4[0]][idx3[j]][idx2[i]][idx1[0]];
+			
+			return re;
+		}
+		
+		if(!dim2&&!dim4){
+			float[][] re=new float[idx4.length][idx2.length];
+			
+			for(int j=0,J=idx4.length;j<J;j++)
+			for(int i=0,I=idx2.length;i<I;i++) re[j][i]=data[idx4[j]][idx3[0]][idx2[i]][idx1[0]];
+			
+			return re;
+		}
+		
+		if(!dim3&&!dim4){
+			float[][] re=new float[idx4.length][idx3.length];
+			
+			for(int j=0,J=idx4.length;j<J;j++)
+			for(int i=0,I=idx3.length;i<I;i++) re[j][i]=data[idx4[j]][idx3[i]][idx2[0]][idx1[0]];
+			
+			return re;
+		}
+		
+		throw new IllegalArgumentException("this should not happen");
+	}
+	
+	
+	/**
      * set the data to a given value
      */
 	public Variable setInner(float v){
@@ -2078,19 +2231,22 @@ public final class Variable implements Operatable<Variable>{
 	}
 	
 	
-	/** test
+	/** test*/
 	public static void main(String[] args){
-		Matcher m=unitPtn.matcher("[(sv)'M'] (kg m K^-1 s^-2)");
+		Variable v=new Variable("v",new Range(2,3,4,5));
 		
-		if(m.find()){
-			String unitInBracket=m.group();
-			System.out.println("1 "+unitInBracket);
-			
-		};
+		float[][][][] vdata=v.getData();
 		
-		if(m.find()){
-			String unitInBracket=m.group();
-			System.out.println("2 "+unitInBracket);
+		for(int l=0,ii=0;l<v.getTCount();l++)
+		for(int k=0;k<v.getZCount();k++)
+		for(int j=0;j<v.getYCount();j++)
+		for(int i=0;i<v.getXCount();i++){
+			vdata[l][k][j][i]=ii++;
 		}
-	}*/
+		
+		float[][] re=v.extract2D("0,0,:,0:1:end-1");
+		
+		for(float[] r:re)
+		System.out.println(Arrays.toString(r));
+	}
 }

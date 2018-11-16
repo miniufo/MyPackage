@@ -16,6 +16,12 @@ package miniufo.basic;
  */
 public interface Operatable<T> extends BasicOperatable<T>{
 	//
+	public T hypotenuse(T o);
+	public T hypotenuseEq(T o);
+	
+	public T logarithm();
+	public T logarithmEq();
+	
 	public T pow(float f);
 	public T pow(T o);
 	

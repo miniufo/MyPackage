@@ -136,10 +136,10 @@ public final class SphericalSpatialModel extends SpatialModel{
 			lsin[j]=(float)sin(tmp);
 			lcos[j]=(float)cos(tmp);
 			ltan[j]=(float)tan(tmp);
-			rcos[j]=EARTH_RADIUS*lcos[j];
-			  f1[j]=2*EARTH_ROTATE_SPEED*lsin[j];
-			  f2[j]=2*EARTH_ROTATE_SPEED*lcos[j];
-			Beta[j]=f2[j]/EARTH_RADIUS;
+			rcos[j]=REarth*lcos[j];
+			  f1[j]=2*omegaEarth*lsin[j];
+			  f2[j]=2*omegaEarth*lcos[j];
+			Beta[j]=f2[j]/REarth;
 		}
 		
 		if(levType==LevelType.PRESSURE) dz=dd.getDZDef()[0]*100;	// change to Pa
@@ -148,25 +148,25 @@ public final class SphericalSpatialModel extends SpatialModel{
 		dt=dd.getDTDef()[0];
 		
 		if(!ydef.isLinear()&&ycount!=1)
-			dy=EARTH_RADIUS*ydef.getRange()/(ycount-1);
+			dy=REarth*ydef.getRange()/(ycount-1);
 		else
-			dy=EARTH_RADIUS*(float)(dd.getDYDef()[0]*Math.PI/180);
+			dy=REarth*(float)(dd.getDYDef()[0]*Math.PI/180);
 		
 		if(!xdef.isLinear()&&xcount!=1)
-			dx=EARTH_RADIUS*xdef.getRange()/(xcount-1);
+			dx=REarth*xdef.getRange()/(xcount-1);
 		else
-			dx=EARTH_RADIUS*(float)(dd.getDXDef()[0]*Math.PI/180);
+			dx=REarth*(float)(dd.getDXDef()[0]*Math.PI/180);
 		
 		/*** x-direction ***/
 		for(int i=0;i<xcount;i++) xdef.getSamples()[i]*=Math.PI/180;
 		if(!xdef.isLinear()&&xcount!=1){
 			for(int j=0;j<ycount;j++){
-				dxs[j]=EARTH_RADIUS*lcos[j]*xdef.getRange()/(xcount-1);
+				dxs[j]=REarth*lcos[j]*xdef.getRange()/(xcount-1);
 				dxs[j]=dxs[j]<0?0:dxs[j];
 			}
 			
 		}else for(int j=0;j<ycount;j++){
-			dxs[j]=EARTH_RADIUS*lcos[j]*(float)(dd.getDXDef()[0]*Math.PI/180);
+			dxs[j]=REarth*lcos[j]*(float)(dd.getDXDef()[0]*Math.PI/180);
 			dxs[j]=dxs[j]<0?0:dxs[j];
 		}
 		

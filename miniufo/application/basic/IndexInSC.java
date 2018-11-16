@@ -115,6 +115,8 @@ public final class IndexInSC extends EquationInSphericalCoordinate{
      * @param	yinc		increment in radial direction (degree)
      * @param	ycount		ring count in cylindrical coordinates
      * @param	xcount		grid count in each ring
+     * @param	str			start radial index (from 0)
+     * @param	end			end   radial index (from 0)
      * @param	idxNames	index names: REFC, PEFC, AEFC, EAMA, FFCT, FFBS, ISB, ETA, ULFI
      *
      * @return	2-dimensional horizontal indices
@@ -148,6 +150,8 @@ public final class IndexInSC extends EquationInSphericalCoordinate{
      * @param	yinc		increment in radial direction (degree)
      * @param	ycount		ring count in cylindrical coordinates
      * @param	xcount		grid count in each ring
+     * @param	str			start radial index (from 0)
+     * @param	end			end   radial index (from 0)
      * @param	idxNames	index names: REFC, PEFC, AEFC, EAMA, FFCT, FFBS, ISB, ETA, ULFI
      *
      * @return	2-dimensional horizontal indices
@@ -170,6 +174,8 @@ public final class IndexInSC extends EquationInSphericalCoordinate{
      * @param	yinc		increment in radial direction (degree)
      * @param	ycount		ring count in cylindrical coordinates
      * @param	xcount		grid count in each ring
+     * @param	str			start radial index (from 0)
+     * @param	end			end   radial index (from 0)
      * @param	idxNames	index names: REFC, PEFC, AEFC, EAMA, FFCT, FFBS, ISB, ETA, ULFI
      *
      * @return	2-dimensional horizontal indices
@@ -308,6 +314,8 @@ public final class IndexInSC extends EquationInSphericalCoordinate{
      * @param	u			gridded zonal wind
      * @param	v			gridded meridional wind
      * @param	T			gridded temperature
+     * @param	str			start radial index (from 0)
+     * @param	end			end   radial index (from 0)
      * @param	idxNames	index names: REFC, PEFC, AEFC, EAMA, FFCT, FFBS, ISB, ETA, ULFI
      *
      * @return	radial-band averaged diagnostics
@@ -321,10 +329,12 @@ public final class IndexInSC extends EquationInSphericalCoordinate{
 		ThermoDynamicMethodsInCC tdm=new ThermoDynamicMethodsInCC(csm);
 		
 		Variable[] re=ct.reprojectToCylindrical(ct.transToCylindrical(u),ct.transToCylindrical(v));
+		
 		Variable Vr=re[1].copy();	// full radial velocity, not storm-relative
 		Variable Tc=T==null?null:ct.transToCylindrical(T);
 		
 		dm.cStormRelativeAziRadVelocity(csm.getUWhole(),csm.getVWhole(),re[0],re[1]);
+		
 		Variable utm=re[0].anomalizeX();
 		Variable uta=re[0]; re[1].anomalizeX();
 		Variable vra=re[1];

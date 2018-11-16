@@ -10,8 +10,8 @@ import miniufo.diagnosis.Variable;
 import miniufo.diagnosis.CartesianSpatialModel;
 import miniufo.application.EllipticEquationInterface;
 import miniufo.application.EquationInCartesianCoordinate;
-import miniufo.application.advanced.EllipticEqSORSolver;
-import miniufo.application.advanced.EllipticEqSORSolver.DimCombination;
+import miniufo.application.advanced.EllipticEqSORSolver2D;
+import miniufo.application.advanced.EllipticEqSORSolver2D.DimCombination;
 
 
 /**
@@ -90,7 +90,7 @@ public class PoissonEquationInCTS extends EquationInCartesianCoordinate implemen
 	 * @param	F	forcing on the r.h.s. of Poisson equation
 	 */
 	public Variable invertingBySOR(Variable F){
-		EllipticEqSORSolver ees=new EllipticEqSORSolver(sm);
+		EllipticEqSORSolver2D ees=new EllipticEqSORSolver2D(sm);
 		
 		Variable SS=new Variable("S",F);
 		

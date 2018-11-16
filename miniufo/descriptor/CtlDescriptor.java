@@ -38,8 +38,6 @@ public class CtlDescriptor extends DataDescriptor{
 	protected ByteOrder order    =ByteOrder.nativeOrder();
 	protected String storageType =null;
 	
-	protected enum IncreType{mn,hr,dy,mo,yr};
-	
 	
 	/**
      * constructor

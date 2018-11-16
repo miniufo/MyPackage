@@ -6,7 +6,7 @@
  */
 package miniufo.test.application.basic;
 
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
+import static miniufo.diagnosis.SpatialModel.REarth;
 import miniufo.application.EquationInSphericalCoordinate;
 import miniufo.descriptor.DataDescriptor;
 import miniufo.diagnosis.DiagnosisFactory;
@@ -198,13 +198,13 @@ public final class GlobalLinearHeatInducedModel extends EquationInSphericalCoord
 						-Hdata[j][i]*(
 							(udata[tag2][j][i+1]-udata[tag2][j][i-1])/(dxs[j]+dxs[j])+
 							(vdata[tag2][j+1][i]-vdata[tag2][j-1][i])/(dy+dy)-
-							vdata[tag2][j][i]*ltan[j]/EARTH_RADIUS
+							vdata[tag2][j][i]*ltan[j]/REarth
 						)
 						/**/
 						-hdata[tag2][j][i]*(
 							(Udata[j][i+1]-Udata[j][i-1])/(dxs[j]+dxs[j])+
 							(Vdata[j+1][i]-Vdata[j-1][i])/(dy+dy)-
-							Vdata[j][i]*ltan[j]/EARTH_RADIUS
+							Vdata[j][i]*ltan[j]/REarth
 						)
 						-(
 							udata[tag2][j][i]*(Hdata[j][i+1]-Hdata[j][i-1])+
@@ -224,13 +224,13 @@ public final class GlobalLinearHeatInducedModel extends EquationInSphericalCoord
 					-Hdata[j][0]*(
 						(udata[tag2][j][1]-udata[tag2][j][x-1])/(dxs[j]+dxs[j])+
 						(vdata[tag2][j+1][0]-vdata[tag2][j-1][0])/(dy+dy)-
-						vdata[tag2][j][0]*ltan[j]/EARTH_RADIUS
+						vdata[tag2][j][0]*ltan[j]/REarth
 					)
 					/**/
 					-hdata[tag2][j][0]*(
 						(Udata[j][1]-Udata[j][x-1])/(dxs[j]+dxs[j])+
 						(Vdata[j+1][0]-Vdata[j-1][0])/(dy+dy)-
-						Vdata[j][0]*ltan[j]/EARTH_RADIUS
+						Vdata[j][0]*ltan[j]/REarth
 					)
 					-(
 						udata[tag2][j][0]*(Hdata[j][1]-Hdata[j][x-1])+
@@ -249,13 +249,13 @@ public final class GlobalLinearHeatInducedModel extends EquationInSphericalCoord
 					-Hdata[j][x-1]*(
 						(udata[tag2][j][0]-udata[tag2][j][x-2])/(dxs[j]+dxs[j])+
 						(vdata[tag2][j+1][x-1]-vdata[tag2][j-1][x-1])/(dy+dy)-
-						vdata[tag2][j][x-1]*ltan[j]/EARTH_RADIUS
+						vdata[tag2][j][x-1]*ltan[j]/REarth
 					)
 					/**/
 					-hdata[tag2][j][x-1]*(
 						(Udata[j][0]-Udata[j][x-2])/(dxs[j]+dxs[j])+
 						(Vdata[j+1][x-1]-Vdata[j-1][x-1])/(dy+dy)-
-						Vdata[j][x-1]*ltan[j]/EARTH_RADIUS
+						Vdata[j][x-1]*ltan[j]/REarth
 					)
 					-(
 						udata[tag2][j][x-1]*(Hdata[j][0]-Hdata[j][x-2])/+
@@ -281,7 +281,7 @@ public final class GlobalLinearHeatInducedModel extends EquationInSphericalCoord
 						-(Vdata[j][i]*(udata[tag2][j+1][i]-udata[tag2][j-1][i]))/(dy+dy)
 						+(
 							Udata[j][i]*vdata[tag2][j][i]+Vdata[j][i]*udata[tag2][j][i]
-						)*ltan[j]/EARTH_RADIUS
+						)*ltan[j]/REarth
 						-epsilon*udata[tag2][j][i]
 					);
 				}
@@ -295,7 +295,7 @@ public final class GlobalLinearHeatInducedModel extends EquationInSphericalCoord
 					-(Vdata[j][0]*(udata[tag2][j+1][0]-udata[tag2][j-1][0]))/(dy+dy)
 					+(
 						Udata[j][0]*vdata[tag2][j][0]+Vdata[j][0]*udata[tag2][j][0]
-					)*ltan[j]/EARTH_RADIUS
+					)*ltan[j]/REarth
 					-epsilon*udata[tag2][j][0]
 				);
 				
@@ -308,7 +308,7 @@ public final class GlobalLinearHeatInducedModel extends EquationInSphericalCoord
 					-(Vdata[j][x-1]*(udata[tag2][j+1][x-1]-udata[tag2][j-1][x-1]))/(dy+dy)
 					+(
 						Udata[j][x-1]*vdata[tag2][j][x-1]+Vdata[j][x-1]*udata[tag2][j][x-1]
-					)*ltan[j]/EARTH_RADIUS
+					)*ltan[j]/REarth
 					-epsilon*udata[tag2][j][x-1]
 				);
 			}
@@ -322,7 +322,7 @@ public final class GlobalLinearHeatInducedModel extends EquationInSphericalCoord
 						/**/
 						-(Udata[j][i]*(vdata[tag2][j][i+1]-vdata[tag2][j][i-1]))/(dxs[j]+dxs[j])
 						-(Vdata[j][i]*(vdata[tag2][j+1][i]-vdata[tag2][j-1][i]))/(dy+dy)
-						-Udata[j][i]*ltan[j]/EARTH_RADIUS*udata[tag2][j][i]*2
+						-Udata[j][i]*ltan[j]/REarth*udata[tag2][j][i]*2
 						-epsilon*vdata[tag2][j][i]
 					);
 				}
@@ -334,7 +334,7 @@ public final class GlobalLinearHeatInducedModel extends EquationInSphericalCoord
 					/**/
 					-(Udata[j][0]*(vdata[tag2][j][1]-vdata[tag2][j][x-1]))/(dxs[j]+dxs[j])
 					-(Vdata[j][0]*(vdata[tag2][j+1][0]-vdata[tag2][j-1][0]))/(dy+dy)
-					-Udata[j][0]*ltan[j]/EARTH_RADIUS*udata[tag2][j][0]*2
+					-Udata[j][0]*ltan[j]/REarth*udata[tag2][j][0]*2
 					-epsilon*vdata[tag2][j][0]
 				);
 				
@@ -345,7 +345,7 @@ public final class GlobalLinearHeatInducedModel extends EquationInSphericalCoord
 					/**/
 					-(Udata[j][x-1]*(vdata[tag2][j][0]-vdata[tag2][j][x-2]))/(dxs[j]+dxs[j])
 					-(Vdata[j][x-1]*(vdata[tag2][j+1][x-1]-vdata[tag2][j-1][x-1]))/(dy+dy)
-					-Udata[j][x-1]*ltan[j]/EARTH_RADIUS*udata[tag2][j][x-1]*2
+					-Udata[j][x-1]*ltan[j]/REarth*udata[tag2][j][x-1]*2
 					-epsilon*vdata[tag2][j][x-1]
 				);
 			}

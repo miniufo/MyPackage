@@ -45,15 +45,11 @@ public final class Record implements Serializable{
 	public Record(long time){
 		this.time=time;
 		
-		data=new float[2];
+		data=new float[]{undef,undef};
 	}
 	
 	public Record(long time,float xpos,float ypos){
-		this.time=time;
-		this.xpos=xpos;
-		this.ypos=ypos;
-		
-		data=new float[2];
+		this(time,xpos,ypos,2);
 	}
 	
 	public Record(long time,float xpos,float ypos,float uvel,float vvel){
@@ -67,7 +63,9 @@ public final class Record implements Serializable{
 	}
 	
 	public Record(long time,float xpos,float ypos,int dataLen){
-		this(time,xpos,ypos);
+		this.time=time;
+		this.xpos=xpos;
+		this.ypos=ypos;
 		
 		data=new float[dataLen];
 		
@@ -94,7 +92,7 @@ public final class Record implements Serializable{
 		if(r.xpos==undef||r.ypos==undef) return undef;
 		
 		if(llpos)	// in unit of degree (lat/lon grid)
-			return (float)(SpatialModel.EARTH_RADIUS*(xpos-r.xpos)*Math.PI/180.0*Math.cos((ypos+r.ypos)/2.0));
+			return (float)(SpatialModel.REarth*(xpos-r.xpos)*Math.PI/180.0*Math.cos((ypos+r.ypos)/2.0));
 		else		// in unit of meter (cartesian grid)
 			return Math.abs(xpos-r.xpos);
 	}
@@ -110,7 +108,7 @@ public final class Record implements Serializable{
 		if(r.xpos==undef||r.ypos==undef) return undef;
 		
 		if(llpos)	// in unit of degree (lat/lon grid)
-			return (float)(SpatialModel.EARTH_RADIUS*(ypos-r.ypos)*Math.PI/180.0);
+			return (float)(SpatialModel.REarth*(ypos-r.ypos)*Math.PI/180.0);
 		else		// in unit of meter (cartesian grid)
 			return Math.abs(ypos-r.ypos);
 	}
@@ -143,9 +141,9 @@ public final class Record implements Serializable{
 	
 	public float getYPos(){ return ypos;}
 	
-	public float getDataValue(AttachedMeta meta){ return data[meta.index];}
+	public float getData(AttachedMeta meta){ return data[meta.index];}
 	
-	public float[] getDataValues(){ return data;}
+	public float[] getData(){ return data;}
 	
 	public void setCycleNum(int cycleNum){ this.cycleNum=cycleNum;}
 	
@@ -233,7 +231,7 @@ public final class Record implements Serializable{
 	/*** helper methods ***/
 	private String toStringSimple(boolean llpos){
 		return String.format(
-			"%9.3f%10.3f%19s%10.3f%10.3f",
+			"%9.3f%10.3f%19s%20.8f%20.8f",
 			xpos/(llpos?1f:1000f),ypos/(llpos?1f:1000f),time,data[0],data[1]
 		);
 	}
@@ -248,7 +246,7 @@ public final class Record implements Serializable{
 		os[2]=time;
 		
 		for(int i=0;i<data.length;i++){
-			format.append("%10.3f");
+			format.append("%20.8f");
 			os[i+3]=data[i];
 		}
 		

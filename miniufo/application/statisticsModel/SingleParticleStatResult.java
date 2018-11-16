@@ -19,12 +19,12 @@ import java.io.IOException;
  */
 public final class SingleParticleStatResult{
 	//
-	int     dt=0;	// delta-T in seconds
-	int  tRad =0;	// maximum time lag
+	int    dt=0;	// delta-T in seconds
+	int  tRad=0;	// maximum time lag
 	
 	int pseudoTracks=0;	// total data
-	int noOfMaxLag  =0;	// observations at maximum lag
-	int noOfMinLag  =0;	// observations at minimum lag
+	int noOfMaxLag  =0;	// observations at maximum positive lag
+	int noOfMinLag  =0;	// observations at minimum negative lag
 	
 	float umn =0;	// bin mean
 	float vmn =0;	// bin mean
@@ -76,6 +76,8 @@ public final class SingleParticleStatResult{
 	float[] Dxy=null;
 	float[] Dyx=null;
 	
+	public static enum LagType{NegativeLag,PositiveLag,All}
+	
 	
 	/**
 	 * constructor
@@ -117,142 +119,109 @@ public final class SingleParticleStatResult{
 	
 	
 	/**
+	 * Copy the current result to a new one.
+	 */
+	public SingleParticleStatResult copy(){
+		SingleParticleStatResult spsr=new SingleParticleStatResult(tRad);
+		
+		spsr.dt  =dt;
+		spsr.umn =umn;
+		spsr.vmn =vmn;
+		spsr.ucfd=ucfd;
+		spsr.vcfd=vcfd;
+		spsr.Ku  =Ku;
+		spsr.Kv  =Kv;
+		spsr.Tu  =Tu;
+		spsr.Tv  =Tv;
+		spsr.Lu  =Lu;
+		spsr.Lv  =Lv;
+		spsr.pseudoTracks=pseudoTracks;
+		spsr.noOfMaxLag  =noOfMaxLag;
+		spsr.noOfMinLag  =noOfMinLag;
+		
+		if(num !=null) spsr.num =num.clone();
+		if(um  !=null) spsr.um  = um.clone();
+		if(vm  !=null) spsr.vm  = vm.clone();
+		if(ua  !=null) spsr.ua  = ua.clone();
+		if(va  !=null) spsr.va  = va.clone();
+		if(mlon!=null) spsr.mlon=mlon.clone();
+		if(mlat!=null) spsr.mlat=mlat.clone();
+		
+		if(DXm !=null) spsr.DXm =DXm.clone();
+		if(DYm !=null) spsr.DYm =DYm.clone();
+		if(DXa !=null) spsr.DXa =DXa.clone();
+		if(DYa !=null) spsr.DYa =DYa.clone();
+		
+		if(Pxx !=null) spsr.Pxx =Pxx.clone();
+		if(Pyy !=null) spsr.Pyy =Pyy.clone();
+		if(Pxy !=null) spsr.Pxy =Pxy.clone();
+		if(Pyx !=null) spsr.Pyx =Pyx.clone();
+		
+		if(Qxx !=null) spsr.Qxx =Qxx.clone();
+		if(Qyy !=null) spsr.Qyy =Qyy.clone();
+		if(Qxy !=null) spsr.Qxy =Qxy.clone();
+		if(Qyx !=null) spsr.Qyx =Qyx.clone();
+		
+		if(Kxx !=null) spsr.Kxx =Kxx.clone();
+		if(Kyy !=null) spsr.Kyy =Kyy.clone();
+		if(Kxy !=null) spsr.Kxy =Kxy.clone();
+		if(Kyx !=null) spsr.Kyx =Kyx.clone();
+		
+		if(K11 !=null) spsr.K11 =K11.clone();
+		if(K22 !=null) spsr.K22 =K22.clone();
+		if(ang !=null) spsr.ang =ang.clone();
+		
+		if(Dxx !=null) spsr.Dxx =Dxx.clone();
+		if(Dyy !=null) spsr.Dyy =Dyy.clone();
+		if(Dxy !=null) spsr.Dxy =Dxy.clone();
+		if(Dyx !=null) spsr.Dyx =Dyx.clone();
+		
+		return spsr;
+	}
+	
+	
+	/**
 	 * Average the result from str to end lag for both positive and negtive time lags.
 	 * 
-	 * @param	str		start index
-	 * @param	end		end index
+	 * @param	str			start index
+	 * @param	end			end index
+	 * @param	minTracks	minimum number of pseudotrack
+	 * @param	type		mean of positive lags or negative lags or all
 	 * 
-	 * @return	mean	[0,1] for [Kxx,Kyy], [2,3] for [Tx,Ty] and [4,5] for [Lx,Ly]
+	 * @return	mean		[0,1] for [Kxx,Kyy], [2,3] for [Tx,Ty] and [4,5] for [Lx,Ly]
 	 */
-	public float[] getMean(int str,int end,int minTracks){
-		checkIndices(str,end);
-		
-		if(pseudoTracks<minTracks||noOfMaxLag<minTracks*0.2f||noOfMinLag<minTracks*0.2f) return null;
-		
-		int cK=0;
-		
-		float KxxM=0,KyyM=0,K11M=0,K22M=0,AngM=0;
-		
-		for(int i=tRad+str,I=tRad+end;i<=I;i++) if(!Float.isNaN(Kxx[i])){ KxxM+=Kxx[i]; cK++;}
-		for(int i=tRad-end,I=tRad-str;i<=I;i++) if(!Float.isNaN(Kxx[i])){ KxxM-=Kxx[i]; cK++;}
-		
-		KxxM/=cK;	cK=0;
-		
-		for(int i=tRad+str,I=tRad+end;i<=I;i++) if(!Float.isNaN(Kyy[i])){ KyyM+=Kyy[i]; cK++;}
-		for(int i=tRad-end,I=tRad-str;i<=I;i++) if(!Float.isNaN(Kyy[i])){ KyyM-=Kyy[i]; cK++;}
-		
-		KyyM/=cK;	cK=0;
-		
-		for(int i=tRad+str,I=tRad+end;i<=I;i++) if(!Float.isNaN(K11[i])){ K11M+=K11[i]; cK++;}
-		for(int i=tRad-end,I=tRad-str;i<=I;i++) if(!Float.isNaN(K11[i])){ K11M-=K11[i]; cK++;}
-		
-		K11M/=cK;	cK=0;
-		
-		for(int i=tRad+str,I=tRad+end;i<=I;i++) if(!Float.isNaN(K22[i])){ K22M+=K22[i]; cK++;}
-		for(int i=tRad-end,I=tRad-str;i<=I;i++) if(!Float.isNaN(K22[i])){ K22M-=K22[i]; cK++;}
-		
-		K22M/=cK;	cK=0;
-		
-		float angP=0,angN=0;	int cP=0,cN=0;
-		for(int i=tRad+str,I=tRad+end;i<=I;i++) if(!Float.isNaN(ang[i])){ angP+=ang[i]; cP++;}
-		for(int i=tRad-end,I=tRad-str;i<=I;i++) if(!Float.isNaN(ang[i])){ angN+=ang[i]; cN++;}
-		
-		angP/=cP;
-		angN/=cN;
-		
-		if(angN!=0){
-			angN+=Math.PI/2.0;
-			if(angN>Math.PI/2.0) angN-=Math.PI;
+	public float[] getMean(int str,int end,int minTracks){ return getMean(str,end,minTracks,LagType.All);}
+	
+	public float[] getMean(int str,int end,int minTracks,LagType type){
+		switch(type){
+		case All: return getMeanAll(str,end,minTracks);
+		case NegativeLag: return getMeanNegative(str,end,minTracks);
+		case PositiveLag: return getMeanPositive(str,end,minTracks);
+		default: throw new IllegalArgumentException("unsupported LagType: "+type);
 		}
-		
-		AngM=(angP+angN)/2f;
-		
-		float[] mean=new float[9];
-		
-		mean[0]=KxxM/1e3f;
-		mean[1]=KyyM/1e3f;
-		
-		mean[2]=KxxM/Pxx[tRad]/86400f;
-		mean[3]=KyyM/Pyy[tRad]/86400f;
-		
-		mean[4]=KxxM/(float)Math.sqrt(Pxx[tRad])/1000f;
-		mean[5]=KyyM/(float)Math.sqrt(Pyy[tRad])/1000f;
-		
-		mean[6]=K11M/1e3f;
-		mean[7]=K22M/1e3f;
-		mean[8]=AngM;
-		
-		return mean;
 	}
 	
 	/**
 	 * Get the maximum result from str to end lag for both positive and negtive time lags.
 	 * 
-	 * @param	str		start index
-	 * @param	end		end index
+	 * @param	str			start index
+	 * @param	end			end index
+	 * @param	minTracks	minimum number of pseudotrack
+	 * @param	type		maximum of positive lags or negative lags or all
 	 * 
-	 * @return	max		[0,1] for [Kxx,Kyy], [2,3] for [Tx,Ty] and [4,5] for [Lx,Ly]
+	 * @return	max			[0,1] for [Kxx,Kyy], [2,3] for [Tx,Ty] and [4,5] for [Lx,Ly]
 	 */
-	public float[] getMax(int str,int end,int minTracks){
-		checkIndices(str,end);
-		
-		if(pseudoTracks<minTracks||noOfMaxLag<minTracks*0.2f||noOfMinLag<minTracks*0.2f) return null;
-		
-		int cK=0;
-		
-		float KxxM=0,KyyM=0,K11M=0,K22M=0,AngM=0,tmpMax=0;
-		
-		tmpMax=getAbsMax(Kxx,tRad+str,tRad+end); if(tmpMax!=0){ KxxM+=tmpMax; cK++;}
-		tmpMax=getAbsMax(Kxx,tRad-end,tRad-str); if(tmpMax!=0){ KxxM+=tmpMax; cK++;}
-		
-		if(cK!=0) KxxM/=cK;	cK=0;
-		
-		tmpMax=getAbsMax(Kyy,tRad+str,tRad+end); if(tmpMax!=0){ KyyM+=tmpMax; cK++;}
-		tmpMax=getAbsMax(Kyy,tRad-end,tRad-str); if(tmpMax!=0){ KyyM+=tmpMax; cK++;}
-		
-		if(cK!=0) KyyM/=cK;	cK=0;
-		
-		tmpMax=getAbsMax(K11,tRad+str,tRad+end); if(tmpMax!=0){ K11M+=tmpMax; cK++;}
-		tmpMax=getAbsMax(K11,tRad-end,tRad-str); if(tmpMax!=0){ K11M+=tmpMax; cK++;}
-		
-		if(cK!=0) K11M/=cK;	cK=0;
-		
-		tmpMax=getAbsMax(K22,tRad+str,tRad+end); if(tmpMax!=0){ K22M+=tmpMax; cK++;}
-		tmpMax=getAbsMax(K22,tRad-end,tRad-str); if(tmpMax!=0){ K22M+=tmpMax; cK++;}
-		
-		if(cK!=0) K22M/=cK;	cK=0;
-		
-		float angP=0,angN=0;	int cP=0,cN=0;
-		tmpMax=getAbsMax(ang,tRad+str,tRad+end); if(tmpMax!=0){ angP+=tmpMax; cP++;}
-		tmpMax=getAbsMax(ang,tRad-end,tRad-str); if(tmpMax!=0){ angN+=tmpMax; cN++;}
-		
-		if(cP!=0) angP/=cP;
-		if(cN!=0) angN/=cN;
-		
-		if(angN!=0){
-			angN+=Math.PI/2.0;
-			if(angN>Math.PI/2.0) angN-=Math.PI;
+	public float[] getMax(int str,int end,int minTracks){ return getMax(str,end,minTracks,LagType.All);}
+	
+	public float[] getMax(int str,int end,int minTracks,LagType type){
+		switch(type){
+		case All: return getMaxAll(str,end,minTracks);
+		case NegativeLag: return getMaxNegative(str,end,minTracks);
+		case PositiveLag: return getMaxPositive(str,end,minTracks);
+		default: throw new IllegalArgumentException("unsupported LagType: "+type);
 		}
-		
-		AngM=(angP+angN)/2f;
-		
-		float[] extremes=new float[9];
-		
-		extremes[0]=KxxM/1e3f;
-		extremes[1]=KyyM/1e3f;
-		
-		extremes[2]=KxxM/Pxx[tRad]/86400f;
-		extremes[3]=KyyM/Pyy[tRad]/86400f;
-		
-		extremes[4]=KxxM/(float)Math.sqrt(Pxx[tRad])/1000f;
-		extremes[5]=KyyM/(float)Math.sqrt(Pyy[tRad])/1000f;
-		
-		extremes[6]=K11M/1e3f;
-		extremes[7]=K22M/1e3f;
-		extremes[8]=AngM;
-		
-		return extremes;
 	}
+	
 	
 	/**
 	 * write out to a specific file
@@ -333,6 +302,358 @@ public final class SingleParticleStatResult{
 		}
 		
 		return re;
+	}
+	
+	
+	private float[] getMeanAll(int str,int end,int minTracks){
+		checkIndices(str,end);
+		
+		if(pseudoTracks<minTracks||noOfMaxLag<minTracks*0.2f||noOfMinLag<minTracks*0.2f){
+			System.out.println("no enough tracks pseudoTracks("+pseudoTracks+") noOfMaxLag("+noOfMaxLag+") noOfMinLag("+noOfMinLag+") minTracks("+minTracks+")");
+			return null;
+		}
+		
+		int cK=0;
+		
+		float KxxM=0,KyyM=0,K11M=0,K22M=0,AngM=0;
+		
+		for(int i=tRad+str,I=tRad+end;i<=I;i++) if(!Float.isNaN(Kxx[i])){ KxxM+=Kxx[i]; cK++;}
+		for(int i=tRad-end,I=tRad-str;i<=I;i++) if(!Float.isNaN(Kxx[i])){ KxxM-=Kxx[i]; cK++;}
+		
+		KxxM/=cK;	cK=0;
+		
+		for(int i=tRad+str,I=tRad+end;i<=I;i++) if(!Float.isNaN(Kyy[i])){ KyyM+=Kyy[i]; cK++;}
+		for(int i=tRad-end,I=tRad-str;i<=I;i++) if(!Float.isNaN(Kyy[i])){ KyyM-=Kyy[i]; cK++;}
+		
+		KyyM/=cK;	cK=0;
+		
+		for(int i=tRad+str,I=tRad+end;i<=I;i++) if(!Float.isNaN(K11[i])){ K11M+=K11[i]; cK++;}
+		for(int i=tRad-end,I=tRad-str;i<=I;i++) if(!Float.isNaN(K11[i])){ K11M-=K11[i]; cK++;}
+		
+		K11M/=cK;	cK=0;
+		
+		for(int i=tRad+str,I=tRad+end;i<=I;i++) if(!Float.isNaN(K22[i])){ K22M+=K22[i]; cK++;}
+		for(int i=tRad-end,I=tRad-str;i<=I;i++) if(!Float.isNaN(K22[i])){ K22M-=K22[i]; cK++;}
+		
+		K22M/=cK;	cK=0;
+		
+		float angP=0,angN=0;	int cP=0,cN=0;
+		for(int i=tRad+str,I=tRad+end;i<=I;i++) if(!Float.isNaN(ang[i])){ angP+=ang[i]; cP++;}
+		for(int i=tRad-end,I=tRad-str;i<=I;i++) if(!Float.isNaN(ang[i])){ angN+=ang[i]; cN++;}
+		
+		angP/=cP;
+		angN/=cN;
+		
+		if(angN!=0){
+			angN+=Math.PI/2.0;
+			if(angN>Math.PI/2.0) angN-=Math.PI;
+		}
+		
+		AngM=(angP+angN)/2f;
+		
+		float[] mean=new float[9];
+		
+		mean[0]=KxxM/1e3f;
+		mean[1]=KyyM/1e3f;
+		
+		mean[2]=KxxM/Pxx[tRad]/86400f;
+		mean[3]=KyyM/Pyy[tRad]/86400f;
+		
+		mean[4]=KxxM/(float)Math.sqrt(Pxx[tRad])/1000f;
+		mean[5]=KyyM/(float)Math.sqrt(Pyy[tRad])/1000f;
+		
+		mean[6]=K11M/1e3f;
+		mean[7]=K22M/1e3f;
+		mean[8]=AngM;
+		
+		return mean;
+	}
+	
+	private float[] getMeanPositive(int str,int end,int minTracks){
+		checkIndices(str,end);
+		
+		if(pseudoTracks<minTracks||noOfMaxLag<minTracks*0.2f){
+			System.out.println("no enough tracks pseudoTracks("+pseudoTracks+") noOfMaxLag("+noOfMaxLag+") minTracks("+minTracks+")");
+			return null;
+		}
+		
+		int cK=0;
+		
+		float KxxM=0,KyyM=0,K11M=0,K22M=0,AngM=0;
+		
+		for(int i=tRad+str,I=tRad+end;i<=I;i++) if(!Float.isNaN(Kxx[i])){ KxxM+=Kxx[i]; cK++;}
+		
+		KxxM/=cK;	cK=0;
+		
+		for(int i=tRad+str,I=tRad+end;i<=I;i++) if(!Float.isNaN(Kyy[i])){ KyyM+=Kyy[i]; cK++;}
+		
+		KyyM/=cK;	cK=0;
+		
+		for(int i=tRad+str,I=tRad+end;i<=I;i++) if(!Float.isNaN(K11[i])){ K11M+=K11[i]; cK++;}
+		
+		K11M/=cK;	cK=0;
+		
+		for(int i=tRad+str,I=tRad+end;i<=I;i++) if(!Float.isNaN(K22[i])){ K22M+=K22[i]; cK++;}
+		
+		K22M/=cK;	cK=0;
+		
+		float angP=0;	int cP=0;
+		for(int i=tRad+str,I=tRad+end;i<=I;i++) if(!Float.isNaN(ang[i])){ angP+=ang[i]; cP++;}
+		
+		angP/=cP;
+		
+		AngM=angP;
+		
+		float[] mean=new float[9];
+		
+		mean[0]=KxxM/1e3f;
+		mean[1]=KyyM/1e3f;
+		
+		mean[2]=KxxM/Pxx[tRad]/86400f;
+		mean[3]=KyyM/Pyy[tRad]/86400f;
+		
+		mean[4]=KxxM/(float)Math.sqrt(Pxx[tRad])/1000f;
+		mean[5]=KyyM/(float)Math.sqrt(Pyy[tRad])/1000f;
+		
+		mean[6]=K11M/1e3f;
+		mean[7]=K22M/1e3f;
+		mean[8]=AngM;
+		
+		return mean;
+	}
+	
+	private float[] getMeanNegative(int str,int end,int minTracks){
+		checkIndices(str,end);
+		
+		if(pseudoTracks<minTracks||noOfMinLag<minTracks*0.2f){
+			System.out.println("no enough tracks pseudoTracks("+pseudoTracks+") noOfMinLag("+noOfMinLag+") minTracks("+minTracks+")");
+			return null;
+		}
+		
+		int cK=0;
+		
+		float KxxM=0,KyyM=0,K11M=0,K22M=0,AngM=0;
+		
+		for(int i=tRad-end,I=tRad-str;i<=I;i++) if(!Float.isNaN(Kxx[i])){ KxxM-=Kxx[i]; cK++;}
+		
+		KxxM/=cK;	cK=0;
+		
+		for(int i=tRad-end,I=tRad-str;i<=I;i++) if(!Float.isNaN(Kyy[i])){ KyyM-=Kyy[i]; cK++;}
+		
+		KyyM/=cK;	cK=0;
+		
+		for(int i=tRad-end,I=tRad-str;i<=I;i++) if(!Float.isNaN(K11[i])){ K11M-=K11[i]; cK++;}
+		
+		K11M/=cK;	cK=0;
+		
+		for(int i=tRad-end,I=tRad-str;i<=I;i++) if(!Float.isNaN(K22[i])){ K22M-=K22[i]; cK++;}
+		
+		K22M/=cK;	cK=0;
+		
+		float angN=0;	int cN=0;
+		for(int i=tRad-end,I=tRad-str;i<=I;i++) if(!Float.isNaN(ang[i])){ angN+=ang[i]; cN++;}
+		
+		angN/=cN;
+		
+		if(angN!=0){
+			angN+=Math.PI/2.0;
+			if(angN>Math.PI/2.0) angN-=Math.PI;
+		}
+		
+		AngM=angN;
+		
+		float[] mean=new float[9];
+		
+		mean[0]=KxxM/1e3f;
+		mean[1]=KyyM/1e3f;
+		
+		mean[2]=KxxM/Pxx[tRad]/86400f;
+		mean[3]=KyyM/Pyy[tRad]/86400f;
+		
+		mean[4]=KxxM/(float)Math.sqrt(Pxx[tRad])/1000f;
+		mean[5]=KyyM/(float)Math.sqrt(Pyy[tRad])/1000f;
+		
+		mean[6]=K11M/1e3f;
+		mean[7]=K22M/1e3f;
+		mean[8]=AngM;
+		
+		return mean;
+	}
+	
+	
+	private float[] getMaxAll(int str,int end,int minTracks){
+		checkIndices(str,end);
+		
+		if(pseudoTracks<minTracks||noOfMaxLag<minTracks*0.2f||noOfMinLag<minTracks*0.2f){
+			System.out.println("no enough tracks pseudoTracks("+pseudoTracks+") noOfMaxLag("+noOfMaxLag+") noOfMinLag("+noOfMinLag+") minTracks("+minTracks+")");
+			return null;
+		}
+		
+		int cK=0;
+		
+		float KxxM=0,KyyM=0,K11M=0,K22M=0,AngM=0,tmpMax=0;
+		
+		tmpMax=getAbsMax(Kxx,tRad+str,tRad+end); if(tmpMax!=0){ KxxM+=tmpMax; cK++;}
+		tmpMax=getAbsMax(Kxx,tRad-end,tRad-str); if(tmpMax!=0){ KxxM+=tmpMax; cK++;}
+		
+		if(cK!=0) KxxM/=cK;	cK=0;
+		
+		tmpMax=getAbsMax(Kyy,tRad+str,tRad+end); if(tmpMax!=0){ KyyM+=tmpMax; cK++;}
+		tmpMax=getAbsMax(Kyy,tRad-end,tRad-str); if(tmpMax!=0){ KyyM+=tmpMax; cK++;}
+		
+		if(cK!=0) KyyM/=cK;	cK=0;
+		
+		tmpMax=getAbsMax(K11,tRad+str,tRad+end); if(tmpMax!=0){ K11M+=tmpMax; cK++;}
+		tmpMax=getAbsMax(K11,tRad-end,tRad-str); if(tmpMax!=0){ K11M+=tmpMax; cK++;}
+		
+		if(cK!=0) K11M/=cK;	cK=0;
+		
+		tmpMax=getAbsMax(K22,tRad+str,tRad+end); if(tmpMax!=0){ K22M+=tmpMax; cK++;}
+		tmpMax=getAbsMax(K22,tRad-end,tRad-str); if(tmpMax!=0){ K22M+=tmpMax; cK++;}
+		
+		if(cK!=0) K22M/=cK;	cK=0;
+		
+		float angP=0,angN=0;	int cP=0,cN=0;
+		tmpMax=getAbsMax(ang,tRad+str,tRad+end); if(tmpMax!=0){ angP+=tmpMax; cP++;}
+		tmpMax=getAbsMax(ang,tRad-end,tRad-str); if(tmpMax!=0){ angN+=tmpMax; cN++;}
+		
+		if(cP!=0) angP/=cP;
+		if(cN!=0) angN/=cN;
+		
+		if(angN!=0){
+			angN+=Math.PI/2.0;
+			if(angN>Math.PI/2.0) angN-=Math.PI;
+		}
+		
+		AngM=(angP+angN)/2f;
+		
+		float[] extremes=new float[9];
+		
+		extremes[0]=KxxM/1e3f;
+		extremes[1]=KyyM/1e3f;
+		
+		extremes[2]=KxxM/Pxx[tRad]/86400f;
+		extremes[3]=KyyM/Pyy[tRad]/86400f;
+		
+		extremes[4]=KxxM/(float)Math.sqrt(Pxx[tRad])/1000f;
+		extremes[5]=KyyM/(float)Math.sqrt(Pyy[tRad])/1000f;
+		
+		extremes[6]=K11M/1e3f;
+		extremes[7]=K22M/1e3f;
+		extremes[8]=AngM;
+		
+		return extremes;
+	}
+	
+	private float[] getMaxPositive(int str,int end,int minTracks){
+		checkIndices(str,end);
+		
+		if(pseudoTracks<minTracks||noOfMaxLag<minTracks*0.2f){
+			System.out.println("no enough tracks pseudoTracks("+pseudoTracks+") noOfMaxLag("+noOfMaxLag+") minTracks("+minTracks+")");
+			return null;
+		}
+		
+		int cK=0;
+		
+		float KxxM=0,KyyM=0,K11M=0,K22M=0,AngM=0,tmpMax=0;
+		
+		tmpMax=getAbsMax(Kxx,tRad+str,tRad+end); if(tmpMax!=0){ KxxM+=tmpMax; cK++;}
+		
+		if(cK!=0) KxxM/=cK;	cK=0;
+		
+		tmpMax=getAbsMax(Kyy,tRad+str,tRad+end); if(tmpMax!=0){ KyyM+=tmpMax; cK++;}
+		
+		if(cK!=0) KyyM/=cK;	cK=0;
+		
+		tmpMax=getAbsMax(K11,tRad+str,tRad+end); if(tmpMax!=0){ K11M+=tmpMax; cK++;}
+		
+		if(cK!=0) K11M/=cK;	cK=0;
+		
+		tmpMax=getAbsMax(K22,tRad+str,tRad+end); if(tmpMax!=0){ K22M+=tmpMax; cK++;}
+		
+		if(cK!=0) K22M/=cK;	cK=0;
+		
+		float angP=0;	int cP=0;
+		tmpMax=getAbsMax(ang,tRad+str,tRad+end); if(tmpMax!=0){ angP+=tmpMax; cP++;}
+		
+		if(cP!=0) angP/=cP;
+		
+		AngM=angP;
+		
+		float[] extremes=new float[9];
+		
+		extremes[0]=KxxM/1e3f;
+		extremes[1]=KyyM/1e3f;
+		
+		extremes[2]=KxxM/Pxx[tRad]/86400f;
+		extremes[3]=KyyM/Pyy[tRad]/86400f;
+		
+		extremes[4]=KxxM/(float)Math.sqrt(Pxx[tRad])/1000f;
+		extremes[5]=KyyM/(float)Math.sqrt(Pyy[tRad])/1000f;
+		
+		extremes[6]=K11M/1e3f;
+		extremes[7]=K22M/1e3f;
+		extremes[8]=AngM;
+		
+		return extremes;
+	}
+	
+	private float[] getMaxNegative(int str,int end,int minTracks){
+		checkIndices(str,end);
+		
+		if(pseudoTracks<minTracks||noOfMinLag<minTracks*0.2f){
+			System.out.println("no enough tracks pseudoTracks("+pseudoTracks+") noOfMinLag("+noOfMinLag+") minTracks("+minTracks+")");
+			return null;
+		}
+		
+		int cK=0;
+		
+		float KxxM=0,KyyM=0,K11M=0,K22M=0,AngM=0,tmpMax=0;
+		
+		tmpMax=getAbsMax(Kxx,tRad-end,tRad-str); if(tmpMax!=0){ KxxM+=tmpMax; cK++;}
+		
+		if(cK!=0) KxxM/=cK;	cK=0;
+		
+		tmpMax=getAbsMax(Kyy,tRad-end,tRad-str); if(tmpMax!=0){ KyyM+=tmpMax; cK++;}
+		
+		if(cK!=0) KyyM/=cK;	cK=0;
+		
+		tmpMax=getAbsMax(K11,tRad-end,tRad-str); if(tmpMax!=0){ K11M+=tmpMax; cK++;}
+		
+		if(cK!=0) K11M/=cK;	cK=0;
+		
+		tmpMax=getAbsMax(K22,tRad-end,tRad-str); if(tmpMax!=0){ K22M+=tmpMax; cK++;}
+		
+		if(cK!=0) K22M/=cK;	cK=0;
+		
+		float angN=0;	int cN=0;
+		tmpMax=getAbsMax(ang,tRad-end,tRad-str); if(tmpMax!=0){ angN+=tmpMax; cN++;}
+		
+		if(cN!=0) angN/=cN;
+		
+		if(angN!=0){
+			angN+=Math.PI/2.0;
+			if(angN>Math.PI/2.0) angN-=Math.PI;
+		}
+		
+		AngM=angN;
+		
+		float[] extremes=new float[9];
+		
+		extremes[0]=KxxM/1e3f;
+		extremes[1]=KyyM/1e3f;
+		
+		extremes[2]=KxxM/Pxx[tRad]/86400f;
+		extremes[3]=KyyM/Pyy[tRad]/86400f;
+		
+		extremes[4]=KxxM/(float)Math.sqrt(Pxx[tRad])/1000f;
+		extremes[5]=KyyM/(float)Math.sqrt(Pyy[tRad])/1000f;
+		
+		extremes[6]=K11M/1e3f;
+		extremes[7]=K22M/1e3f;
+		extremes[8]=AngM;
+		
+		return extremes;
 	}
 	
 	

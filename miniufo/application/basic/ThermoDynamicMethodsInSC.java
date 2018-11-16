@@ -19,8 +19,8 @@ import static miniufo.geophysics.atmos.ThermoDynamics.E0;
 import static miniufo.geophysics.atmos.ThermoDynamics.L0;
 import static miniufo.geophysics.atmos.ThermoDynamics.Rd;
 import static miniufo.geophysics.atmos.ThermoDynamics.Rv;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
-import static miniufo.diagnosis.SpatialModel.GRAVITY_ACCERLERATION;
+import static miniufo.diagnosis.SpatialModel.REarth;
+import static miniufo.diagnosis.SpatialModel.gEarth;
 
 
 /**
@@ -1899,7 +1899,7 @@ public class ThermoDynamicMethodsInSC extends EquationInSphericalCoordinate{
 					(dxs[ystart-1+j]*2)+
 					(qdata[l][k][j+1][i]*udata[l][k][j+1][i]-qdata[l][k][j-1][i]*udata[l][k][j-1][i])/
 					(dy+dy)-
-					(qdata[l][k][j  ][i]*vdata[l][k][j  ][i]*ltan[ystart-1+j]/EARTH_RADIUS)
+					(qdata[l][k][j  ][i]*vdata[l][k][j  ][i]*ltan[ystart-1+j]/REarth)
 					
 				)*(zdef[zstart-2+k]-zdef[zstart-1+k])/2;
 				
@@ -1937,7 +1937,7 @@ public class ThermoDynamicMethodsInSC extends EquationInSphericalCoordinate{
 					(dxs[ystart-1+j]*2)+
 					(qdata[k][j+1][i][l]*udata[k][j+1][i][l]-qdata[k][j-1][i][l]*udata[k][j-1][i][l])/
 					(dy+dy)-
-					(qdata[k][j  ][i][l]*vdata[k][j  ][i][l]*ltan[ystart-1+j]/EARTH_RADIUS)
+					(qdata[k][j  ][i][l]*vdata[k][j  ][i][l]*ltan[ystart-1+j]/REarth)
 					
 				)*(zdef[zstart-2+k]-zdef[zstart-1+k])/2;
 				
@@ -1984,7 +1984,7 @@ public class ThermoDynamicMethodsInSC extends EquationInSphericalCoordinate{
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++)
 			if(qdata[l][k][j][i]!=undef&&Tdata[l][k][j][i]!=undef&&hdata[l][k][j][i]!=undef){
-				rdata[l][k][j][i]=Cp*Tdata[l][k][j][i]+GRAVITY_ACCERLERATION*hdata[l][k][j][i]+
+				rdata[l][k][j][i]=Cp*Tdata[l][k][j][i]+gEarth*hdata[l][k][j][i]+
 					(L0-2327f*(Tdata[l][k][j][i]-273.15f))*qdata[l][k][j][i];
 				
 			}else rdata[l][k][j][i]=undef;
@@ -1995,7 +1995,7 @@ public class ThermoDynamicMethodsInSC extends EquationInSphericalCoordinate{
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++)
 			if(qdata[k][j][i][l]!=undef&&Tdata[k][j][i][l]!=undef&&hdata[k][j][i][l]!=undef){
-				rdata[k][j][i][l]=Cp*Tdata[k][j][i][l]+GRAVITY_ACCERLERATION*hdata[k][j][i][l]+
+				rdata[k][j][i][l]=Cp*Tdata[k][j][i][l]+gEarth*hdata[k][j][i][l]+
 					(L0-2327f*(Tdata[k][j][i][l]-273.15f))*qdata[k][j][i][l];
 				
 			}else rdata[k][j][i][l]=undef;
@@ -2110,10 +2110,10 @@ public class ThermoDynamicMethodsInSC extends EquationInSphericalCoordinate{
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
 				if(qdata[l][k][j][i]!=undef&&udata[l][k][j][i]!=undef){
-					if(udata[l][k][j][i]!=undef) r0data[l][k][j][i]=qdata[l][k][j][i]*udata[l][k][j][i]/GRAVITY_ACCERLERATION;
+					if(udata[l][k][j][i]!=undef) r0data[l][k][j][i]=qdata[l][k][j][i]*udata[l][k][j][i]/gEarth;
 					else r0data[l][k][j][i]=undef;
 					
-					if(vdata[l][k][j][i]!=undef) r1data[l][k][j][i]=qdata[l][k][j][i]*vdata[l][k][j][i]/GRAVITY_ACCERLERATION;
+					if(vdata[l][k][j][i]!=undef) r1data[l][k][j][i]=qdata[l][k][j][i]*vdata[l][k][j][i]/gEarth;
 					else r1data[l][k][j][i]=undef;
 					
 				}else{
@@ -2128,10 +2128,10 @@ public class ThermoDynamicMethodsInSC extends EquationInSphericalCoordinate{
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
 				if(qdata[k][j][i][l]!=undef&&udata[k][j][i][l]!=undef){
-					if(udata[k][j][i][l]!=undef) r0data[k][j][i][l]=qdata[k][j][i][l]*udata[k][j][i][l]/GRAVITY_ACCERLERATION;
+					if(udata[k][j][i][l]!=undef) r0data[k][j][i][l]=qdata[k][j][i][l]*udata[k][j][i][l]/gEarth;
 					else r0data[k][j][i][l]=undef;
 					
-					if(vdata[k][j][i][l]!=undef) r1data[k][j][i][l]=qdata[k][j][i][l]*vdata[k][j][i][l]/GRAVITY_ACCERLERATION;
+					if(vdata[k][j][i][l]!=undef) r1data[k][j][i][l]=qdata[k][j][i][l]*vdata[k][j][i][l]/gEarth;
 					else r1data[k][j][i][l]=undef;
 					
 				}else{

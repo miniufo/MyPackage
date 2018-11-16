@@ -23,8 +23,8 @@ import static miniufo.geophysics.atmos.ThermoDynamics.Cp;
 import static miniufo.geophysics.atmos.ThermoDynamics.Rd;
 import static miniufo.basic.ArrayUtil.getAbsMax;
 import static miniufo.diagnosis.SpatialModel.cSphericalDistanceByRadian;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
-import static miniufo.diagnosis.SpatialModel.EARTH_ROTATE_SPEED;
+import static miniufo.diagnosis.SpatialModel.REarth;
+import static miniufo.diagnosis.SpatialModel.omegaEarth;
 
 
 /**
@@ -814,7 +814,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				for(int j=1;j<y-1;j++)
 				if(buf[k][j]!=undef&&buf[k][j+1]!=undef&&buf[k][j-1]!=undef&&gmdata[l][k][j][0]!=undef)
 					fdata[l][k][j][0]=gmdata[l][k][j][0]*(buf[k][j+1]*bsin[j+1]-buf[k][j-1]*bsin[j-1])/dy
-					/(EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[j]*bsin[j]*bsin[j]*bsin[j]);
+					/(REarth*REarth*REarth*bsin[j]*bsin[j]*bsin[j]*bsin[j]);
 					
 				else fdata[l][k][j][0]=undef;
 				
@@ -823,7 +823,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 					
 					if(buf[k][y-1]!=undef&&buf[k][y-2]!=undef&&gmdata[l][k][y-1][0]!=undef)
 						fdata[l][k][y-1][0]=2*gmdata[l][k][y-1][0]*(buf[k][y-1]*bsin[y-1]-buf[k][y-2]*bsin[y-2])/dy
-						/(EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[y-1]*bsin[y-1]*bsin[y-1]*bsin[y-1]);
+						/(REarth*REarth*REarth*bsin[y-1]*bsin[y-1]*bsin[y-1]*bsin[y-1]);
 					
 					else fdata[l][k][y-1][0]=undef;
 				}
@@ -872,7 +872,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				for(int j=1;j<y-1;j++)
 				if(buf[k][j]!=undef&&buf[k][j+1]!=undef&&buf[k][j-1]!=undef&&gmdata[k][j][0][l]!=undef)
 					fdata[k][j][0][l]=gmdata[k][j][0][l]*(buf[k][j+1]*bsin[j+1]-buf[k][j-1]*bsin[j-1])/dy
-					/(EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[j]*bsin[j]*bsin[j]*bsin[j]);
+					/(REarth*REarth*REarth*bsin[j]*bsin[j]*bsin[j]*bsin[j]);
 					
 				else fdata[k][j][0][l]=undef;
 				
@@ -881,7 +881,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 					
 					if(buf[k][y-1]!=undef&&buf[k][y-2]!=undef&&gmdata[k][y-1][0][l]!=undef)
 						fdata[k][y-1][0][l]=2*gmdata[k][y-1][0][l]*(buf[k][y-1]*bsin[y-1]-buf[k][y-2]*bsin[y-2])/dy
-						/(EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[y-1]*bsin[y-1]*bsin[y-1]*bsin[y-1]);
+						/(REarth*REarth*REarth*bsin[y-1]*bsin[y-1]*bsin[y-1]*bsin[y-1]);
 					
 					else fdata[k][y-1][0][l]=undef;
 				}
@@ -971,7 +971,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 							fdata[l][k][j][0]=-2*(
 								(gmdata[l][k+1][j][0]+gmdata[l][k][j][0])*(buf[k+1][j]-buf[k][j])-
 								(gmdata[l][k-1][j][0]+gmdata[l][k][j][0])*(buf[k][j]-buf[k-1][j])
-							)/(float)pow(bsin[j]*EARTH_RADIUS,3)/(dz*dz*2);
+							)/(float)pow(bsin[j]*REarth,3)/(dz*dz*2);
 						
 						else fdata[l][k][j][0]=undef;
 					}
@@ -1010,7 +1010,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 							fdata[k][j][0][l]=-2*(
 								(gmdata[k+1][j][0][l]+gmdata[k][j][0][l])*(buf[k+1][j]-buf[k][j])-
 								(gmdata[k-1][j][0][l]+gmdata[k][j][0][l])*(buf[k][j]-buf[k-1][j])
-							)/(float)pow(bsin[j]*EARTH_RADIUS,3)/(dz*dz*2);
+							)/(float)pow(bsin[j]*REarth,3)/(dz*dz*2);
 							
 						else fdata[k][j][0][l]=undef;
 					}
@@ -1052,7 +1052,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 		
 		if(frm.isTFirst()){
 			for(int j=1;j<y-1;j++){
-				float tmp=(float)Math.pow(EARTH_RADIUS*bsin[j],2);
+				float tmp=(float)Math.pow(REarth*bsin[j],2);
 				
 				for(int l=0;l<t;l++)
 				for(int k=1;k<z-1;k++)
@@ -1063,7 +1063,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 			
 		}else{
 			for(int j=1;j<y-1;j++){
-				float tmp=(float)Math.pow(EARTH_RADIUS*bsin[j],2);
+				float tmp=(float)Math.pow(REarth*bsin[j],2);
 				
 				for(int l=0;l<t;l++)
 				for(int k=1;k<z-1;k++)
@@ -1128,7 +1128,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 							-wnor[l][i]*cos(olat[l])*cos(xdef[i])
 						);
 						
-						buf[k][j]+=til3+EARTH_RADIUS*EARTH_ROTATE_SPEED*(til4+til5);
+						buf[k][j]+=til3+REarth*omegaEarth*(til4+til5);
 						
 						count++;
 						
@@ -1136,7 +1136,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 					
 					if(count!=0) buf[k][j]/=count;
 					
-					til2=-EARTH_RADIUS*EARTH_ROTATE_SPEED*cs[l]*bsin[j]*bsin[j]*(float)(cos(olat[l])*cos(cd[l]))/2;
+					til2=-REarth*omegaEarth*cs[l]*bsin[j]*bsin[j]*(float)(cos(olat[l])*cos(cd[l]))/2;
 					buf[k][j]+=til2;
 					count=0;
 				}
@@ -1147,7 +1147,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				if(gmdata[l][k+1][j][0]!=undef&&gmdata[l][k-1][j][0]!=undef&&buf[k+1][j]!=undef&&buf[k-1][j]!=undef)
 					fdata[l][k][j][0]=
 					2*(gmdata[l][k+1][j][0]*buf[k+1][j]-gmdata[l][k-1][j][0]*buf[k-1][j])
-					/(float)pow(bsin[j]*EARTH_RADIUS,3)/(dz*2);
+					/(float)pow(bsin[j]*REarth,3)/(dz*2);
 				
 				else fdata[k][j][0][l]=undef;
 				
@@ -1156,7 +1156,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				if(gmdata[l][1][j][0]!=undef&&gmdata[l][0][j][0]!=undef&&buf[1][j]!=undef&&buf[0][j]!=undef)
 					fdata[l][0][j][0]=
 					2*(gmdata[l][1][j][0]*buf[1][j]-gmdata[l][0][j][0]*buf[0][j])
-					/(float)pow(bsin[j]*EARTH_RADIUS,3)/dz;
+					/(float)pow(bsin[j]*REarth,3)/dz;
 				
 				else fdata[l][0][j][0]=undef;
 				
@@ -1165,7 +1165,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				if(gmdata[l][z-1][j][0]!=undef&&gmdata[l][z-2][j][0]!=undef&&buf[z-1][j]!=undef&&buf[z-2][j]!=undef)
 					fdata[l][z-1][j][0]=
 					2*(gmdata[l][z-1][j][0]*buf[z-1][j]-gmdata[l][z-2][j][0]*buf[z-2][j])
-					/(float)pow(bsin[j]*EARTH_RADIUS,3)/dz;
+					/(float)pow(bsin[j]*REarth,3)/dz;
 				
 				else fdata[l][z-1][j][0]=undef;
 				
@@ -1197,14 +1197,14 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 							+vrdata[k][j][i][l]*(cos(ydef[j])*cos(olat[l])*cos(xdef[i])-bsin[j]*sin(olat[l]))
 							-wnor[l][i]*cos(olat[l])*cos(xdef[i]));
 						
-						buf[k][j]+=til3+EARTH_RADIUS*EARTH_ROTATE_SPEED*(til4+til5);
+						buf[k][j]+=til3+REarth*omegaEarth*(til4+til5);
 						
 						count++;
 					}
 					
 					if(count!=0) buf[k][j]/=count;
 					
-					til2=-EARTH_RADIUS*EARTH_ROTATE_SPEED*cs[l]*bsin[j]*bsin[j]*(float)(cos(olat[l])*cos(cd[l]))/2;
+					til2=-REarth*omegaEarth*cs[l]*bsin[j]*bsin[j]*(float)(cos(olat[l])*cos(cd[l]))/2;
 					buf[k][j]+=til2;
 					count=0;
 				}
@@ -1215,7 +1215,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				if(gmdata[k+1][j][0][l]!=undef&&gmdata[k-1][j][0][l]!=undef&&buf[k+1][j]!=undef&&buf[k-1][j]!=undef)
 					fdata[k][j][0][l]=
 					2*(gmdata[k+1][j][0][l]*buf[k+1][j]-gmdata[k-1][j][0][l]*buf[k-1][j])
-					/(float)pow(bsin[j]*EARTH_RADIUS,3)/(dz*2);
+					/(float)pow(bsin[j]*REarth,3)/(dz*2);
 				
 				else fdata[k][j][0][l]=undef;
 				
@@ -1224,7 +1224,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				if(gmdata[1][j][0][l]!=undef&&gmdata[0][j][0][l]!=undef&&buf[1][j]!=undef&&buf[0][j]!=undef)
 					fdata[0][j][0][l]=
 					2*(gmdata[1][j][0][l]*buf[1][j]-gmdata[0][j][0][l]*buf[0][j])
-					/(float)pow(bsin[j]*EARTH_RADIUS,3)/dz;
+					/(float)pow(bsin[j]*REarth,3)/dz;
 				
 				else fdata[0][j][0][l]=undef;
 				
@@ -1233,7 +1233,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				if(gmdata[z-1][j][0][l]!=undef&&gmdata[z-2][j][0][l]!=undef&&buf[z-1][j]!=undef&&buf[z-2][j]!=undef)
 					fdata[z-1][j][0][l]=
 					2*(gmdata[z-1][j][0][l]*buf[z-1][j]-gmdata[z-2][j][0][l]*buf[z-2][j])
-					/(float)pow(bsin[j]*EARTH_RADIUS,3)/dz;
+					/(float)pow(bsin[j]*REarth,3)/dz;
 				
 				else fdata[z-1][j][0][l]=undef;
 				
@@ -1498,7 +1498,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				for(int j=1;j<y-1;j++)
 				if(gava[k][j]!=undef&&gava[k][j+1]!=undef&&gava[k][j-1]!=undef&&gmdata[l][k][j][0]!=undef)
 					fdata[l][k][j][0]=-gmdata[l][k][j][0]*(gava[k][j+1]*bsin[j+1]-gava[k][j-1]*bsin[j-1])/dy
-					/(EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[j]*bsin[j]*bsin[j]*bsin[j]);
+					/(REarth*REarth*REarth*bsin[j]*bsin[j]*bsin[j]*bsin[j]);
 				
 				else fdata[l][k][j][0]=undef;
 				
@@ -1507,7 +1507,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 					
 					if(gava[k][y-1]!=undef&&gava[k][y-2]!=undef&&gmdata[l][k][y-1][0]!=undef)
 						fdata[l][k][y-1][0]=-2*gmdata[l][k][y-1][0]*(gava[k][y-1]*bsin[y-1]-gava[k][y-2]*bsin[y-2])/dy
-						/(EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[y-1]*bsin[y-1]*bsin[y-1]*bsin[y-1]);
+						/(REarth*REarth*REarth*bsin[y-1]*bsin[y-1]*bsin[y-1]*bsin[y-1]);
 					
 					else fdata[l][k][y-1][0]=undef;
 				}
@@ -1534,7 +1534,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				for(int j=1;j<y-1;j++)
 				if(gava[k][j]!=undef&&gava[k][j+1]!=undef&&gava[k][j-1]!=undef&&gmdata[k][j][0][l]!=undef)
 					fdata[k][j][0][l]=-gmdata[k][j][0][l]*(gava[k][j+1]*bsin[j+1]-gava[k][j-1]*bsin[j-1])/dy
-					/(EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[j]*bsin[j]*bsin[j]*bsin[j]);
+					/(REarth*REarth*REarth*bsin[j]*bsin[j]*bsin[j]*bsin[j]);
 				
 				else fdata[k][j][0][l]=undef;
 				
@@ -1543,7 +1543,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 					
 					if(gava[k][y-1]!=undef&&gava[k][y-2]!=undef&&gmdata[k][y-1][0][l]!=undef)
 						fdata[k][y-1][0][l]=-2*gmdata[k][y-1][0][l]*(gava[k][y-1]*bsin[y-1]-gava[k][y-2]*bsin[y-2])/dy
-						/(EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[y-1]*bsin[y-1]*bsin[y-1]*bsin[y-1]);
+						/(REarth*REarth*REarth*bsin[y-1]*bsin[y-1]*bsin[y-1]*bsin[y-1]);
 					
 					else fdata[k][y-1][0][l]=undef;
 				}
@@ -1610,7 +1610,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 						buf[k+1][j]!=undef&&buf[k][j]!=undef&&buf[k-1][j]!=undef)
 							fdata[l][k][j][0]=-2*(
 								gmdata[l][k][j][0]*(buf[k+1][j]-buf[k-1][j])
-							)/(float)pow(bsin[j]*EARTH_RADIUS,3)/(dz*2);
+							)/(float)pow(bsin[j]*REarth,3)/(dz*2);
 						
 						else fdata[l][k][j][0]=undef;
 					}
@@ -1646,7 +1646,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 						buf[k+1][j]!=undef&&buf[k][j]!=undef&&buf[k-1][j]!=undef)
 							fdata[k][j][0][l]=-2*(
 								gmdata[k][j][0][l]*(buf[k+1][j]-buf[k-1][j])
-							)/(float)pow(bsin[j]*EARTH_RADIUS,3)/(dz*2);
+							)/(float)pow(bsin[j]*REarth,3)/(dz*2);
 							
 						else fdata[k][j][0][l]=undef;
 					}
@@ -1686,7 +1686,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 		
 		if(frm.isTFirst()){
 			for(int j=1;j<y-1;j++){
-				float tmp=(float)Math.pow(EARTH_RADIUS*bsin[j],2);
+				float tmp=(float)Math.pow(REarth*bsin[j],2);
 				
 				for(int l=0;l<t;l++)
 				for(int k=0;k<z;k++)
@@ -1696,7 +1696,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 			
 		}else{
 			for(int j=1;j<y-1;j++){
-				float tmp=(float)Math.pow(EARTH_RADIUS*bsin[j],2);
+				float tmp=(float)Math.pow(REarth*bsin[j],2);
 				
 				for(int l=0;l<t;l++)
 				for(int k=0;k<z;k++)
@@ -1760,7 +1760,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 							-wnor[l][i]*cos(olat[l])*cos(xdef[i])
 						);
 						
-						buf[k][j]+=til3+EARTH_RADIUS*EARTH_ROTATE_SPEED*(til4+til5);
+						buf[k][j]+=til3+REarth*omegaEarth*(til4+til5);
 						
 						count++;
 						
@@ -1768,7 +1768,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 					
 					if(count!=0) buf[k][j]/=count;
 					
-					til2=-EARTH_RADIUS*EARTH_ROTATE_SPEED*cs[l]*bsin[j]*bsin[j]*(float)(cos(olat[l])*cos(cd[l]))/2;
+					til2=-REarth*omegaEarth*cs[l]*bsin[j]*bsin[j]*(float)(cos(olat[l])*cos(cd[l]))/2;
 					buf[k][j]+=til2;
 					count=0;
 				}
@@ -1777,7 +1777,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				for(int j=1;j<y;j++)
 				for(int k=0;k<z;k++)
 				if(gmdata[l][k][j][0]!=undef&&buf[k][j]!=undef)
-					fdata[l][k][j][0]=2*gmdata[l][k][j][0]*buf[k][j]/(float)pow(bsin[j]*EARTH_RADIUS,3);
+					fdata[l][k][j][0]=2*gmdata[l][k][j][0]*buf[k][j]/(float)pow(bsin[j]*REarth,3);
 				else
 					fdata[l][k][j][0]=undef;
 				
@@ -1809,14 +1809,14 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 							+vrdata[k][j][i][l]*(cos(ydef[j])*cos(olat[l])*cos(xdef[i])-bsin[j]*sin(olat[l]))
 							-wnor[l][i]*cos(olat[l])*cos(xdef[i]));
 						
-						buf[k][j]+=til3+EARTH_RADIUS*EARTH_ROTATE_SPEED*(til4+til5);
+						buf[k][j]+=til3+REarth*omegaEarth*(til4+til5);
 						
 						count++;
 					}
 					
 					if(count!=0) buf[k][j]/=count;
 					
-					til2=-EARTH_RADIUS*EARTH_ROTATE_SPEED*cs[l]*bsin[j]*bsin[j]*(float)(cos(olat[l])*cos(cd[l]))/2;
+					til2=-REarth*omegaEarth*cs[l]*bsin[j]*bsin[j]*(float)(cos(olat[l])*cos(cd[l]))/2;
 					buf[k][j]+=til2;
 					count=0;
 				}
@@ -1825,7 +1825,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				for(int j=1;j<y;j++)
 				for(int k=0;k<z;k++)
 				if(gmdata[k][j][0][l]!=undef&&buf[k][j]!=undef)
-					fdata[k][j][0][l]=2*gmdata[k][j][0][l]*buf[k][j]/(float)pow(bsin[j]*EARTH_RADIUS,3);
+					fdata[k][j][0][l]=2*gmdata[k][j][0][l]*buf[k][j]/(float)pow(bsin[j]*REarth,3);
 				else
 					fdata[k][j][0][l]=undef;
 				
@@ -1971,7 +1971,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				for(int j=1;j<y-1;j++){
 					if(buffer[k-1][j]!=undef&&buffer[k-1][j+1]!=undef&&buffer[k-1][j-1]!=undef)
 						Cdata[l][k][j][0]=(buffer[k-1][j+1]-buffer[k-1][j-1])/
-							(2*dy*EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[j]*bsin[j]*bsin[j]*bsin[j]);
+							(2*dy*REarth*REarth*REarth*bsin[j]*bsin[j]*bsin[j]*bsin[j]);
 					
 					else Cdata[l][k][j][0]=undef;
 				}
@@ -1979,7 +1979,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				for(int k=1;k<z;k++){
 					if(buffer[k-1][y-1]!=undef&&buffer[k-1][y-2]!=undef)
 						Cdata[l][k][y-1][0]=(buffer[k-1][y-1]-buffer[k-1][y-2])/
-						(dy*EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[y-1]*bsin[y-1]*bsin[y-1]*bsin[y-1]);
+						(dy*REarth*REarth*REarth*bsin[y-1]*bsin[y-1]*bsin[y-1]*bsin[y-1]);
 					
 					else Cdata[l][k][y-1][0]=undef;
 					
@@ -2003,7 +2003,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 					for(int j=1;j<y-1;j++){
 						if(buffer[k-1][j]!=undef&&buffer[k-1][j+1]!=undef&&buffer[k-1][j-1]!=undef)
 							Cdata[k][j][0][l]=(buffer[k-1][j+1]-buffer[k-1][j-1])/
-								(2*dy*EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[j]*bsin[j]*bsin[j]*bsin[j]);
+								(2*dy*REarth*REarth*REarth*bsin[j]*bsin[j]*bsin[j]*bsin[j]);
 						
 						else Cdata[k][j][0][l]=undef;
 					}
@@ -2011,7 +2011,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 					for(int k=1;k<z;k++){
 						if(buffer[k-1][y-1]!=undef&&buffer[k-1][y-2]!=undef)
 							Cdata[k][y-1][0][l]=(buffer[k-1][y-1]-buffer[k-1][y-2])/
-							(dy*EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[y-1]*bsin[y-1]*bsin[y-1]*bsin[y-1]);
+							(dy*REarth*REarth*REarth*bsin[y-1]*bsin[y-1]*bsin[y-1]*bsin[y-1]);
 						
 						else Cdata[k][y-1][0][l]=undef;
 						
@@ -2093,7 +2093,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				for(int j=1;j<y-1;j++){
 					if(buffer[k][j+1]!=undef&&buffer[k][j-1]!=undef)
 						Cdata[l][k][j][0]=(buffer[k][j+1]-buffer[k][j-1])/
-							(2*dy*EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[j]*bsin[j]*bsin[j]*bsin[j]);
+							(2*dy*REarth*REarth*REarth*bsin[j]*bsin[j]*bsin[j]*bsin[j]);
 					
 					else Cdata[l][k][j][0]=undef;
 				}
@@ -2101,7 +2101,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				for(int k=0;k<z;k++){
 					if(buffer[k][y-1]!=undef&&buffer[k][y-2]!=undef)
 						Cdata[l][k][y-1][0]=(buffer[k][y-1]-buffer[k][y-2])/
-						(dy*EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[y-1]*bsin[y-1]*bsin[y-1]*bsin[y-1]);
+						(dy*REarth*REarth*REarth*bsin[y-1]*bsin[y-1]*bsin[y-1]*bsin[y-1]);
 					
 					else Cdata[l][k][y-1][0]=undef;
 					
@@ -2125,7 +2125,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 					for(int j=1;j<y-1;j++){
 						if(buffer[k][j+1]!=undef&&buffer[k][j-1]!=undef)
 							Cdata[k][j][0][l]=(buffer[k][j+1]-buffer[k][j-1])/
-								(2*dy*EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[j]*bsin[j]*bsin[j]*bsin[j]);
+								(2*dy*REarth*REarth*REarth*bsin[j]*bsin[j]*bsin[j]*bsin[j]);
 						
 						else Cdata[k][j][0][l]=undef;
 					}
@@ -2133,7 +2133,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 					for(int k=0;k<z;k++){
 						if(buffer[k][y-1]!=undef&&buffer[k][y-2]!=undef)
 							Cdata[k][y-1][0][l]=(buffer[k][y-1]-buffer[k][y-2])/
-							(dy*EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[y-1]*bsin[y-1]*bsin[y-1]*bsin[y-1]);
+							(dy*REarth*REarth*REarth*bsin[y-1]*bsin[y-1]*bsin[y-1]*bsin[y-1]);
 						
 						else Cdata[k][y-1][0][l]=undef;
 						
@@ -2230,7 +2230,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				for(int j=1;j<y-1;j++){
 					if(buffer[k][j+1]!=undef&&buffer[k][j-1]!=undef)
 						Cdata[l][k][j][0]=(buffer[k][j+1]-buffer[k][j-1])/
-							(2*dy*EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[j]*bsin[j]*bsin[j]);
+							(2*dy*REarth*REarth*REarth*bsin[j]*bsin[j]*bsin[j]);
 					
 					else Cdata[l][k][j][0]=undef;
 				}
@@ -2238,7 +2238,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				for(int k=0;k<z;k++){
 					if(buffer[k][y-1]!=undef&&buffer[k][y-2]!=undef)
 						Cdata[l][k][y-1][0]=(buffer[k][y-1]-buffer[k][y-2])/
-						(dy*EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[y-1]*bsin[y-1]*bsin[y-1]);
+						(dy*REarth*REarth*REarth*bsin[y-1]*bsin[y-1]*bsin[y-1]);
 					
 					else Cdata[l][k][y-1][0]=undef;
 					
@@ -2262,7 +2262,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				for(int j=1;j<y-1;j++){
 					if(buffer[k][j+1]!=undef&&buffer[k][j-1]!=undef)
 						Cdata[k][j][0][l]=(buffer[k][j+1]-buffer[k][j-1])/
-							(2*dy*EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[j]*bsin[j]*bsin[j]);
+							(2*dy*REarth*REarth*REarth*bsin[j]*bsin[j]*bsin[j]);
 					
 					else Cdata[k][j][0][l]=undef;
 				}
@@ -2270,7 +2270,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 				for(int k=0;k<z;k++){
 					if(buffer[k][y-1]!=undef&&buffer[k][y-2]!=undef)
 						Cdata[k][y-1][0][l]=(buffer[k][y-1]-buffer[k][y-2])/
-						(dy*EARTH_RADIUS*EARTH_RADIUS*EARTH_RADIUS*bsin[y-1]*bsin[y-1]*bsin[y-1]);
+						(dy*REarth*REarth*REarth*bsin[y-1]*bsin[y-1]*bsin[y-1]);
 					
 					else Cdata[k][y-1][0][l]=undef;
 					
@@ -2425,7 +2425,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 			for(int j=1;j<y-1;j++){
 				float gm2=gmdata[l][k][j+1][0]*gmdata[l][k][j+1][0];
 				float gm1=gmdata[l][k][j-1][0]*gmdata[l][k][j-1][0];
-				float fct=(float)Math.pow(EARTH_RADIUS*bsin[j],3);
+				float fct=(float)Math.pow(REarth*bsin[j],3);
 				
 				lp1data[l][k][j][0]=-smdata[l][k][j][0]* wmdata[l][k][j][0];
 				lp2data[l][k][j][0]= vmdata[l][k][j][0]*(amdata[l][k][j+1][0]-amdata[l][k][j-1][0])/(2*dy);
@@ -2439,7 +2439,7 @@ public final class TyphoonInCC extends EllipticEquationInCC implements Print{
 			for(int j=1;j<y-1;j++){
 				float gm2=gmdata[k][j+1][0][l]*gmdata[k][j+1][0][l];
 				float gm1=gmdata[k][j-1][0][l]*gmdata[k][j-1][0][l];
-				float fct=(float)Math.pow(EARTH_RADIUS*bsin[j],3);
+				float fct=(float)Math.pow(REarth*bsin[j],3);
 				
 				lp1data[k][j][0][l]=-smdata[k][j][0][l]* wmdata[k][j][0][l];
 				lp2data[k][j][0][l]= vmdata[k][j][0][l]*(amdata[k][j+1][0][l]-amdata[k][j-1][0][l])/(2*dy);

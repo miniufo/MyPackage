@@ -45,9 +45,9 @@ public abstract class SpatialModel{
 	
 	protected float[] dxs=null;	// dx scaled by lcos[j]
 	
-	public static final float GRAVITY_ACCERLERATION=9.80665f;	// gravitational acceleration
-	public static final float EARTH_ROTATE_SPEED=7.292e-5f;		// rotating speed of earth
-	public static final float EARTH_RADIUS=6371200f;			// radius of the earth (meter), consistent with GrADS
+	public static final float gEarth    =9.80665f;	// gravitational acceleration
+	public static final float omegaEarth=7.292e-5f;	// rotating speed of earth
+	public static final float REarth    =6371200f;	// radius of the earth (meter), consistent with GrADS
 	
 	public enum LevelType{GEOMETRIC,PRESSURE,ISENTROPIC,SIGMA,ISOPYCNAL};
 	
@@ -157,7 +157,7 @@ public abstract class SpatialModel{
     		if(a<0) a=0;
     		if(a>1) a=1;
     		
-    		return (float)(EARTH_RADIUS*2.0*Math.atan2(sqrt(a),sqrt(1-a)));
+    		return (float)(REarth*2.0*Math.atan2(sqrt(a),sqrt(1-a)));
     	}
     }
     
@@ -175,7 +175,7 @@ public abstract class SpatialModel{
 		return (float)(MathsPhysicsUtil.cAreaQuadByRadian(
 			Math.toRadians(lon1),Math.toRadians(lat1),
 			Math.toRadians(lon2),Math.toRadians(lat2)
-		)*4.0*Math.PI*EARTH_RADIUS*EARTH_RADIUS);
+		)*4.0*Math.PI*REarth*REarth);
 	}
 	
 	public static float cAreaQuadByRadian(float lon1,float lat1,float lon2,float lat2){

@@ -9,7 +9,7 @@ package miniufo.test.application.basic;
 import miniufo.application.basic.DynamicMethodsInSC;
 import miniufo.diagnosis.Variable;
 import miniufo.diagnosis.SphericalSpatialModel;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
+import static miniufo.diagnosis.SpatialModel.REarth;
 
 
 /**
@@ -66,7 +66,7 @@ public final class GlobalDynamicMethodsInSC extends DynamicMethodsInSC{
 						divdata[l][k][j][i]=
 							(udata[l][k][j][i+1]-udata[l][k][j][i-1])/(dxs[j]*2)+
 							(vdata[l][k][j+1][i]-vdata[l][k][j-1][i])/(dy*2)-
-							vdata[l][k][j][i]*ltan[j]/EARTH_RADIUS;
+							vdata[l][k][j][i]*ltan[j]/REarth;
 						
 					else divdata[l][k][j][i]=undef;
 				}
@@ -76,7 +76,7 @@ public final class GlobalDynamicMethodsInSC extends DynamicMethodsInSC{
 					divdata[l][k][j][0]=
 						(udata[l][k][j  ][1]-udata[l][k][j  ][x-1])/(dxs[j]*2)+
 						(vdata[l][k][j+1][0]-vdata[l][k][j-1][0])/(dy*2)-
-						vdata[l][k][j][0]*ltan[j]/EARTH_RADIUS;
+						vdata[l][k][j][0]*ltan[j]/REarth;
 					
 				else divdata[l][k][j][0]=undef;
 				
@@ -84,7 +84,7 @@ public final class GlobalDynamicMethodsInSC extends DynamicMethodsInSC{
 					divdata[l][k][j][x-1]=
 						(udata[l][k][j  ][0]-udata[l][k][j  ][x-2])/(dxs[j]*2)+
 						(vdata[l][k][j+1][x-1]-vdata[l][k][j-1][x-1])/(dy*2)-
-						vdata[l][k][j][x-1]*ltan[j]/EARTH_RADIUS;
+						vdata[l][k][j][x-1]*ltan[j]/REarth;
 					
 				else divdata[l][k][j][x-1]=undef;
 			}
@@ -99,7 +99,7 @@ public final class GlobalDynamicMethodsInSC extends DynamicMethodsInSC{
 						divdata[k][j][i][l]=
 							(udata[k][j][i+1][l]-udata[k][j][i-1][l])/(dxs[j]*2)+
 							(vdata[k][j+1][i][l]-vdata[k][j-1][i][l])/(dy*2)-
-							(vdata[k][j][i][l]/EARTH_RADIUS)*ltan[j];
+							(vdata[k][j][i][l]/REarth)*ltan[j];
 						
 					else divdata[k][j][i][l]=undef;
 				}
@@ -109,7 +109,7 @@ public final class GlobalDynamicMethodsInSC extends DynamicMethodsInSC{
 					divdata[k][j][0][l]=
 						(udata[k][j  ][1][l]-udata[k][j][x-1][l])/(dxs[j]*2)+
 						(vdata[k][j+1][0][l]-vdata[k][j-1][0][l])/(dy*2)-
-						vdata[k][j][0][l]*ltan[j]/EARTH_RADIUS;
+						vdata[k][j][0][l]*ltan[j]/REarth;
 					
 				else divdata[k][j][0][l]=undef;
 				
@@ -117,7 +117,7 @@ public final class GlobalDynamicMethodsInSC extends DynamicMethodsInSC{
 					divdata[k][j][x-1][l]=
 						(udata[k][j  ][0  ][l]-udata[k][j  ][x-2][l])/(dxs[j]*2)+
 						(vdata[k][j+1][x-1][l]-vdata[k][j-1][x-1][l])/(dy*2)-
-						vdata[k][j][x-1][l]*ltan[j]/EARTH_RADIUS;
+						vdata[k][j][x-1][l]*ltan[j]/REarth;
 					
 				else divdata[k][j][x-1][l]=undef;
 			}
@@ -159,7 +159,7 @@ public final class GlobalDynamicMethodsInSC extends DynamicMethodsInSC{
 						vordata[l][k][j][i]=
 							(vdata[l][k][j][i+1]-vdata[l][k][j][i-1])/(dxs[j]*2)-
 							(udata[l][k][j+1][i]-udata[l][k][j-1][i])/(dy*2)+
-							udata[l][k][j][i]*ltan[j]/EARTH_RADIUS;
+							udata[l][k][j][i]*ltan[j]/REarth;
 						
 					else vordata[l][k][j][i]=undef;
 				}
@@ -169,7 +169,7 @@ public final class GlobalDynamicMethodsInSC extends DynamicMethodsInSC{
 					vordata[l][k][j][0]=
 						(vdata[l][k][j][1]-vdata[l][k][j][x-1])/(dxs[j]*2)-
 						(udata[l][k][j+1][0]-udata[l][k][j-1][0])/(dy*2)+
-						udata[l][k][j][0]*ltan[j]/EARTH_RADIUS;
+						udata[l][k][j][0]*ltan[j]/REarth;
 					
 				else vordata[l][k][j][0]=undef;
 				
@@ -177,7 +177,7 @@ public final class GlobalDynamicMethodsInSC extends DynamicMethodsInSC{
 					vordata[l][k][j][x-1]=
 						(vdata[l][k][j  ][0  ]-vdata[l][k][j  ][x-2])/(dxs[j]*2)-
 						(udata[l][k][j+1][x-1]-udata[l][k][j-1][x-1])/(dy*2)+
-						udata[l][k][j][x-1]*ltan[j]/EARTH_RADIUS;
+						udata[l][k][j][x-1]*ltan[j]/REarth;
 					
 				else vordata[l][k][j][x-1]=undef;
 			}
@@ -192,7 +192,7 @@ public final class GlobalDynamicMethodsInSC extends DynamicMethodsInSC{
 						vordata[k][j][i][l]=
 							(vdata[k][j][i+1][l]-vdata[k][j][i-1][l])/(dxs[j]*2)-
 							(udata[k][j+1][i][l]-udata[k][j-1][i][l])/(dy*2)+
-							udata[k][j][i][l]*ltan[j]/EARTH_RADIUS;
+							udata[k][j][i][l]*ltan[j]/REarth;
 						
 					else vordata[k][j][i][l]=undef;
 				}
@@ -202,7 +202,7 @@ public final class GlobalDynamicMethodsInSC extends DynamicMethodsInSC{
 					vordata[k][j][0][l]=
 						(vdata[k][j  ][1][l]-vdata[k][j  ][x-1][l])/(dxs[j]*2)-
 						(udata[k][j+1][0][l]-udata[k][j-1][0][l])/(dy*2)+
-						udata[k][j][0][l]*ltan[j]/EARTH_RADIUS;
+						udata[k][j][0][l]*ltan[j]/REarth;
 					
 				else vordata[k][j][0][l]=undef;
 				
@@ -210,7 +210,7 @@ public final class GlobalDynamicMethodsInSC extends DynamicMethodsInSC{
 					vordata[k][j][x-1][l]=
 						(vdata[k][j  ][0  ][l]-vdata[k][j  ][x-2][l])/(dxs[j]*2)-
 						(udata[k][j+1][x-1][l]-udata[k][j-1][x-1][l])/(dy*2)+
-						udata[k][j][x-1][l]*ltan[j]/EARTH_RADIUS;
+						udata[k][j][x-1][l]*ltan[j]/REarth;
 					
 				else vordata[k][j][x-1][l]=undef;
 			}
@@ -606,7 +606,7 @@ public final class GlobalDynamicMethodsInSC extends DynamicMethodsInSC{
 						ladata[l][k][j][i]=
 						(vdata[l][k][j][i+1]+vdata[l][k][j][i-1]-2*vdata[l][k][j][i])/(dxs[j]*dxs[j])+
 						(vdata[l][k][j+1][i]+vdata[l][k][j-1][i]-2*vdata[l][k][j][i])/(dy*dy)-
-						(vdata[l][k][j+1][i]-vdata[l][k][j-1][i])/(2*dy)*ltan[j]/EARTH_RADIUS;
+						(vdata[l][k][j+1][i]-vdata[l][k][j-1][i])/(2*dy)*ltan[j]/REarth;
 				}
 				
 				/*** west and east boundary ***/
@@ -616,14 +616,14 @@ public final class GlobalDynamicMethodsInSC extends DynamicMethodsInSC{
 						ladata[l][k][j][0]=
 						(vdata[l][k][j][1]+vdata[l][k][j][x-1]-2*vdata[l][k][j][0])/(dxs[j]*dxs[j])+
 						(vdata[l][k][j+1][0]+vdata[l][k][j-1][0]-2*vdata[l][k][j][0])/(dy*dy)-
-						(vdata[l][k][j+1][0]-vdata[l][k][j-1][0])/(2*dy)*ltan[j]/EARTH_RADIUS;
+						(vdata[l][k][j+1][0]-vdata[l][k][j-1][0])/(2*dy)*ltan[j]/REarth;
 					
 					if(vdata[l][k][j][0]!=undef&&vdata[l][k][j][x-1]!=undef&&
 					vdata[l][k][j][x-2]!=undef&&vdata[l][k][j+1][x-1]!=undef&&vdata[l][k][j-1][x-1]!=undef)
 						ladata[l][k][j][x-1]=
 						(vdata[l][k][j][0]+vdata[l][k][j][x-2]-2*vdata[l][k][j][x-1])/(dxs[j]*dxs[j])+
 						(vdata[l][k][j+1][x-1]+vdata[l][k][j-1][x-1]-2*vdata[l][k][j][x-1])/(dy*dy)-
-						(vdata[l][k][j+1][x-1]-vdata[l][k][j-1][x-1])/(2*dy)*ltan[j]/EARTH_RADIUS;
+						(vdata[l][k][j+1][x-1]-vdata[l][k][j-1][x-1])/(2*dy)*ltan[j]/REarth;
 				}
 				
 				/*** south and north boundary ***/
@@ -644,7 +644,7 @@ public final class GlobalDynamicMethodsInSC extends DynamicMethodsInSC{
 						ladata[k][j][i][l]=
 						(vdata[k][j][i+1][l]+vdata[k][j][i-1][l]-2*vdata[k][j][i][l])/(dxs[j]*dxs[j])+
 						(vdata[k][j+1][i][l]+vdata[k][j-1][i][l]-2*vdata[k][j][i][l])/(dy*dy)-
-						(vdata[k][j+1][i][l]-vdata[k][j-1][i][l])/(2*dy)*ltan[j]/EARTH_RADIUS;
+						(vdata[k][j+1][i][l]-vdata[k][j-1][i][l])/(2*dy)*ltan[j]/REarth;
 				}
 				
 				/*** west and east boundary ***/
@@ -654,14 +654,14 @@ public final class GlobalDynamicMethodsInSC extends DynamicMethodsInSC{
 						ladata[k][j][0][l]=
 						(vdata[k][j][1][l]+vdata[k][j][x-1][l]-2*vdata[k][j][0][l])/(dxs[j]*dxs[j])+
 						(vdata[k][j+1][0][l]+vdata[k][j-1][0][l]-2*vdata[k][j][0][l])/(dy*dy)-
-						(vdata[k][j+1][0][l]-vdata[k][j-1][0][l])/(2*dy)*ltan[j]/EARTH_RADIUS;
+						(vdata[k][j+1][0][l]-vdata[k][j-1][0][l])/(2*dy)*ltan[j]/REarth;
 					
 					if(vdata[k][j][0][l]!=undef&&vdata[k][j][x-1][l]!=undef&&
 					vdata[k][j][x-2][l]!=undef&&vdata[k][j+1][x-1][l]!=undef&&vdata[k][j-1][x-1][l]!=undef)
 						ladata[k][j][x-1][l]=
 						(vdata[k][j][0][l]+vdata[k][j][x-2][l]-2*vdata[k][j][x-1][l])/(dxs[j]*dxs[j])+
 						(vdata[k][j+1][x-1][l]+vdata[k][j-1][x-1][l]-2*vdata[k][j][x-1][l])/(dy*dy)-
-						(vdata[k][j+1][x-1][l]-vdata[k][j-1][x-1][l])/(2*dy)*ltan[j]/EARTH_RADIUS;
+						(vdata[k][j+1][x-1][l]-vdata[k][j-1][x-1][l])/(2*dy)*ltan[j]/REarth;
 				}
 				
 				/*** south and north boundary ***/

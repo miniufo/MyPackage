@@ -6,7 +6,7 @@
  */
 package miniufo.geophysics.atmos;
 
-import static miniufo.diagnosis.SpatialModel.GRAVITY_ACCERLERATION;
+import static miniufo.diagnosis.SpatialModel.gEarth;
 
 
 /**
@@ -23,15 +23,16 @@ import static miniufo.diagnosis.SpatialModel.GRAVITY_ACCERLERATION;
  */
 public final class ThermoDynamics{
 	//
-	public static final float RHO=1.225f;	// density of air at sea level at a temperature of 15 degree
-	public static final float Cp =1004.88f;	// thermal capacity of ideal gas (J kg^-1 K^-1)
-	public static final float E0 =610.78f;	// saturated vapor pressure above pure water surface (Pa)
-	public static final float Rd =287.04f;	// constant of dry air (J kg^-1 K^-1)
-	public static final float Rv =461.52f;	// constant of vapor   (J kg^-1 K^-1)
-	public static final float rd =GRAVITY_ACCERLERATION/Cp;		// vertical temperature decrease rate
-	public static final float Cv =Cp-Rd;						// (J kg^-1 K^-1)
-	public static final float kp =Rd/Cp;						// kappa
-	public static final float L0 =2500794f;						// (J kg^-1)
+	public static final float RHO  =1.225f;		// density of air at sea level at a temperature of 15 degree
+	public static final float Cp   =1004.88f;	// thermal capacity of ideal gas (J kg^-1 K^-1)
+	public static final float E0   =610.78f;	// saturated vapor pressure above pure water surface (Pa)
+	public static final float Rd   =287.04f;	// constant of dry air (J kg^-1 K^-1)
+	public static final float Rv   =461.52f;	// constant of vapor   (J kg^-1 K^-1)
+	public static final float rd   =gEarth/Cp;	// vertical temperature decrease rate
+	public static final float Cv   =Cp-Rd;		// (J kg^-1 K^-1)
+	public static final float kappa=Rd/Cp;		// kappa
+	public static final float L0   =2500794f;	// (J kg^-1)
+	public static final float Pref =100000;		// 1000 hPa of pressure reference
 	
 	private static final float[] lvap={
 		2.3823f,2.3945f,2.4062f,2.4183f,2.4300f,
@@ -116,11 +117,33 @@ public final class ThermoDynamics{
 	
 	public static float cEquivalentTemperature(){ return 1;}
 	
-	public static float cVirtualTemperature(){ return 1;}
+	public static float cVirtualTemperature(float T,float q){
+		return T*(1f+0.607717f*q);
+	}
 	
-	public static float cPotentialTemperature(){ return 1;}
+	/**
+	 * Calculate potential temperature reference to 1000 hPa
+	 * 
+	 * @param	T	temperature (K)
+	 * @param	p	pressure (Pa)
+	 */
+	public static float cPotentialTemperature(float T,float p){
+		return (float)(T*Math.pow(Pref/p,kappa));
+	}
+	
+	/**
+	 * Calculate temperature from potential temperature referenced to 1000 hPa
+	 * 
+	 * @param	theta	potential temperature (K)
+	 * @param	p		pressure (Pa)
+	 */
+	public static float cTemperature(float theta,float p){
+		return (float)(theta*Math.pow(p/Pref,kappa));
+	}
 	
 	public static float cEquivalentPotentialTemperature(){ return 1;}
 	
-	public static float cExnerFunction(){ return 1;}
+	public static float cExnerFunction(float p){
+		return (float)(Cp*Math.pow(p/Pref,Rd/Cp));
+	}
 }

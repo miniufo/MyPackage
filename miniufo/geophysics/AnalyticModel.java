@@ -12,8 +12,8 @@ import static java.lang.Math.exp;
 import static java.lang.Math.sin;
 import static java.lang.Math.cos;
 import static java.lang.Math.tanh;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
-import static miniufo.diagnosis.SpatialModel.EARTH_ROTATE_SPEED;
+import static miniufo.diagnosis.SpatialModel.REarth;
+import static miniufo.diagnosis.SpatialModel.omegaEarth;
 
 
 /**
@@ -89,13 +89,13 @@ public final class AnalyticModel{
      * @return	RH wave, [0] is geopotential (m^2 s^-2), [1] u- and [2] v- velocity components (m s^-1)
      */
 	public double[] cRossbyHaurwitzWave(double lamda,double fai){
-		double a=EARTH_RADIUS,o=7.848e-6,K=7.848e-6,fai0=9.8*8000.0;
+		double a=REarth,o=7.848e-6,K=7.848e-6,fai0=9.8*8000.0;
 		
-		double A=o*(2.0*EARTH_ROTATE_SPEED+o)*pow(cos(fai),2.0)/2.0+K*K*pow(cos(fai),8.0)*(
+		double A=o*(2.0*omegaEarth+o)*pow(cos(fai),2.0)/2.0+K*K*pow(cos(fai),8.0)*(
 			5.0*pow(cos(fai),2.0)+26.0-32.0*pow(cos(fai),-2.0)
 		)/4.0;
 		
-		double B=(EARTH_ROTATE_SPEED+o)*K/15*pow(cos(fai),4.0)*(26.0-25.0*pow(cos(fai),2.0));
+		double B=(omegaEarth+o)*K/15*pow(cos(fai),4.0)*(26.0-25.0*pow(cos(fai),2.0));
 		
 		double C=K*K*pow(cos(fai),8.0)*(5.0*pow(cos(fai),2.0)-6.0)/4.0;
 		

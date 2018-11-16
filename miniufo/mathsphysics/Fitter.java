@@ -40,7 +40,7 @@ public abstract class Fitter{
 		
 		checkLength(len);
 		
-		x=ArrayUtil.newMonotonousArray(len,1);
+		x=ArrayUtil.newMonotonicArray(len,1);
 	}
 	
 	

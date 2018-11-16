@@ -60,19 +60,19 @@ public final class LSM1st extends StochasticModel{
 		
 		float velXk1=velm[0];
 		float velYk1=velm[1];
-		float velXk2=r2.getDataValue(VelX);
-		float velYk2=r2.getDataValue(VelY);
-		float velXk3=r3.getDataValue(VelX);
-		float velYk3=r3.getDataValue(VelY);
-		float velXk4=r4.getDataValue(VelX);
-		float velYk4=r4.getDataValue(VelY);
+		float velXk2=r2.getData(VelX);
+		float velYk2=r2.getData(VelY);
+		float velXk3=r3.getData(VelX);
+		float velYk3=r3.getData(VelY);
+		float velXk4=r4.getData(VelX);
+		float velYk4=r4.getData(VelY);
 		
 		float velXRK4=(velXk1+2*velXk2+2*velXk3+velXk4)/6;
 		float velYRK4=(velYk1+2*velYk2+2*velYk3+velYk4)/6;
 		
 		//// compute estimated position using mean background and previous random velocity ////
-		float resX0=init.getDataValue(VelX)-velXk1;
-		float resY0=init.getDataValue(VelY)-velYk1;
+		float resX0=init.getData(VelX)-velXk1;
+		float resY0=init.getData(VelY)-velYk1;
 		
 		r4.setData(VelX,velXRK4+resX0);
 		r4.setData(VelY,velYRK4+resY0);
@@ -102,8 +102,8 @@ public final class LSM1st extends StochasticModel{
 		
 		float[] velm=fetchVelocity(init.getTime(),init.getXPos(),init.getYPos());
 		
-		float resX0=init.getDataValue(VelX)-velm[0];
-		float resY0=init.getDataValue(VelY)-velm[1];
+		float resX0=init.getData(VelX)-velm[0];
+		float resY0=init.getData(VelY)-velm[1];
 		
 		//// compute inhomogeneous correction ////
 		float velXCr=(

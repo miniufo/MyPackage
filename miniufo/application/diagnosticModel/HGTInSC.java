@@ -12,7 +12,7 @@ import miniufo.application.basic.DynamicMethodsInSC;
 import miniufo.application.EllipticEquationInterface;
 import miniufo.application.EquationInSphericalCoordinate;
 import static java.lang.Math.cos;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
+import static miniufo.diagnosis.SpatialModel.REarth;
 
 
 /**
@@ -500,20 +500,20 @@ public final class HGTInSC extends EquationInSphericalCoordinate implements Elli
 					Fdata[l][k][j][0]=(
 						udata[l][k][j][1  ]*vdata[l][k][j][1  ]-
 						udata[l][k][j][x-1]*vdata[l][k][j][x-1]
-					)*ltan[ystart-1+j]/(dx*2)/EARTH_RADIUS;
+					)*ltan[ystart-1+j]/(dx*2)/REarth;
 					
 					/*** East boundary ***/
 					Fdata[l][k][j][x-1]=(
 						udata[l][k][j][0  ]*vdata[l][k][j][0  ]-
 						udata[l][k][j][x-2]*vdata[l][k][j][x-2]
-					)*ltan[ystart-1+j]/(dx*2)/EARTH_RADIUS;
+					)*ltan[ystart-1+j]/(dx*2)/REarth;
 				}
 				
 				for(int i=1;i<x-1;i++)
 				Fdata[l][k][j][i]=(
 					udata[l][k][j][i+1]*vdata[l][k][j][i+1]-
 					udata[l][k][j][i-1]*vdata[l][k][j][i-1]
-				)*ltan[ystart-1+j]/(dx*2)/EARTH_RADIUS;
+				)*ltan[ystart-1+j]/(dx*2)/REarth;
 			}
 			
 		}else{
@@ -525,20 +525,20 @@ public final class HGTInSC extends EquationInSphericalCoordinate implements Elli
 					Fdata[k][j][0][l]=(
 						udata[k][j][1  ][l]*vdata[k][j][1  ][l]-
 						udata[k][j][x-1][l]*vdata[k][j][x-1][l]
-					)*ltan[ystart-1+j]/(dx*2)/EARTH_RADIUS;
+					)*ltan[ystart-1+j]/(dx*2)/REarth;
 					
 					/*** East boundary ***/
 					Fdata[k][j][x-1][l]=(
 						udata[k][j][0  ][l]*vdata[k][j][0  ][l]-
 						udata[k][j][x-2][l]*vdata[k][j][x-2][l]
-					)*ltan[ystart-1+j]/(dx*2)/EARTH_RADIUS;
+					)*ltan[ystart-1+j]/(dx*2)/REarth;
 				}
 				
 				for(int i=1;i<x-1;i++)
 				Fdata[k][j][i][l]=(
 					udata[k][j][i+1][l]*vdata[k][j][i+1][l]-
 					udata[k][j][i-1][l]*vdata[k][j][i-1][l]
-				)*ltan[ystart-1+j]/(dx*2)/EARTH_RADIUS;
+				)*ltan[ystart-1+j]/(dx*2)/REarth;
 			}
 		}
 		
@@ -561,7 +561,7 @@ public final class HGTInSC extends EquationInSphericalCoordinate implements Elli
 			Fdata[l][k][j][i]=-(
 				udata[l][k][j+1][i]*udata[l][k][j+1][i]*lsin[ystart  +j]-
 				udata[l][k][j-1][i]*udata[l][k][j-1][i]*lsin[ystart-2+j]
-			)/(dy*2)/EARTH_RADIUS;
+			)/(dy*2)/REarth;
 			
 		}else{
 			for(int l=0;l<t;l++)
@@ -571,7 +571,7 @@ public final class HGTInSC extends EquationInSphericalCoordinate implements Elli
 			Fdata[k][j][i][l]=-(
 				udata[k][j+1][i][l]*udata[k][j+1][i][l]*lsin[ystart  +j]-
 				udata[k][j-1][i][l]*udata[k][j-1][i][l]*lsin[ystart-2+j]
-			)/(dy*2)/EARTH_RADIUS;
+			)/(dy*2)/REarth;
 		}
 		
 		return F;

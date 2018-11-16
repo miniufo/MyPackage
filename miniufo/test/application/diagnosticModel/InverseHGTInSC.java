@@ -15,8 +15,8 @@ import miniufo.diagnosis.SphericalSpatialModel;
 import miniufo.io.DataIOFactory;
 import miniufo.io.DataWrite;
 import miniufo.test.application.basic.GlobalVelocityFieldInSC;
-import miniufo.application.advanced.EllipticEqSORSolver;
-import miniufo.application.advanced.EllipticEqSORSolver.DimCombination;
+import miniufo.application.advanced.EllipticEqSORSolver2D;
+import miniufo.application.advanced.EllipticEqSORSolver2D.DimCombination;
 import miniufo.application.basic.DynamicMethodsInSC;
 import miniufo.application.basic.SphericalHarmonicExpansion;
 import miniufo.application.EllipticEquationInterface;
@@ -51,7 +51,7 @@ public final class InverseHGTInSC extends EquationInSphericalCoordinate implemen
      * @param	gpt		geopotential (m^2 s^-2)
      */
 	public Variable invertingNondivergentFlow(Variable gpt){
-		EllipticEqSORSolver ees=new EllipticEqSORSolver(sm);
+		EllipticEqSORSolver2D ees=new EllipticEqSORSolver2D(sm);
 		DynamicMethodsInSC dm=new DynamicMethodsInSC((SphericalSpatialModel)sm);
 		
 		ees.setBCofX(BCx); dm.setBCofX(BCx);

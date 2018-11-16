@@ -238,10 +238,10 @@ public final class GridDataFetcher{
 			int xend=xtag==dd.getXCount()-1?xtag:xtag+1;
 			int yend=ytag==dd.getYCount()-1?ytag:ytag+1;
 			
-			float lt=xyb[yend][xtag];	if(lt==undef) return undef;
-			float lb=xyb[ytag][xtag];	if(lb==undef) return undef;
-			float rb=xyb[ytag][xend];	if(rb==undef) return undef;
-			float rt=xyb[yend][xend];	if(rt==undef) return undef;
+			float lt=xyb[yend][xtag];
+			float lb=xyb[ytag][xtag];
+			float rb=xyb[ytag][xend];
+			float rt=xyb[yend][xend];
 			
 			float dx1=(xpos-xdef[xtag])/dxdef[xend-1];
 			float dy1=(ypos-ydef[ytag])/dydef[yend-1];
@@ -262,10 +262,10 @@ public final class GridDataFetcher{
 			int xend=xtag==dd.getXCount()-1?0:xtag+1;
 			int yend=ytag==dd.getYCount()-1?ytag:ytag+1;
 			
-			float lt=xyb[yend][xtag];	if(lt==undef) return undef;
-			float lb=xyb[ytag][xtag];	if(lb==undef) return undef;
-			float rb=xyb[ytag][xend];	if(rb==undef) return undef;
-			float rt=xyb[yend][xend];	if(rt==undef) return undef;
+			float lt=xyb[yend][xtag];
+			float lb=xyb[ytag][xtag];
+			float rb=xyb[ytag][xend];
+			float rt=xyb[yend][xend];
 			
 			float dx1=(xpos-xdef[xtag])/dxdef[xend-1<0?0:xend-1];
 			float dy1=(ypos-ydef[ytag])/dydef[yend-1];
@@ -301,15 +301,15 @@ public final class GridDataFetcher{
 			int yend=ytag==dd.getYCount()-1?ytag:ytag+1;
 			int zend=ztag==dd.getZCount()-1?ztag:ztag+1;
 			
-			float ltl=xyzb[ztag][yend][xtag];	if(ltl==undef) return undef;
-			float lbl=xyzb[ztag][ytag][xtag];	if(lbl==undef) return undef;
-			float rbl=xyzb[ztag][ytag][xend];	if(rbl==undef) return undef;
-			float rtl=xyzb[ztag][yend][xend];	if(rtl==undef) return undef;
+			float ltl=xyzb[ztag][yend][xtag];
+			float lbl=xyzb[ztag][ytag][xtag];
+			float rbl=xyzb[ztag][ytag][xend];
+			float rtl=xyzb[ztag][yend][xend];
 			
-			float ltu=xyzb[zend][yend][xtag];	if(ltu==undef) return undef;
-			float lbu=xyzb[zend][ytag][xtag];	if(lbu==undef) return undef;
-			float rbu=xyzb[zend][ytag][xend];	if(rbu==undef) return undef;
-			float rtu=xyzb[zend][yend][xend];	if(rtu==undef) return undef;
+			float ltu=xyzb[zend][yend][xtag];
+			float lbu=xyzb[zend][ytag][xtag];
+			float rbu=xyzb[zend][ytag][xend];
+			float rtu=xyzb[zend][yend][xend];
 			
 			float dx1=(xpos-xdef[xtag])/dxdef[xend-1];
 			float dy1=(ypos-ydef[ytag])/dydef[yend-1];
@@ -340,15 +340,15 @@ public final class GridDataFetcher{
 			int yend=ytag==dd.getYCount()-1?ytag:ytag+1;
 			int zend=ztag==dd.getZCount()-1?ztag:ztag+1;
 			
-			float ltl=xyzb[ztag][yend][xtag];	if(ltl==undef) return undef;
-			float lbl=xyzb[ztag][ytag][xtag];	if(lbl==undef) return undef;
-			float rbl=xyzb[ztag][ytag][xend];	if(rbl==undef) return undef;
-			float rtl=xyzb[ztag][yend][xend];	if(rtl==undef) return undef;
+			float ltl=xyzb[ztag][yend][xtag];
+			float lbl=xyzb[ztag][ytag][xtag];
+			float rbl=xyzb[ztag][ytag][xend];
+			float rtl=xyzb[ztag][yend][xend];
 			
-			float ltu=xyzb[zend][yend][xtag];	if(ltu==undef) return undef;
-			float lbu=xyzb[zend][ytag][xtag];	if(lbu==undef) return undef;
-			float rbu=xyzb[zend][ytag][xend];	if(rbu==undef) return undef;
-			float rtu=xyzb[zend][yend][xend];	if(rtu==undef) return undef;
+			float ltu=xyzb[zend][yend][xtag];
+			float lbu=xyzb[zend][ytag][xtag];
+			float rbu=xyzb[zend][ytag][xend];
+			float rtu=xyzb[zend][yend][xend];
 			
 			float dx1=(xpos-xdef[xtag])/dxdef[xend-1<0?0:xend-1];
 			float dy1=(ypos-ydef[ytag])/dydef[yend-1];
@@ -380,23 +380,23 @@ public final class GridDataFetcher{
 			int xtag=dd.getXLENum(xpos);
 			int ytag=dd.getYLENum(ypos);
 			int ttag=dd.getTLENum(tim)-tlev+1;
-			int xend=xtag==dd.getXCount()-1?xtag:xtag+1;
-			int yend=ytag==dd.getYCount()-1?ytag:ytag+1;
-			int tend=ttag==xytb[0][0].length-1?ttag:ttag+1;
+			int xend=(xtag==dd.getXCount()   -1?xtag:xtag+1);
+			int yend=(ytag==dd.getYCount()   -1?ytag:ytag+1);
+			int tend=(ttag==xytb[0][0].length-1?ttag:ttag+1);
 			
 			if(ttag==-1) throw new IllegalArgumentException(
 				"time "+tim+" outside ["+dd.getTDef().getFirst().getLongTime()+","+dd.getTDef().getLast().getLongTime()+"]"
 			);
 			
-			float ltp=xytb[yend][xtag][ttag];	if(ltp==undef) return undef;
-			float lbp=xytb[ytag][xtag][ttag];	if(lbp==undef) return undef;
-			float rbp=xytb[ytag][xend][ttag];	if(rbp==undef) return undef;
-			float rtp=xytb[yend][xend][ttag];	if(rtp==undef) return undef;
+			float ltp=xytb[yend][xtag][ttag];
+			float lbp=xytb[ytag][xtag][ttag];
+			float rbp=xytb[ytag][xend][ttag];
+			float rtp=xytb[yend][xend][ttag];
 			
-			float ltn=xytb[yend][xtag][tend];	if(ltn==undef) return undef;
-			float lbn=xytb[ytag][xtag][tend];	if(lbn==undef) return undef;
-			float rbn=xytb[ytag][xend][tend];	if(rbn==undef) return undef;
-			float rtn=xytb[yend][xend][tend];	if(rtn==undef) return undef;
+			float ltn=xytb[yend][xtag][tend];
+			float lbn=xytb[ytag][xtag][tend];
+			float rbn=xytb[ytag][xend][tend];
+			float rtn=xytb[yend][xend][tend];
 			
 			float dx1=(xpos-xdef[xtag])/dxdef[xend-1];
 			float dy1=(ypos-ydef[ytag])/dydef[yend-1];
@@ -427,15 +427,15 @@ public final class GridDataFetcher{
 				"time "+tim+" outside ["+dd.getTDef().getFirst().getLongTime()+","+dd.getTDef().getLast().getLongTime()+"]"
 			);
 			
-			float ltp=xytb[yend][xtag][ttag];	if(ltp==undef) return undef;
-			float lbp=xytb[ytag][xtag][ttag];	if(lbp==undef) return undef;
-			float rbp=xytb[ytag][xend][ttag];	if(rbp==undef) return undef;
-			float rtp=xytb[yend][xend][ttag];	if(rtp==undef) return undef;
+			float ltp=xytb[yend][xtag][ttag];
+			float lbp=xytb[ytag][xtag][ttag];
+			float rbp=xytb[ytag][xend][ttag];
+			float rtp=xytb[yend][xend][ttag];
 			
-			float ltn=xytb[yend][xtag][tend];	if(ltn==undef) return undef;
-			float lbn=xytb[ytag][xtag][tend];	if(lbn==undef) return undef;
-			float rbn=xytb[ytag][xend][tend];	if(rbn==undef) return undef;
-			float rtn=xytb[yend][xend][tend];	if(rtn==undef) return undef;
+			float ltn=xytb[yend][xtag][tend];
+			float lbn=xytb[ytag][xtag][tend];
+			float rbn=xytb[ytag][xend][tend];
+			float rtn=xytb[yend][xend][tend];
 			
 			float dx1=(xpos-xdef[xtag])/dxdef[xend-1<0?0:xend-1];
 			float dy1=(ypos-ydef[ytag])/dydef[yend-1];

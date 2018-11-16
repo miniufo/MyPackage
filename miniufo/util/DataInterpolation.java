@@ -9,16 +9,22 @@ package miniufo.util;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 import miniufo.io.DataIOFactory;
 import miniufo.io.DataRead;
 import miniufo.io.DataWrite;
 import miniufo.io.FileWriteInterface;
 import miniufo.io.IOUtil;
+import miniufo.basic.ArrayUtil;
+import miniufo.basic.InterpolationModel;
 import miniufo.descriptor.DataDescriptor;
 import miniufo.descriptor.Var;
 import miniufo.diagnosis.Range;
 import miniufo.diagnosis.Variable;
+import miniufo.geophysics.atmos.ThermoDynamics;
 import miniufo.mathsphysics.Spline;
 import static miniufo.io.FileWriteInterface.Solution.*;
 import static miniufo.basic.InterpolationModel.Type;
@@ -27,6 +33,9 @@ import static miniufo.basic.InterpolationModel.interp2D;
 import static miniufo.basic.InterpolationModel.bilinearInterpolation;
 import static miniufo.basic.InterpolationModel.bicubicPolynomialInterpolation;
 import static miniufo.basic.InterpolationModel.bicubicLagrangeInterpolation;
+import static miniufo.diagnosis.SpatialModel.gEarth;
+import static miniufo.geophysics.atmos.ThermoDynamics.kappa;
+import static miniufo.geophysics.atmos.ThermoDynamics.Pref;
 
 
 /**
@@ -39,6 +48,8 @@ import static miniufo.basic.InterpolationModel.bicubicLagrangeInterpolation;
 public final class DataInterpolation{
 	//
 	private DataDescriptor srcdata=null;
+	
+	private static final double P0k=Math.pow(Pref,kappa);
 	
 	
 	/**
@@ -740,8 +751,328 @@ public final class DataInterpolation{
 	}
 	
 	
+	/**
+     * Data from isobaric levels are interpolated to isentropic levels, assuming a
+     * linear dependence of temperature on log(p) (method c in Ziv and Alpert 1994, JAM).
+     * Other variables are assumed to vary linearly with potential temperature and will
+     * be linearly interpolated to the new isentropic levels.
+     *
+     * @param	path	path for interpolated file
+     * @param	TPrs	temperature at pressure levels (K)
+     * @param	ZPrs	geopotential at pressure levels (m^2 s^-2)
+     * @param	Zsfc	surface geopotential (m^2 s^-2)
+     * @param	ptDes	destinated theta levels for interpolation
+     * @param	vPrs	variables at pressure levels that need to be interpolated
+     */
+	public void isobaricToIsentropicInterp(String path,String TPrs,String ZPrs,String Zsfc,float[] ptDes,String... vPrs){
+		System.out.println("Start isobaric to isentropic interpolating...");
+		
+		int sx=srcdata.getXCount(),sy=srcdata.getYCount(),sz=srcdata.getZCount(),st=srcdata.getTCount();
+		int z=ptDes.length,M=vPrs.length;
+		
+		// destinated data for writting, [vs..., sgm, p]
+		Variable[] desv=new Variable[M+4];
+		float[][][][] dedata=new float[M+4][][][];
+		for(int m=0;m<M+4;m++){
+			desv[m]=new Variable(null,true,new Range(1,z,sy,sx));
+			dedata[m]=desv[m].getData()[0];
+		}
+		
+		float[] zdef  =srcdata.getZDef().getSamples().clone();
+		float[] lnPSrc=new float[sz];
+		for(int k=0;k<sz;k++){
+			zdef[k]*=100f; // change hPa to Pa
+			lnPSrc[k]=(float)Math.log(zdef[k]);
+		}
+		
+		GridDataFetcher gdf=new GridDataFetcher(srcdata);
+		DataWrite cdws=DataIOFactory.getDataWrite(srcdata,path);
+		
+		for(int l=0;l<st;l++){
+			System.out.println("  processing "+srcdata.getTDef().getSamples()[l].toString()+" ...");
+			
+			// preparing data
+			Variable t  =gdf.prepareXYZBuffer(TPrs,l+1  );
+			Variable Z  =gdf.prepareXYZBuffer(ZPrs,l+1  );
+			Variable Zsf=gdf.prepareXYBuffer (Zsfc,l+1,1);
+			Variable[] vsBuf=new Variable[M];
+			
+			float[][][]   tpdata=t.getData()[0];
+			float[][][]   ZZdata=Z.getData()[0];
+			float[][][][] bfData=new float[M][][][];
+			
+			for(int m=0;m<M;m++){
+				 vsBuf[m]=gdf.prepareXYZBuffer(vPrs[m],l+1);
+				bfData[m]=vsBuf[m].getData()[0];
+			}
+			
+			for(int j=0;j<sy;j++)
+			for(int i=0;i<sx;i++){	// loop for each grid
+				// preparing 1D vertical arrays
+				float[]   tpSrc=new float[sz];	// temperature
+				float[]   zzSrc=new float[sz];	// geopotential
+				float[]   sfSrc=new float[M ];
+				float[][] vsSrc=new float[M ][sz];
+				
+				// store 1D vertical data
+				for(int k=0;k<sz;k++){
+					tpSrc[k]=tpdata[k][j][i];
+					zzSrc[k]=ZZdata[k][j][i];
+					for(int m=0;m<M;m++) vsSrc[m][k]=bfData[m][k][j][i];
+				}
+				
+				for(int m=0;m<M;m++) sfSrc[m]=vsSrc[m][0];
+				
+				OnePointZMask pnt=new OnePointZMask(zdef[0],tpSrc[0],Zsf.getData()[0][0][j][i],t.getUndef(),zdef,lnPSrc,tpSrc,zzSrc);
+				
+				float[][] vDes=interpFromPress2Thetas(pnt,ptDes,sfSrc,vsSrc);
+				
+				for(int m=0;m<M+4;m++)
+				for(int k=0;k<z;k++) dedata[m][k][j][i]=vDes[m][k];
+			}
+			
+			for(int m=0;m<M+4;m++) cdws.writeData(desv[m]);
+		}
+		
+		cdws.closeFile();
+		
+		// write ctl
+		FileWriteInterface fwi=new FileWriteInterface(IOUtil.getCompleteFileNameWithoutExtension(path)+".ctl");
+		FileWriter fw=null;	Scanner sn=null;
+		
+		if(fwi.getFlag()!=SKIP){
+			StringBuilder sb=new StringBuilder();
+			
+			try{
+				switch(fwi.getFlag()){
+				case RENAME   : fw=new FileWriter(fwi.getParent()+fwi.getNewName()); break;
+				case OVERWRITE: fw=new FileWriter(fwi.getFile()); break;
+				case APPEND   : fw=new FileWriter(fwi.getFile(),true); break;
+				default       : throw new IllegalArgumentException("unsupported for "+fwi.getFlag());
+				}
+				sn=new Scanner(new File(srcdata.getPath()));
+				
+			}catch(IOException e){ e.printStackTrace(); System.exit(0);}
+			
+			while(sn.hasNextLine()){
+				String line=sn.nextLine();
+				
+				if(line.startsWith("dset")){
+					sb.append("dset ^"+IOUtil.getFileName(path)+"\n");
+					
+				}else if(line.startsWith("zdef")){
+					sb.append("zdef "+z+" levels ");
+					for(int k=0;k<z;k++) sb.append(ptDes[k]+" ");
+					sb.append("\n");
+				
+				}else if(line.startsWith("vars")){
+					sb.append("vars "+(vPrs.length+4)+"\n");
+					
+					Scanner tmp=new Scanner(line);
+					tmp.next();	int lc=Integer.parseInt(tmp.next());
+					tmp.close();
+					
+					List<String> vars=new ArrayList<>();
+					
+					for(int i=0;i<lc;i++) vars.add(sn.nextLine());
+					
+					for(int m=0;m<M;m++) for(String v:vars)
+					if(v.startsWith(vPrs[m]+" ")){ sb.append(v.replace(sz+"",z+"")+"\n"); break;}
+					
+					sb.append(String.format("%-11s %3d %5s %2s\n","sgm",z,99,"isentropic density (kg m^-2 s^-1)"));
+					sb.append(String.format("%-11s %3d %5s %2s\n","p"  ,z,99,"pressure (Pa)"));
+					sb.append(String.format("%-11s %3d %5s %2s\n","z"  ,z,99,"geopotential (m^2 s^-2)"));
+					sb.append(String.format("%-11s %3d %5s %2s\n","M"  ,z,99,"Montgomery streamfunction (m^2 s^-2)"));
+				}
+				else if(line.startsWith("options")) continue;
+				else sb.append(line+"\n");
+			}
+			
+			sn.close();
+			
+			try{ fw.write(sb.toString());	fw.close();}
+			catch(IOException e){ e.printStackTrace(); System.exit(0);}
+		}
+		
+		System.out.println("Finish vertical interpolating.");
+	}
+	
+	/**
+     * Data from isobaric level are interpolated to isentropic levels, assuming a
+     * linear dependence of temperature on lnp (method c in Ziv and Alpert 1994, JAM).
+     * Other variables are assumed to vary linearly with potential temperature and will
+     * be linearly interpolated to the new isentropic levels.
+     * 
+     * Surface variables sfcT or sfcP are used to mask those grid points under the ground,
+     * using the extended definitions of Andrews (1983, JAS).
+     *
+     * @param	path	path for interpolated file
+     * @param	TPrs	temperature at pressure levels (K)
+     * @param	ZPrs	geopotential at pressure levels (m^2 s^-2)
+     * @param	Tsfc	surface temperature (K)
+     * @param	Psfc	surface pressure (Pa)
+     * @param	Zsfc	surface geopotential (m^2 s^-2)
+     * @param	ptDes	destinated theta levels for interpolation (K)
+     * @param	vSfc	surface variables corresponding to vPrs for masking
+     * @param	vPrs	variables at pressure levels that need to be interpolated
+     */
+	public void isobaricToIsentropicInterp(String path,String TPrs,String ZPrs,String Tsfc,String Psfc,String Zsfc,float[] ptDes,String[] vSfc,String[] vPrs){
+		System.out.println("Start isobaric to isentropic interpolating with surface masking...");
+		
+		int sx=srcdata.getXCount(),sy=srcdata.getYCount(),sz=srcdata.getZCount(),st=srcdata.getTCount();
+		int z=ptDes.length,M=vPrs.length;
+		
+		if(M!=vSfc.length) throw new IllegalArgumentException("vSfc ("+vSfc.length+") should have the same length as vPrs ("+vPrs.length+")");
+		
+		// destinated data for writting, [vPrs..., p, sgm]
+		Variable[] desv=new Variable[M+4];
+		float[][][][] dedata=new float[M+4][][][];
+		for(int m=0;m<M+4;m++){
+			desv[m]=new Variable(null,true,new Range(1,z,sy,sx));
+			dedata[m]=desv[m].getData()[0];
+		}
+		
+		float[] zdef  =srcdata.getZDef().getSamples().clone();
+		float[] lnPSrc=new float[sz];
+		for(int k=0;k<sz;k++){
+			zdef[k]*=100f; // change hPa to Pa
+			lnPSrc[k]=(float)Math.log(zdef[k]);
+		}
+		
+		GridDataFetcher gdf=new GridDataFetcher(srcdata);
+		DataWrite cdws=DataIOFactory.getDataWrite(srcdata,path);
+		
+		for(int l=0;l<st;l++){
+			System.out.println("  processing "+srcdata.getTDef().getSamples()[l].toString()+" ...");
+			
+			// preparing data
+			Variable t  =gdf.prepareXYZBuffer(TPrs,l+1  );
+			Variable Z  =gdf.prepareXYZBuffer(ZPrs,l+1  );
+			Variable Tsf=gdf.prepareXYBuffer (Tsfc,l+1,1);
+			Variable Psf=gdf.prepareXYBuffer (Psfc,l+1,1);
+			Variable Zsf=gdf.prepareXYBuffer (Zsfc,l+1,1);
+			Variable[] sfBuf=new Variable[M];
+			Variable[] vsBuf=new Variable[M];
+			
+			float[][][]   tpdata=t.getData()[0];
+			float[][][]   ZZdata=Z.getData()[0];
+			float[][][]   sfData=new float[M][][];
+			float[][][][] vsData=new float[M][][][];
+			
+			for(int m=0;m<M;m++){
+				sfBuf[m]=gdf.prepareXYBuffer (vPrs[m],l+1,1);
+				vsBuf[m]=gdf.prepareXYZBuffer(vPrs[m],l+1  );
+				
+				sfData[m]=sfBuf[m].getData()[0][0];
+				vsData[m]=vsBuf[m].getData()[0];
+			}
+			
+			for(int j=0;j<sy;j++)
+			for(int i=0;i<sx;i++){	// loop for each grid
+				// preparing 1D vertical arrays
+				float[]   tpSrc=new float[sz];	// temperature
+				float[]   zzSrc=new float[sz];	// geopotential
+				float[]   sfSrc=new float[M ];
+				float[][] vsSrc=new float[M ][sz];
+				
+				for(int m=0;m<M;m++) sfSrc[m]=sfData[m][j][i];
+				
+				// store 1D vertical data
+				for(int k=0;k<sz;k++){
+					tpSrc[k]=tpdata[k][j][i];
+					zzSrc[k]=ZZdata[k][j][i];
+					for(int m=0;m<M;m++) vsSrc[m][k]=vsData[m][k][j][i];
+				}
+				
+				OnePointZMask pnt=new OnePointZMask(
+					Psf.getData()[0][0][j][i],
+					Tsf.getData()[0][0][j][i],
+					Zsf.getData()[0][0][j][i],
+					t.getUndef(),zdef,lnPSrc,tpSrc,zzSrc
+				);
+				
+				float[][] vDes=interpFromPress2Thetas(pnt,ptDes,sfSrc,vsSrc);
+				
+				for(int m=0;m<M+4;m++)
+				for(int k=0;k<z;k++) dedata[m][k][j][i]=vDes[m][k];
+			}
+			
+			for(int m=0;m<M+4;m++) cdws.writeData(desv[m]);
+		}
+		
+		cdws.closeFile();
+		
+		// write ctl
+		FileWriteInterface fwi=new FileWriteInterface(IOUtil.getCompleteFileNameWithoutExtension(path)+".ctl");
+		FileWriter fw=null;	Scanner sn=null;
+		
+		if(fwi.getFlag()!=SKIP){
+			StringBuilder sb=new StringBuilder();
+			
+			try{
+				switch(fwi.getFlag()){
+				case RENAME   : fw=new FileWriter(fwi.getParent()+fwi.getNewName()); break;
+				case OVERWRITE: fw=new FileWriter(fwi.getFile());                    break;
+				case APPEND   : fw=new FileWriter(fwi.getFile(),true);               break;
+				default       : throw new IllegalArgumentException("unsupported for "+fwi.getFlag());
+				}
+				sn=new Scanner(new File(srcdata.getPath()));
+				
+			}catch(IOException e){ e.printStackTrace(); System.exit(0);}
+			
+			while(sn.hasNextLine()){
+				String line=sn.nextLine();
+				
+				if(line.startsWith("dset")){
+					sb.append("dset ^"+IOUtil.getFileName(path)+"\n");
+					
+				}else if(line.startsWith("zdef")){
+					sb.append("zdef "+z+" levels ");
+					for(int k=0;k<z;k++) sb.append(ptDes[k]+" ");
+					sb.append("\n");
+				
+				}else if(line.startsWith("vars")){
+					sb.append("vars "+(vPrs.length+4)+"\n");
+					
+					Scanner tmp=new Scanner(line);
+					tmp.next();	int lc=Integer.parseInt(tmp.next());
+					tmp.close();
+					
+					List<String> vars=new ArrayList<>();
+					
+					for(int i=0;i<lc;i++) vars.add(sn.nextLine());
+					
+					for(int m=0;m<M;m++) for(String v:vars)
+					if(v.startsWith(vPrs[m]+" ")){ sb.append(v.replace(sz+"",z+"")+"\n"); break;}
+					
+					sb.append(String.format("%-11s %3d %5s %2s\n","sgm",z,99,"isentropic density (kg m^-2 s^-1)"));
+					sb.append(String.format("%-11s %3d %5s %2s\n","p",z,99,"pressure (Pa)"));
+					sb.append(String.format("%-11s %3d %5s %2s\n","z",z,99,"geopotential (m^2 s^-2)"));
+					sb.append(String.format("%-11s %3d %5s %2s\n","M",z,99,"Montgomery streamfunction (m^2 s^-2)"));
+				}
+				else if(line.startsWith("options")) continue;
+				else sb.append(line+"\n");
+			}
+			
+			sn.close();
+			
+			try{ fw.write(sb.toString());	fw.close();}
+			catch(IOException e){ e.printStackTrace(); System.exit(0);}
+		}
+		
+		System.out.println("Finish vertical interpolating.");
+	}
+	
+	
 	/*** helper methods ***/
-	private boolean inNameList(String name,String[] list){
+	
+	/**
+	 * Whether a variable of a given name is in a given list.
+	 * 
+	 * @param	name	a given variable name
+	 * @param	list	a given name list
+	 */
+	private static boolean inNameList(String name,String[] list){
 		if(list==null) return false;
 		
 		for(String s:list)
@@ -751,10 +1082,245 @@ public final class DataInterpolation{
 	}
 	
 	
+	/**
+	 * Using the Newton-Rapson iteration to solve Eq. (9) of 
+	 * Ziv and Alpert (1994, JAM) and find lnp for a given theta.
+	 * 
+	 * @param	iniGuess	initial guess of lnp (logPa)
+	 * @param	theta		a given theta
+	 * @param	a			coefficient in Eq. (8) of Ziv and Alpert (1994, JAM)
+	 * @param	b			coefficient in Eq. (8) of Ziv and Alpert (1994, JAM)
+	 * @param	undef		undefined value
+	 */
+	private static float iterateToFindLogP(float iniGuess,float theta,float a,float b,float undef){
+		if(iniGuess==undef) return undef;
+		
+		double exnerInv=P0k*Math.exp(-kappa*iniGuess);
+		double t=a*iniGuess+b;
+		
+		// Newton-Rapson interation
+		double f=theta-t*exnerInv;
+		double fp=exnerInv*(kappa*t-a);
+		
+		return (float)(iniGuess-(f/fp));
+	}
+	
+	
+	/**
+	 * Interpolate from pressure levels to specified theta levels with surface masks.
+	 * 
+	 * @param	pnt		OnePoint data needed for column interpolation
+	 * @param	ptDes	destined array of potential temperature (K)
+	 * @param	sfcV	all surface variable corresponding to vSrcs
+	 * @param	vPres	all variable sources to be interpolated
+	 */
+	private static float[][] interpFromPress2Thetas(OnePointZMask pnt,float[] ptDes,float[] sfcV,float[][] vPres){
+		int zD =ptDes.length;
+		int vC =vPres.length;
+		int idx=pnt.idx;
+		int sL =pnt.pres.length;
+		
+		float undef=pnt.undef;
+		
+		float[][] vDes=new float[vC+4][zD];
+		float[] sgmDes=vDes[vC  ];
+		float[] lnPDes=vDes[vC+1];
+		float[] geoDes=vDes[vC+2];
+		float[] monDes=vDes[vC+3];
+		
+		for(int k=0;k<zD;k++){
+			if(ptDes[k]>pnt.theta[sL-1]){// mask with undefined value
+				sgmDes[k]=undef;
+				lnPDes[k]=undef;
+				geoDes[k]=undef;
+				monDes[k]=undef;
+				for(int m=0;m<vC;m++) vDes[m][k]=undef;
+				continue;
+			}
+			
+			if(ptDes[k]==pnt.theta[sL-1]){// upper most point
+				sgmDes[k]=pnt.sigma[sL-1];
+				lnPDes[k]=pnt.pres[sL-1];
+				geoDes[k]=pnt.geopt[sL-1];
+				monDes[k]=ThermoDynamics.cTemperature(ptDes[k],pnt.pres[sL-1])*ThermoDynamics.Cp+pnt.geopt[sL-1];
+				for(int m=0;m<vC;m++) vDes[m][k]=vPres[m][sL-1];
+				continue;
+			}
+			
+			int idxC=ArrayUtil.getLEIdxIncre(pnt.theta,ptDes[k]);
+			
+			if(idxC==-1||idxC<idx){// mask with surface value
+				sgmDes[k]=0;
+				lnPDes[k]=pnt.pSfc;
+				geoDes[k]=pnt.zSfc;
+				monDes[k]=ThermoDynamics.cTemperature(ptDes[k],pnt.pSfc)*ThermoDynamics.Cp+pnt.zSfc;
+				for(int m=0;m<vC;m++) vDes[m][k]=sfcV[m];
+				continue;
+				
+			}else if(idxC==idx){
+				if(ptDes[k]<pnt.ptSfc){// mask with surface value
+					sgmDes[k]=0;
+					lnPDes[k]=pnt.pSfc;
+					geoDes[k]=pnt.zSfc;
+					monDes[k]=ThermoDynamics.cTemperature(ptDes[k],pnt.pSfc)*ThermoDynamics.Cp+pnt.zSfc;
+					for(int m=0;m<vC;m++) vDes[m][k]=sfcV[m];
+					continue;
+					
+				}else{// interpolate between surface and idxC+1
+					float a=(pnt.temp[idxC+1]-pnt.tSfc)/(pnt.lnPrs[idxC+1]-pnt.lPSfc);
+					float b= pnt.temp[idxC+1]-pnt.lnPrs[idxC+1]*a;
+					
+					lnPDes[k]=(pnt.lnPrs[idxC+1]+pnt.lPSfc)/2f;	// initial guess
+					
+					for(int i=0;i<50;i++){
+						float tmp=lnPDes[k];
+						lnPDes[k]=iterateToFindLogP(lnPDes[k],ptDes[k],a,b,undef);
+						tmp-=lnPDes[k];
+						if(tmp==undef||Math.abs(tmp)<1e-6) break;
+					}
+					
+					sgmDes[k]=-(pnt.pres[idxC+1]-pnt.pSfc)/(pnt.theta[idxC+1]-pnt.ptSfc)/gEarth;
+					lnPDes[k]=(float)Math.exp(lnPDes[k]);
+					geoDes[k]=InterpolationModel.linearInterpolation(pnt.ptSfc,pnt.theta[idxC+1],pnt.zSfc,pnt.geopt[idxC+1],ptDes[k],undef);
+					monDes[k]=ThermoDynamics.cTemperature(ptDes[k],lnPDes[k])*ThermoDynamics.Cp+geoDes[k];
+					
+					for(int m=0;m<vC;m++) vDes[m][k]=InterpolationModel.linearInterpolation(
+						pnt.theta[idxC],pnt.theta[idxC+1],sfcV[m],vPres[m][idxC+1],ptDes[k],undef
+					);
+				}
+				
+			}else{// interpolate between idxC and idxC+1
+				float a=(pnt.temp[idxC+1]-pnt.temp[idxC])/(pnt.lnPrs[idxC+1]-pnt.lnPrs[idxC]);
+				float b= pnt.temp[idxC+1]-pnt.lnPrs[idxC+1]*a;
+				
+				lnPDes[k]=(pnt.lnPrs[idxC+1]+pnt.lnPrs[idxC])/2f;	// initial guess
+				
+				for(int i=0;i<50;i++){
+					float tmp=lnPDes[k];
+					lnPDes[k]=iterateToFindLogP(lnPDes[k],ptDes[k],a,b,undef);
+					tmp-=lnPDes[k];
+					if(tmp==undef||Math.abs(tmp)<1e-6) break;
+				}
+				
+				sgmDes[k]=InterpolationModel.linearInterpolation(pnt.theta[idxC],pnt.theta[idxC+1],pnt.sigma[idxC],pnt.sigma[idxC+1],ptDes[k],undef);
+				lnPDes[k]=(float)Math.exp(lnPDes[k]);
+				geoDes[k]=InterpolationModel.linearInterpolation(pnt.theta[idxC],pnt.theta[idxC+1],pnt.geopt[idxC],pnt.geopt[idxC+1],ptDes[k],undef);
+				monDes[k]=ThermoDynamics.cTemperature(ptDes[k],lnPDes[k])*ThermoDynamics.Cp+geoDes[k];
+				
+				for(int m=0;m<vC;m++) vDes[m][k]=InterpolationModel.linearInterpolation(
+					pnt.theta[idxC],pnt.theta[idxC+1],vPres[m][idxC],vPres[m][idxC+1],ptDes[k],undef
+				);
+			}
+		}
+		
+		final float threshold=800;
+		for(int k=0;k<zD;k++)
+		if(sgmDes[k]>threshold){
+			if(sgmDes[k+1]<threshold) sgmDes[k]=sgmDes[k+1];
+			if(sgmDes[k+1]>threshold&&sgmDes[k+2]<threshold) sgmDes[k]=sgmDes[k+1]=sgmDes[k+2];
+		}
+		
+		return vDes;
+	}
+	
+	
+	/**
+	 * Help to collect those data needed for interpolate a single column.
+	 */
+	private static final class OnePointZMask{
+		//
+		int       idx=-1;	// index that pointed to the last underground point
+		
+		float   undef=0;	// undefined value
+		float    pSfc=0;	// surface pressure (Pa)
+		float    tSfc=0;	// surface temperature (K)
+		float    zSfc=0;	// surface geopotential (m^2 s^-2)
+		float   ptSfc=0;	// surface potential temperature (K)
+		float   lPSfc=0;	// surface natural log of pressure
+		
+		float[] pres =null;	// pressure at each pressure level (Pa)
+		float[] temp =null;	// temperature at each pressure level (K)
+		float[] geopt=null;	// geopotential at each pressure level (m^2 s^-2)
+		float[] theta=null;	// potential temperature at each pressure level (K)
+		float[] lnPrs=null;	// natural log of pressure at each pressure level
+		float[] sigma=null;	// -g*d(p)/d(theta) at each pressure level, pre-calculated before interpolation
+		
+		
+		/**
+		 * Constructor.
+		 */
+		public OnePointZMask(float pSfc,float tSfc,float zSfc,float undef,float[] pres,float[] lnPrs,float[] temp,float[] geopt){
+			int z=pres.length;
+			
+			this.undef=undef; this.pSfc=pSfc;
+			this.tSfc =tSfc ; this.zSfc=zSfc;
+			this.lnPrs=lnPrs; this.pres=pres;
+			this.geopt=geopt; this.temp=temp;
+			
+			lPSfc=(float)Math.log(pSfc);
+			ptSfc=ThermoDynamics.cPotentialTemperature(tSfc,pSfc);
+			
+			theta=new float[z];
+			sigma=new float[z];
+			
+			for(int k=0;k<z;k++) theta[k]=ThermoDynamics.cPotentialTemperature(temp[k],pres[k]);
+			
+			Arrays.sort(theta);
+			
+			//mono=monotonic(theta);
+			
+			idx=ArrayUtil.getLEIdxIncre(geopt,zSfc);
+			
+			interpIsentropicDensity();
+		}
+		
+		
+		/**
+		 * Check the potential temperature at pressure levels to be monotonic increasing with height.
+		private boolean monotonic(float[] theta){
+			for(int k=idx+1,K=theta.length-1;k<K;k++)
+			if(theta[k+1]<theta[k]) return false;
+			
+			return true;
+		}
+		 */
+		
+		/**
+		 * Calculate isentropic density at irregular pressure levels.
+		 */
+		private void interpIsentropicDensity(){
+			int z=theta.length;
+			
+			float[] prsHalf=new float[z+1];	// half grid pressure
+			float[] denHalf=new float[z+1];	// half grid density
+			
+			for(int k=1;k<z;k++){
+				prsHalf[k]= (pres[k]+pres[k-1])/2f;
+				denHalf[k]=-(pres[k]-pres[k-1])/(theta[k]-theta[k-1])/gEarth;
+			}
+			
+			prsHalf[0]=pres[0  ]; denHalf[0]=denHalf[1];
+			prsHalf[z]=pres[z-1]; denHalf[z]=denHalf[z-1];
+			
+			// interpolate back to original pressure levels and stored in isenDen array
+			InterpolationModel.interp1D(prsHalf,denHalf,pres,sigma,Type.LINEAR,undef,false);
+		}
+	}
+	
+	
 	/** test
-	public static void main(String[] args){
+	public static void main(String[] args){System.out.println(ThermoDynamics.kappa);
 		DataInterpolation di=new DataInterpolation(DiagnosisFactory.parseFile(
-			"D:/Data/ERAInterim/Keff/PV/PV.ctl"
+			"D:/Data/ERAInterim/BKGState/OriginalData/DataPrs.ctl"
 		).getDataDescriptor());
+		
+		di.isobaricToIsentropicInterp(
+			"D:/Data/ERAInterim/BKGState/OriginalData/DataPTInterp.dat","t","z","zsfc",
+			new float[]{265,275,285,300,315,330,350,370,395,430,475,530,600,700,850},new String[]{"u","v"});
+		
+		di.isobaricToIsentropicInterp(
+			"D:/Data/ERAInterim/BKGState/OriginalData/DataPTInterpMask.dat","t","z","tsfc","psfc","zsfc",
+			new float[]{265,275,285,300,315,330,350,370,395,430,475,530,600,700,850},
+			new String[]{"u10","v10"},new String[]{"u","v"});
 	}*/
 }

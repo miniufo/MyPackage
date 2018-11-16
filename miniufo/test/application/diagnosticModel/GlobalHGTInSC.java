@@ -14,8 +14,8 @@ import miniufo.test.application.basic.GlobalLaplaceEquationInSC;
 import miniufo.application.basic.SphericalHarmonicExpansion;
 import static java.lang.Math.cos;
 import static miniufo.geophysics.atmos.ThermoDynamics.Rd;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
-import static miniufo.diagnosis.SpatialModel.GRAVITY_ACCERLERATION;
+import static miniufo.diagnosis.SpatialModel.REarth;
+import static miniufo.diagnosis.SpatialModel.gEarth;
 
 
 /**
@@ -678,13 +678,13 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++)
 			for(int j=1;j<y-1;j++)
-			for(int i=0;i<x;i++) Fdata[l][k][j][i]=-uwnddata[l][k][j][i]*f2[j]/EARTH_RADIUS;
+			for(int i=0;i<x;i++) Fdata[l][k][j][i]=-uwnddata[l][k][j][i]*f2[j]/REarth;
 			
 		}else{
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++)
 			for(int j=1;j<y-1;j++)
-			for(int i=0;i<x;i++) Fdata[k][j][i][l]=-uwnddata[k][j][i][l]*f2[j]/EARTH_RADIUS;
+			for(int i=0;i<x;i++) Fdata[k][j][i][l]=-uwnddata[k][j][i][l]*f2[j]/REarth;
 		}
 	}
 	
@@ -705,20 +705,20 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 					Fdata[l][k][j][i]=(
 						uwnddata[l][k][j][i+1]*vwnddata[l][k][j][i+1]-
 						uwnddata[l][k][j][i-1]*vwnddata[l][k][j][i-1]
-					)*ltan[j]/(dxs[j]*2)/EARTH_RADIUS;
+					)*ltan[j]/(dxs[j]*2)/REarth;
 				}
 				
 				/*** East boundary ***/
 				Fdata[l][k][j][0]=(
 					uwnddata[l][k][j][1]*vwnddata[l][k][j][1]-
 					uwnddata[l][k][j][x-1]*vwnddata[l][k][j][x-1]
-				)*ltan[j]/(dxs[j]*2)/EARTH_RADIUS;
+				)*ltan[j]/(dxs[j]*2)/REarth;
 				
 				/*** West boundary ***/
 				Fdata[l][k][j][x-1]=(
 					uwnddata[l][k][j][0]*vwnddata[l][k][j][0]-
 					uwnddata[l][k][j][x-2]*vwnddata[l][k][j][x-2]
-				)*ltan[j]/(dxs[j]*2)/EARTH_RADIUS;
+				)*ltan[j]/(dxs[j]*2)/REarth;
 			}
 			
 		}else{
@@ -729,20 +729,20 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 					Fdata[k][j][i][l]=(
 						uwnddata[k][j][i+1][l]*vwnddata[k][j][i+1][l]-
 						uwnddata[k][j][i-1][l]*vwnddata[k][j][i-1][l]
-					)*ltan[j]/(dxs[j]*2)/EARTH_RADIUS;
+					)*ltan[j]/(dxs[j]*2)/REarth;
 				}
 				
 				/*** East boundary ***/
 				Fdata[k][j][0][l]=(
 					uwnddata[k][j][1][l]*vwnddata[k][j][1][l]-
 					uwnddata[k][j][x-1][l]*vwnddata[k][j][x-1][l]
-				)*ltan[j]/(dxs[j]*2)/EARTH_RADIUS;
+				)*ltan[j]/(dxs[j]*2)/REarth;
 				
 				/*** West boundary ***/
 				Fdata[k][j][x-1][l]=(
 					uwnddata[k][j][0][l]*vwnddata[k][j][0][l]-
 					uwnddata[k][j][x-2][l]*vwnddata[k][j][x-2][l]
-				)*ltan[j]/(dxs[j]*2)/EARTH_RADIUS;
+				)*ltan[j]/(dxs[j]*2)/REarth;
 			}
 		}
 	}
@@ -763,7 +763,7 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 				Fdata[l][k][j][i]=-(
 					uwnddata[l][k][j+1][i]*uwnddata[l][k][j+1][i]*lsin[j+1]-
 					uwnddata[l][k][j-1][i]*uwnddata[l][k][j-1][i]*lsin[j-1]
-				)/(dy*2)/lcos[j]/EARTH_RADIUS;
+				)/(dy*2)/lcos[j]/REarth;
 			}
 			
 		}else{
@@ -774,7 +774,7 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 				Fdata[k][j][i][l]=-(
 					uwnddata[k][j+1][i][l]*uwnddata[k][j+1][i][l]*lsin[j+1]-
 					uwnddata[k][j-1][i][l]*uwnddata[k][j-1][i][l]*lsin[j-1]
-				)/(dy*2)/lcos[j]/EARTH_RADIUS;
+				)/(dy*2)/lcos[j]/REarth;
 			}
 		}
 	}
@@ -796,7 +796,7 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 			for(int k=0;k<z;k++)
 			for(int j=1;j<y-1;j++)
 			for(int i=0;i<x;i++)
-				Fdata[l][k][j][i]=Rd/GRAVITY_ACCERLERATION/EARTH_RADIUS/zdef[zstart-1+k]*
+				Fdata[l][k][j][i]=Rd/gEarth/REarth/zdef[zstart-1+k]*
 					airdata[l][k][j][i]*omegadata[l][k][j][i]*divdata[l][k][j][i];
 			
 		}else{
@@ -804,7 +804,7 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 			for(int k=0;k<z;k++)
 			for(int j=1;j<y-1;j++)
 			for(int i=0;i<x;i++)
-				Fdata[k][j][i][l]=Rd/GRAVITY_ACCERLERATION/EARTH_RADIUS/zdef[zstart-1+k]*
+				Fdata[k][j][i][l]=Rd/gEarth/REarth/zdef[zstart-1+k]*
 					airdata[k][j][i][l]*omegadata[k][j][i][l]*divdata[k][j][i][l];
 		}
 	}
@@ -832,7 +832,7 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 						uwnddata[l][k][j][i]/(dxs[j]*2)+
 						(omegadata[l][k][j+1][i]*airdata[l][k][j+1][i]-omegadata[l][k][j-1][i]*airdata[l][k][j-1][i])*
 						vwnddata[l][k][j][i]/(dy*2)
-					)*Rd/zdef[zstart-1+k]/GRAVITY_ACCERLERATION/EARTH_RADIUS;
+					)*Rd/zdef[zstart-1+k]/gEarth/REarth;
 				}
 				
 				/*** East boundary ***/
@@ -841,7 +841,7 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 					uwnddata[l][k][j][0]/(dxs[j]*2)+
 					(omegadata[l][k][j+1][0]*airdata[l][k][j+1][0]-omegadata[l][k][j-1][0]*airdata[l][k][j-1][0])*
 					vwnddata[l][k][j][0]/(dy*2)
-				)*Rd/zdef[zstart-1+k]/GRAVITY_ACCERLERATION/EARTH_RADIUS;
+				)*Rd/zdef[zstart-1+k]/gEarth/REarth;
 				
 				/*** West boundary ***/
 				Fdata[l][k][j][x-1]=(
@@ -849,7 +849,7 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 					uwnddata[l][k][j][x-1]/(dxs[j]*2)+
 					(omegadata[l][k][j+1][x-1]*airdata[l][k][j+1][x-1]-omegadata[l][k][j-1][x-1]*airdata[l][k][j-1][x-1])*
 					vwnddata[l][k][j][x-1]/(dy*2)
-				)*Rd/zdef[zstart-1+k]/GRAVITY_ACCERLERATION/EARTH_RADIUS;
+				)*Rd/zdef[zstart-1+k]/gEarth/REarth;
 			}
 			
 		}else{
@@ -862,7 +862,7 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 						uwnddata[k][j][i][l]/(dxs[j]*2)+
 						(omegadata[k][j+1][i][l]*airdata[k][j+1][i][l]-omegadata[k][j-1][i][l]*airdata[k][j-1][i][l])*
 						vwnddata[k][j][i][l]/(dy*2)
-					)*Rd/zdef[zstart-1+k]/GRAVITY_ACCERLERATION/EARTH_RADIUS;
+					)*Rd/zdef[zstart-1+k]/gEarth/REarth;
 				}
 				
 				/*** East boundary ***/
@@ -871,7 +871,7 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 					uwnddata[k][j][0][l]/(dxs[j]*2)+
 					(omegadata[k][j+1][0][l]*airdata[k][j+1][0][l]-omegadata[k][j-1][0][l]*airdata[k][j-1][0][l])*
 					vwnddata[k][j][0][l]/(dy*2)
-				)*Rd/zdef[zstart-1+k]/GRAVITY_ACCERLERATION/EARTH_RADIUS;
+				)*Rd/zdef[zstart-1+k]/gEarth/REarth;
 				
 				/*** West boundary ***/
 				Fdata[k][j][x-1][l]=(
@@ -879,7 +879,7 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 					uwnddata[k][j][x-1][l]/(dxs[j]*2)+
 					(omegadata[k][j+1][x-1][l]*airdata[k][j+1][x-1][l]-omegadata[k][j-1][x-1][l]*airdata[k][j-1][x-1][l])*
 					vwnddata[k][j][x-1][l]/(dy*2)
-				)*Rd/zdef[zstart-1+k]/GRAVITY_ACCERLERATION/EARTH_RADIUS;
+				)*Rd/zdef[zstart-1+k]/gEarth/REarth;
 			}
 		}
 	}
@@ -902,20 +902,20 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 				for(int i=1;i<x-1;i++){
 					Fdata[l][k][j][i]=(
 						(omegadata[l][k][j][i+1]*airdata[l][k][j][i+1]-omegadata[l][k][j][i-1]*airdata[l][k][j][i-1])*
-						f2[j]*Rd/GRAVITY_ACCERLERATION/zdef[zstart-1+k]/(dxs[j]*2)
+						f2[j]*Rd/gEarth/zdef[zstart-1+k]/(dxs[j]*2)
 					);
 				}
 				
 				/*** East boundary ***/
 				Fdata[l][k][j][0]=(
 					(omegadata[l][k][j][1]*airdata[l][k][j][1]-omegadata[l][k][j][x-1]*airdata[l][k][j][x-1])*
-					f2[j]*Rd/GRAVITY_ACCERLERATION/zdef[zstart-1+k]/(dxs[j]*2)
+					f2[j]*Rd/gEarth/zdef[zstart-1+k]/(dxs[j]*2)
 				);
 				
 				/*** West boundary ***/
 				Fdata[l][k][j][x-1]=(
 					(omegadata[l][k][j][0]*airdata[l][k][j][0]-omegadata[l][k][j][x-2]*airdata[l][k][j][x-2])*
-					f2[j]*Rd/GRAVITY_ACCERLERATION/zdef[zstart-1+k]/(dxs[j]*2)
+					f2[j]*Rd/gEarth/zdef[zstart-1+k]/(dxs[j]*2)
 				);
 			}
 			
@@ -926,20 +926,20 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 				for(int i=1;i<x-1;i++){
 					Fdata[k][j][i][l]=(
 						(omegadata[k][j][i+1][l]*airdata[k][j][i+1][l]-omegadata[k][j][i-1][l]*airdata[k][j][i-1][l])*
-						f2[j]*Rd/GRAVITY_ACCERLERATION/zdef[zstart-1+k]/(dxs[j]*2)
+						f2[j]*Rd/gEarth/zdef[zstart-1+k]/(dxs[j]*2)
 					);
 				}
 				
 				/*** East boundary ***/
 				Fdata[k][j][0][l]=(
 					(omegadata[k][j][1][l]*airdata[k][j][1][l]-omegadata[k][j][x-1][l]*airdata[k][j][x-1][l])*
-					f2[j]*Rd/GRAVITY_ACCERLERATION/zdef[zstart-1+k]/(dxs[j]*2)
+					f2[j]*Rd/gEarth/zdef[zstart-1+k]/(dxs[j]*2)
 				);
 				
 				/*** West boundary ***/
 				Fdata[k][j][x-1][l]=(
 					(omegadata[k][j][0][l]*airdata[k][j][0][l]-omegadata[k][j][x-2][l]*airdata[k][j][x-2][l])*
-					f2[j]*Rd/GRAVITY_ACCERLERATION/zdef[zstart-1+k]/(dxs[j]*2)
+					f2[j]*Rd/gEarth/zdef[zstart-1+k]/(dxs[j]*2)
 				);
 			}
 		}
@@ -1001,19 +1001,19 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 					
 					Fdata[l][k][j][i]+=f1[j]*vordata[l][k][j][i];
 					
-					Fdata[l][k][j][i]+=-uwnddata[l][k][j][i]*f2[j]/EARTH_RADIUS;
+					Fdata[l][k][j][i]+=-uwnddata[l][k][j][i]*f2[j]/REarth;
 					/**/
 					Fdata[l][k][j][i]+=(
 						uwnddata[l][k][j][i+1]*vwnddata[l][k][j][i+1]*ltan[j]-
 						uwnddata[l][k][j][i-1]*vwnddata[l][k][j][i-1]*ltan[j]
-					)/(dxs[j]*2)/EARTH_RADIUS;
+					)/(dxs[j]*2)/REarth;
 					/**/
 					Fdata[l][k][j][i]+=-(
 						uwnddata[l][k][j+1][i]*uwnddata[l][k][j+1][i]*lsin[j]-
 						uwnddata[l][k][j-1][i]*uwnddata[l][k][j-1][i]*lsin[j]
-					)/(dy*2)/lcos[j]/EARTH_RADIUS;
+					)/(dy*2)/lcos[j]/REarth;
 					/**/
-					Fdata[l][k][j][i]+=Rd/GRAVITY_ACCERLERATION/EARTH_RADIUS/zdef[zstart-1+k]*
+					Fdata[l][k][j][i]+=Rd/gEarth/REarth/zdef[zstart-1+k]*
 						airdata[l][k][j][i]*omegadata[l][k][j][i]*divdata[l][k][j][i];
 					/**/
 					Fdata[l][k][j][i]+=(
@@ -1021,11 +1021,11 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 						uwnddata[l][k][j][i]/(dxs[j]*2)+
 						(omegadata[l][k][j+1][i]*airdata[l][k][j+1][i]-omegadata[l][k][j-1][i]*airdata[l][k][j-1][i])*
 						vwnddata[l][k][j][i]/(dy*2)
-					)*Rd/zdef[zstart-1+k]/GRAVITY_ACCERLERATION/EARTH_RADIUS;
+					)*Rd/zdef[zstart-1+k]/gEarth/REarth;
 					/**/
 					Fdata[l][k][j][i]+=(
 						(omegadata[l][k][j][i+1]*airdata[l][k][j][i+1]-omegadata[l][k][j][i-1]*airdata[l][k][j][i-1])*
-						f2[j]*Rd/GRAVITY_ACCERLERATION/zdef[zstart-1+k]/(dxs[j]*2)
+						f2[j]*Rd/gEarth/zdef[zstart-1+k]/(dxs[j]*2)
 					);
 					/**/
 					Fdata[l][k][j][i]+=-omegadata[l][k][j][i]*(divdata[l][k+1][j][i]-divdata[l][k-1][j][i])/(dz+dz);
@@ -1068,19 +1068,19 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 				
 				Fdata[l][k][j][0]+=f1[j]*vordata[l][k][j][0];
 				
-				Fdata[l][k][j][0]+=-uwnddata[l][k][j][0]*f2[j]/EARTH_RADIUS;
+				Fdata[l][k][j][0]+=-uwnddata[l][k][j][0]*f2[j]/REarth;
 				/**/
 				Fdata[l][k][j][0]+=(
 					uwnddata[l][k][j][1]*vwnddata[l][k][j][1]*ltan[j]-
 					uwnddata[l][k][j][x-1]*vwnddata[l][k][j][x-1]*ltan[j]
-				)/(dxs[j]*2)/EARTH_RADIUS;
+				)/(dxs[j]*2)/REarth;
 				/**/
 				Fdata[l][k][j][0]+=-(
 					uwnddata[l][k][j+1][0]*uwnddata[l][k][j+1][0]*lsin[j]-
 					uwnddata[l][k][j-1][0]*uwnddata[l][k][j-1][0]*lsin[j]
-				)/(dy*2)/lcos[j]/EARTH_RADIUS;
+				)/(dy*2)/lcos[j]/REarth;
 				/**/
-				Fdata[l][k][j][0]+=Rd/GRAVITY_ACCERLERATION/EARTH_RADIUS/zdef[zstart-1+k]*
+				Fdata[l][k][j][0]+=Rd/gEarth/REarth/zdef[zstart-1+k]*
 					airdata[l][k][j][0]*omegadata[l][k][j][0]*divdata[l][k][j][0];
 				/**/
 				Fdata[l][k][j][0]+=(
@@ -1088,11 +1088,11 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 					uwnddata[l][k][j][0]/(dxs[j]*2)+
 					(omegadata[l][k][j+1][0]*airdata[l][k][j+1][0]-omegadata[l][k][j-1][0]*airdata[l][k][j-1][0])*
 					vwnddata[l][k][j][0]/(dy*2)
-				)*Rd/zdef[zstart-1+k]/GRAVITY_ACCERLERATION/EARTH_RADIUS;
+				)*Rd/zdef[zstart-1+k]/gEarth/REarth;
 				/**/
 				Fdata[l][k][j][0]+=(
 					(omegadata[l][k][j][1]*airdata[l][k][j][1]-omegadata[l][k][j][x-1]*airdata[l][k][j][x-1])*
-					f2[j]*Rd/GRAVITY_ACCERLERATION/zdef[zstart-1+k]/(dxs[j]*2)
+					f2[j]*Rd/gEarth/zdef[zstart-1+k]/(dxs[j]*2)
 				);
 				/**/
 				Fdata[l][k][j][0]+=-omegadata[l][k][j][0]*(divdata[l][k+1][j][0]-divdata[l][k-1][j][0])/(dz+dz);
@@ -1134,19 +1134,19 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 				
 				Fdata[l][k][j][x-1]+=f1[j]*vordata[l][k][j][x-1];
 				
-				Fdata[l][k][j][x-1]+=-uwnddata[l][k][j][x-1]*f2[j]/EARTH_RADIUS;
+				Fdata[l][k][j][x-1]+=-uwnddata[l][k][j][x-1]*f2[j]/REarth;
 				/**/
 				Fdata[l][k][j][x-1]+=(
 					uwnddata[l][k][j][0]*vwnddata[l][k][j][0]*ltan[j]-
 					uwnddata[l][k][j][x-2]*vwnddata[l][k][j][x-2]*ltan[j]
-				)/(dxs[j]*2)/EARTH_RADIUS;
+				)/(dxs[j]*2)/REarth;
 				/**/
 				Fdata[l][k][j][x-1]+=-(
 					uwnddata[l][k][j+1][x-1]*uwnddata[l][k][j+1][x-1]*lsin[j]-
 					uwnddata[l][k][j-1][x-1]*uwnddata[l][k][j-1][x-1]*lsin[j]
-				)/(dy*2)/lcos[j]/EARTH_RADIUS;
+				)/(dy*2)/lcos[j]/REarth;
 				/**/
-				Fdata[l][k][j][x-1]+=Rd/GRAVITY_ACCERLERATION/EARTH_RADIUS/zdef[zstart-1+k]*
+				Fdata[l][k][j][x-1]+=Rd/gEarth/REarth/zdef[zstart-1+k]*
 					airdata[l][k][j][x-1]*omegadata[l][k][j][x-1]*divdata[l][k][j][x-1];
 				/**/
 				Fdata[l][k][j][x-1]+=(
@@ -1154,11 +1154,11 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 					uwnddata[l][k][j][x-1]/(dxs[j]*2)+
 					(omegadata[l][k][j+1][x-1]*airdata[l][k][j+1][x-1]-omegadata[l][k][j-1][x-1]*airdata[l][k][j-1][x-1])*
 					vwnddata[l][k][j][x-1]/(dy*2)
-				)*Rd/zdef[zstart-1+k]/GRAVITY_ACCERLERATION/EARTH_RADIUS;
+				)*Rd/zdef[zstart-1+k]/gEarth/REarth;
 				/**/
 				Fdata[l][k][j][x-1]+=(
 					(omegadata[l][k][j][0]*airdata[l][k][j][0]-omegadata[l][k][j][x-2]*airdata[l][k][j][x-2])*
-					f2[j]*Rd/GRAVITY_ACCERLERATION/zdef[zstart-1+k]/(dxs[j]*2)
+					f2[j]*Rd/gEarth/zdef[zstart-1+k]/(dxs[j]*2)
 				);
 				/**/
 				Fdata[l][k][j][x-1]+=-omegadata[l][k][j][x-1]*(divdata[l][k+1][j][x-1]-divdata[l][k-1][j][x-1])/(dz+dz);
@@ -1204,19 +1204,19 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 					
 					Fdata[k][j][i][l]+=f1[j]*vordata[k][j][i][l];
 					
-					Fdata[k][j][i][l]+=-uwnddata[k][j][i][l]*f2[j]/EARTH_RADIUS;
+					Fdata[k][j][i][l]+=-uwnddata[k][j][i][l]*f2[j]/REarth;
 					/**/
 					Fdata[k][j][i][l]+=(
 						uwnddata[k][j][i+1][l]*vwnddata[k][j][i+1][l]*ltan[j]-
 						uwnddata[k][j][i-1][l]*vwnddata[k][j][i-1][l]*ltan[j]
-					)/(dxs[j]*2)/EARTH_RADIUS;
+					)/(dxs[j]*2)/REarth;
 					/**/
 					Fdata[k][j][i][l]+=-(
 						uwnddata[k][j+1][i][l]*uwnddata[k][j+1][i][l]*lsin[j]-
 						uwnddata[k][j-1][i][l]*uwnddata[k][j-1][i][l]*lsin[j]
-					)/(dy*2)/lcos[j]/EARTH_RADIUS;
+					)/(dy*2)/lcos[j]/REarth;
 					/**/
-					Fdata[k][j][i][l]+=Rd/GRAVITY_ACCERLERATION/EARTH_RADIUS/zdef[zstart-1+k]*
+					Fdata[k][j][i][l]+=Rd/gEarth/REarth/zdef[zstart-1+k]*
 						airdata[k][j][i][l]*omegadata[k][j][i][l]*divdata[k][j][i][l];
 					/**/
 					Fdata[k][j][i][l]+=(
@@ -1224,11 +1224,11 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 						uwnddata[k][j][i][l]/(dxs[j]*2)+
 						(omegadata[k][j+1][i][l]*airdata[k][j+1][i][l]-omegadata[k][j-1][i][l]*airdata[k][j-1][i][l])*
 						vwnddata[k][j][i][l]/(dy*2)
-					)*Rd/zdef[zstart-1+k]/GRAVITY_ACCERLERATION/EARTH_RADIUS;
+					)*Rd/zdef[zstart-1+k]/gEarth/REarth;
 					/**/
 					Fdata[k][j][i][l]+=(
 						(omegadata[k][j][i+1][l]*airdata[k][j][i+1][l]-omegadata[k][j][i-1][l]*airdata[k][j][i-1][l])*
-						f2[j]*Rd/GRAVITY_ACCERLERATION/zdef[zstart-1+k]/(dxs[j]*2)
+						f2[j]*Rd/gEarth/zdef[zstart-1+k]/(dxs[j]*2)
 					);
 					/**/
 					Fdata[k][j][i][l]+=-omegadata[k][j][i][l]*(divdata[k+1][j][i][l]-divdata[k-1][j][i][l])/(dz+dz);
@@ -1271,19 +1271,19 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 				
 				Fdata[k][j][0][l]+=f1[j]*vordata[k][j][0][l];
 				
-				Fdata[k][j][0][l]+=-uwnddata[k][j][0][l]*f2[j]/EARTH_RADIUS;
+				Fdata[k][j][0][l]+=-uwnddata[k][j][0][l]*f2[j]/REarth;
 				/**/
 				Fdata[k][j][0][l]+=(
 					uwnddata[k][j][1][l]*vwnddata[k][j][1][l]*ltan[j]-
 					uwnddata[k][j][x-1][l]*vwnddata[k][j][x-1][l]*ltan[j]
-				)/(dxs[j]*2)/EARTH_RADIUS;
+				)/(dxs[j]*2)/REarth;
 				/**/
 				Fdata[k][j][0][l]+=-(
 					uwnddata[k][j+1][0][l]*uwnddata[k][j+1][0][l]*lsin[j]-
 					uwnddata[k][j-1][0][l]*uwnddata[k][j-1][0][l]*lsin[j]
-				)/(dy*2)/lcos[j]/EARTH_RADIUS;
+				)/(dy*2)/lcos[j]/REarth;
 				/**/
-				Fdata[k][j][0][l]+=Rd/GRAVITY_ACCERLERATION/EARTH_RADIUS/zdef[zstart-1+k]*
+				Fdata[k][j][0][l]+=Rd/gEarth/REarth/zdef[zstart-1+k]*
 					airdata[k][j][0][l]*omegadata[k][j][0][l]*divdata[k][j][0][l];
 				/**/
 				Fdata[k][j][0][l]+=(
@@ -1291,11 +1291,11 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 					uwnddata[k][j][0][l]/(dxs[j]*2)+
 					(omegadata[k][j+1][0][l]*airdata[k][j+1][0][l]-omegadata[k][j-1][0][l]*airdata[k][j-1][0][l])*
 					vwnddata[k][j][0][l]/(dy*2)
-				)*Rd/zdef[zstart-1+k]/GRAVITY_ACCERLERATION/EARTH_RADIUS;
+				)*Rd/zdef[zstart-1+k]/gEarth/REarth;
 				/**/
 				Fdata[k][j][0][l]+=(
 					(omegadata[k][j][1][l]*airdata[k][j][1][l]-omegadata[k][j][x-1][l]*airdata[k][j][x-1][l])*
-					f2[j]*Rd/GRAVITY_ACCERLERATION/zdef[zstart-1+k]/(dxs[j]*2)
+					f2[j]*Rd/gEarth/zdef[zstart-1+k]/(dxs[j]*2)
 				);
 				/**/
 				Fdata[k][j][0][l]+=-omegadata[k][j][0][l]*(divdata[k+1][j][0][l]-divdata[k-1][j][0][l])/(dz+dz);
@@ -1337,19 +1337,19 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 				
 				Fdata[k][j][x-1][l]+=f1[j]*vordata[k][j][x-1][l];
 				
-				Fdata[k][j][x-1][l]+=-uwnddata[k][j][x-1][l]*f2[j]/EARTH_RADIUS;
+				Fdata[k][j][x-1][l]+=-uwnddata[k][j][x-1][l]*f2[j]/REarth;
 				/**/
 				Fdata[k][j][x-1][l]+=(
 					uwnddata[k][j][0][l]*vwnddata[k][j][0][l]*ltan[j]-
 					uwnddata[k][j][x-2][l]*vwnddata[k][j][x-2][l]*ltan[j]
-				)/(dxs[j]*2)/EARTH_RADIUS;
+				)/(dxs[j]*2)/REarth;
 				/**/
 				Fdata[k][j][x-1][l]+=-(
 					uwnddata[k][j+1][x-1][l]*uwnddata[k][j+1][x-1][l]*lsin[j]-
 					uwnddata[k][j-1][x-1][l]*uwnddata[k][j-1][x-1][l]*lsin[j]
-				)/(dy*2)/lcos[j]/EARTH_RADIUS;
+				)/(dy*2)/lcos[j]/REarth;
 				/**/
-				Fdata[k][j][x-1][l]+=Rd/GRAVITY_ACCERLERATION/EARTH_RADIUS/zdef[zstart-1+k]*
+				Fdata[k][j][x-1][l]+=Rd/gEarth/REarth/zdef[zstart-1+k]*
 					airdata[k][j][x-1][l]*omegadata[k][j][x-1][l]*divdata[k][j][x-1][l];
 				/**/
 				Fdata[k][j][x-1][l]+=(
@@ -1357,11 +1357,11 @@ public final class GlobalHGTInSC extends GlobalEllipticalEquationInSpheralCoordi
 					uwnddata[k][j][x-1][l]/(dxs[j]*2)+
 					(omegadata[k][j+1][x-1][l]*airdata[k][j+1][x-1][l]-omegadata[k][j-1][x-1][l]*airdata[k][j-1][x-1][l])*
 					vwnddata[k][j][x-1][l]/(dy*2)
-				)*Rd/zdef[zstart-1+k]/GRAVITY_ACCERLERATION/EARTH_RADIUS;
+				)*Rd/zdef[zstart-1+k]/gEarth/REarth;
 				/**/
 				Fdata[k][j][x-1][l]+=(
 					(omegadata[k][j][0][l]*airdata[k][j][0][l]-omegadata[k][j][x-2][l]*airdata[k][j][x-2][l])*
-					f2[j]*Rd/GRAVITY_ACCERLERATION/zdef[zstart-1+k]/(dxs[j]*2)
+					f2[j]*Rd/gEarth/zdef[zstart-1+k]/(dxs[j]*2)
 				);
 				/**/
 				Fdata[k][j][x-1][l]+=-omegadata[k][j][x-1][l]*(divdata[k+1][j][x-1][l]-divdata[k-1][j][x-1][l])/(dz+dz);

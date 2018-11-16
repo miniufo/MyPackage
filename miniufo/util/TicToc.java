@@ -53,6 +53,24 @@ public final class TicToc{
 		return re;
 	}
 	
+	public static double toc(String s,TimeUnit unit){
+		long elapsedTime=System.nanoTime()-savedTime;
+		double re=0;
+		
+		switch(unit){
+		case MILLISECONDS: re=elapsedTime/1e6;		break;
+		case SECONDS: re=elapsedTime/1e9;			break;
+		case MINUTES: re=elapsedTime/1e9/60.0;		break;
+		case HOURS  : re=elapsedTime/1e9/3600.0;	break;
+		case DAYS   : re=elapsedTime/1e9/86400.0;	break;
+		default: throw new IllegalArgumentException("unsupported TimeUnit: "+unit);
+		}
+		
+		System.out.printf(s+" (%.3f "+unit+")\n",re);
+		
+		return re;
+	}
+	
 	
 	/** test
 	public static void main(String[] args){

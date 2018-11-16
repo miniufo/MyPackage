@@ -7,11 +7,12 @@
 package miniufo.application.contour;
 
 import miniufo.basic.ArrayUtil;
+import miniufo.basic.InterpolationModel;
 
 
 /**
  * This class describe a series of contours used to setup a
- * tracer-contour-based coordinate space.
+ * tracer-contour-based spatial coordinate.
  *
  * @version 1.0, 2017.06.09
  * @author  MiniUFO
@@ -29,8 +30,8 @@ public final class Contours{
 	private double meanIntv=0;		// mean interval
 	
 	private double[] values=null;	// values of contours
-	private double[] areas =null;	// area of each contour
-	private double[] Yeqvs =null;	// equivalent Ys
+	
+	private ContourTable ct=null;	// tabulated M(q), C(q), A(q) and Yeq(q)
 	
 	
 	/**
@@ -60,14 +61,16 @@ public final class Contours{
 		for(int c=0,I=number;c<I;c++) values[c]=southVal+meanIntv*c;
 		
 		isLinear=true;
+		
+		ct=new ContourTable();
 	}
 	
 	/**
-	 * Compute the contours given the south-most and north-most contours
+	 * Compute the contours given the south-most and north-most contours.
 	 * 
 	 * @param	csouth	south-most contour
 	 * @param	cnorth	north-most contour
-	 * @param	numOfC	number of contours
+	 * @param	inc		increment of contour
 	 */
 	public Contours(float csouth,float cnorth,float inc){
 		increSToN=csouth<cnorth;
@@ -79,12 +82,17 @@ public final class Contours{
 		if(number-1!=Math.round((northVal-southVal)/inc))
 		throw new IllegalArgumentException("overflow");
 		
+		if( increSToN&&inc<0) throw new IllegalArgumentException("contour increment ("+inc+") should be positive");
+		if(!increSToN&&inc>0) throw new IllegalArgumentException("contour increment ("+inc+") should be negative");
+		
 		check();
 		
 		values=new double[number];
 		for(int c=0,I=number;c<I;c++) values[c]=southVal+inc*c;
 		
 		isLinear=true;
+		
+		ct=new ContourTable();
 	}
 	
 	/**
@@ -106,6 +114,8 @@ public final class Contours{
 		
 		for(int i=0,I=number-1;i<I;i++)
 		if(Math.abs(values[i+1]-values[i]-meanIntv)/meanIntv>1e-3){ isLinear=false; break;}
+		
+		ct=new ContourTable();
 	}
 	
 	/**
@@ -126,6 +136,8 @@ public final class Contours{
 		
 		for(int i=0,I=number-1;i<I;i++)
 		if(Math.abs(values[i+1]-values[i]-meanIntv)/meanIntv>1e-3){ isLinear=false; break;}
+		
+		ct=new ContourTable();
 	}
 	
 	
@@ -140,15 +152,61 @@ public final class Contours{
 	
 	public double getMinValue(){ return increSToN?southVal:northVal;}
 	
-	public double[] getEquivalentYs(){ return Yeqvs;}
-	
 	public double[] getValues(){ return values;}
 	
-	public double[] getAreas(){ return areas;}
+	public double[] getMappedEquivalentYs(){ return ct.Yeqvs;}
 	
-	public void setAreas(double[] areas){ this.areas=areas;}
+	public double[] getMappedAreas(){ return ct.areas;}
 	
-	public void setYEs(double[] Ye){ this.Yeqvs=Ye;}
+	public double[] getMappedMass(){ return ct.mass;}
+	
+	public double[] getMappedCirculation(){ return ct.circu;}
+	
+	public void setContours(double[] vs){ this.values=vs;}
+	
+	public void setAreas(double[] areas){ ct.areas=areas;}
+	
+	public void setMass(double[] mass){ ct.mass=mass;}
+	
+	public void setCirculation(double[] circu){ ct.circu=circu;}
+	
+	public void setYEs(double[] Ye){ ct.Yeqvs=Ye;}
+	
+	
+	/**
+	 * Find a value of M corresponding to a value (qv) in q by linear interpolating the tabulated M(q).
+	 * 
+	 * @param	qv	a given contour value
+	 */
+	public double findArea(double qv){ return ct.findArrayValue(qv,values,ct.areas);}
+	
+	public double findMass(double qv){ return ct.findArrayValue(qv,values,ct.mass);}
+	
+	public double findCirculation(double qv){ return ct.findArrayValue(qv,values,ct.circu);}
+	
+	public double findYeq(double qv){ return ct.findArrayValue(qv,values,ct.Yeqvs);}
+	
+	public double findContourByMass(double M){ return ct.findArrayValue(M,ct.mass,values);}
+	
+	public double findContourByYeq(double Yeq){ return ct.findArrayValue(Yeq,ct.Yeqvs,values);}
+	
+	
+	/**
+	 * Find values of M corresponding to values of q (qvs) by linear interpolating the tabulated M(q).
+	 * 
+	 * @param	qvs	contour values
+	 */
+	public double[] findAreas(double[] qvs){ return ct.findArrayValues(qvs,values,ct.areas);}
+	
+	public double[] findMasses(double[] qvs){ return ct.findArrayValues(qvs,values,ct.mass);}
+	
+	public double[] findCirculations(double[] qvs){ return ct.findArrayValues(qvs,values,ct.circu);}
+	
+	public double[] findYeqs(double[] qvs){ return ct.findArrayValues(qvs,values,ct.Yeqvs);}
+	
+	public double[] findContoursByMass(double[] Ms){ return ct.findArrayValues(Ms,ct.mass,values);}
+	
+	public double[] findContoursByYeq(double[] Yeqs){ return ct.findArrayValues(Yeqs,ct.Yeqvs,values);}
 	
 	
 	/**
@@ -168,6 +226,59 @@ public final class Contours{
 		throw new IllegalArgumentException("the number of contour is at least 2");
 		if(meanIntv==0)
 		throw new IllegalArgumentException("mean increment is 0 for "+toString());
+	}
+	
+	
+	private final class ContourTable{
+		//
+		double[] areas=null;	// area of each contour
+		double[] mass =null;	// mass within each contour
+		double[] Yeqvs=null;	// equivalent Ys
+		double[] circu=null;	// circulation
+		
+		
+		/**
+		 * Constructor.
+		 */
+		public ContourTable(){}
+		
+		
+		/**
+		 * Find a value of M corresponding to a value (qv) in q by linear interpolating the tabulated M(q).
+		 * 
+		 * @param	qv	a given value in array q
+		 * @param	q	a given q array
+		 * @param	M	a given M array
+		 */
+		public double findArrayValue(double qv,double[] q,double[] M){
+			int len=q.length;
+			
+			if(len!=M.length) throw new IllegalArgumentException("lengths not equal");
+			
+			int idx=q[len-1]>q[0]?ArrayUtil.getLEIdxIncre(q,qv):ArrayUtil.getLEIdxDecre(q,qv);
+			
+			if(idx==-1) throw new IllegalArgumentException("value of "+qv+" is out of range ["+q[0]+", "+q[q.length-1]+"]");
+			
+			if(idx==len-1) return M[idx];
+			
+			return InterpolationModel.linearInterpolation(q[idx],q[idx+1],M[idx],M[idx+1],qv);
+		}
+		
+		/**
+		 * Find values of M corresponding to values of q (qvs) by linear interpolating the tabulated M(q).
+		 * 
+		 * @param	cntr	a given contour value
+		 */
+		public double[] findArrayValues(double[] qvs,double[] q,double[] M){
+			int len=qvs.length;
+			
+			double[] re=new double[len];
+			
+			for(int i=0;i<len;i++) re[i]=findArrayValue(qvs[i],q,M);
+			
+			return re;
+		}
+		
 	}
 	
 	

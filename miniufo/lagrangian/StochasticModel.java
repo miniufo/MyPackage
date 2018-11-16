@@ -25,7 +25,7 @@ import miniufo.util.TicToc;
 import static java.lang.Math.cos;
 import static java.lang.Math.toDegrees;
 import static java.lang.Math.toRadians;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
+import static miniufo.diagnosis.SpatialModel.REarth;
 
 
 /**
@@ -169,14 +169,11 @@ public abstract class StochasticModel{
 		
 		init.setData(VelX,U+rnds[0]);	// velX+resX
 		init.setData(VelY,V+rnds[1]);	// velY+resY
-		init.setData(AccX,rnds[2]);	// accX
-		init.setData(AccY,rnds[3]);	// accY
+		init.setData(AccX,  rnds[2]);	// accX
+		init.setData(AccY,  rnds[3]);	// accY
 		
 		Particle p=new Particle(id,initLen,4,true);
-		p.setAttachedMeta(
-			new AttachedMeta("velX",0),new AttachedMeta("velY",1),
-			new AttachedMeta("accX",2),new AttachedMeta("accY",3)
-		);
+		p.setAttachedMeta(Particle.UVEL,Particle.VVEL,new AttachedMeta("accX",2),new AttachedMeta("accY",3));
 		p.addRecord(init);
 		
 		return p;
@@ -346,8 +343,8 @@ public abstract class StochasticModel{
 		
 		float lon0=init.getXPos();
 		float lat0=init.getYPos();
-		float dlon=(float)toDegrees(velm[0]*dt/(EARTH_RADIUS*cos(toRadians(lat0))));
-		float dlat=(float)toDegrees(velm[1]*dt/EARTH_RADIUS);
+		float dlon=(float)toDegrees(velm[0]*dt/(REarth*cos(toRadians(lat0))));
+		float dlat=(float)toDegrees(velm[1]*dt/REarth);
 		float lon1=lon0+dlon;
 		float lat1=lat0+dlat;
 		
@@ -374,13 +371,13 @@ public abstract class StochasticModel{
 		float lon0=init.getXPos();
 		float lat0=init.getYPos();
 		
-		float velXe=esti.getDataValue(VelX);
-		float velYe=esti.getDataValue(VelY);
-		float accXe=esti.getDataValue(AccX);
-		float accYe=esti.getDataValue(AccY);
+		float velXe=esti.getData(VelX);
+		float velYe=esti.getData(VelY);
+		float accXe=esti.getData(AccX);
+		float accYe=esti.getData(AccY);
 		
-		float dlon=(float)toDegrees(velXe*dt/(EARTH_RADIUS*cos(toRadians(lat0))));
-		float dlat=(float)toDegrees(velYe*dt/EARTH_RADIUS);
+		float dlon=(float)toDegrees(velXe*dt/(REarth*cos(toRadians(lat0))));
+		float dlat=(float)toDegrees(velYe*dt/REarth);
 		float lon1=lon0+dlon;
 		float lat1=lat0+dlat;
 		

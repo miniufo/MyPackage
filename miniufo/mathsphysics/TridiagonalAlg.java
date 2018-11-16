@@ -133,14 +133,12 @@ public final class TridiagonalAlg{
 	
 	/** test
 	public static void main(String[] args){
-		float[] a={1,1,1};
-		float[] b={3,3,3,3};
-		float[] c={1,1,1};
-		float[] d={4,4,4,4};
+		double[] a={2,2,0};
+		double[] b={3,3,3,3};
+		double[] c={0,1,1};
+		double[] d={5,9,9,8};
 		
-		float[] U=new float[4];
-		
-		new Tracer(4).tracePeriodic(a,b,c,d,1,1,U);
+		double[] U=new TridiagonalAlg(4).trace(a,b,c,d);
 		
 		for(int i=0;i<4;i++) System.out.println(U[i]);
 	}*/

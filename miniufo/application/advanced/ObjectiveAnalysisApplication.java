@@ -75,7 +75,7 @@ public final class ObjectiveAnalysisApplication{
 			r=dradii.clone();
 		}
 		
-		float dgrid=(float)Math.toRadians(ctl.getDYDef()[0])*SpatialModel.EARTH_RADIUS;
+		float dgrid=(float)Math.toRadians(ctl.getDYDef()[0])*SpatialModel.REarth;
 		for(int i=0;i<r.length;i++) r[i]*=dgrid;
 		
 		grid.setUndef(station.getUndef());

@@ -20,7 +20,7 @@ import miniufo.io.CtlDataWriteStream;
  */
 public final class BoundedShallowWaterModelA extends ShallowWaterModel2D{
 	//
-	private float f=2f*SpatialModel.EARTH_ROTATE_SPEED;
+	private float f=2f*SpatialModel.omegaEarth;
 	private float deltaR=0;
 	private float epsilonX=1e6f;
 	private float epsilonY=epsilonX;

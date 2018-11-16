@@ -21,8 +21,8 @@ import static java.lang.Math.tan;
 import static java.lang.Math.sqrt;
 import static java.lang.Math.toDegrees;
 import static java.lang.Math.toRadians;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
-import static miniufo.diagnosis.SpatialModel.EARTH_ROTATE_SPEED;
+import static miniufo.diagnosis.SpatialModel.REarth;
+import static miniufo.diagnosis.SpatialModel.omegaEarth;
 
 
 /**
@@ -104,7 +104,7 @@ public final class GlobalShallowWaterModel{
 		dlon=(float)toRadians(dlon);
 		dlat=(float)toRadians(dlat);
 		
-		deltaY=EARTH_RADIUS*dlat*2;
+		deltaY=REarth*dlat*2;
 		
 		ff =new float[y];
 		cos=new float[y];
@@ -116,8 +116,8 @@ public final class GlobalShallowWaterModel{
 			
 			  cos[j]=(float)cos(lat);
 			  tan[j]=(float)tan(lat);
-			   ff[j]=2*EARTH_ROTATE_SPEED*(float)sin(lat);
-			deltaX[j]=EARTH_RADIUS*dlon*cos[j]*2;
+			   ff[j]=2*omegaEarth*(float)sin(lat);
+			deltaX[j]=REarth*dlon*cos[j]*2;
 		}
 		
 		float dtmin=deltaX[1]/350/1.414f;
@@ -133,7 +133,7 @@ public final class GlobalShallowWaterModel{
 	
 	
 	public void initialRossbyHaurwitz(){
-		float a=EARTH_RADIUS,o=7.848e-6f,K=7.848e-6f,fai0=9.8f*8000;
+		float a=REarth,o=7.848e-6f,K=7.848e-6f,fai0=9.8f*8000;
 		float dlon=360f/x,dlat=180f/(y-1);
 		
 		double A,B,C;
@@ -145,11 +145,11 @@ public final class GlobalShallowWaterModel{
 			for(int i=0;i<x;i++){
 				lamda=toRadians(i*dlon);
 				
-				A=o*(2*EARTH_ROTATE_SPEED+o)*pow(cos(fai),2)/2+K*K*pow(cos(fai),8)*(
+				A=o*(2*omegaEarth+o)*pow(cos(fai),2)/2+K*K*pow(cos(fai),8)*(
 					5*pow(cos(fai),2)+26-32*pow(cos(fai),-2)
 				)/4;
 				
-				B=(EARTH_ROTATE_SPEED+o)*K/15*pow(cos(fai),4)*(26-25*pow(cos(fai),2));
+				B=(omegaEarth+o)*K/15*pow(cos(fai),4)*(26-25*pow(cos(fai),2));
 				
 				C=K*K*pow(cos(fai),8)*(5*pow(cos(fai),2)-6)/4;
 				
@@ -429,7 +429,7 @@ public final class GlobalShallowWaterModel{
 				)/deltaX[j]/2+(
 					(v[tag][j+1][i]*cos[j+1]*a[j+1][i]-v[tag][j-1][i]*cos[j-1]*a[j-1][i])/cos[j]+
 					v[tag][j][i]*(a[j+1][i]-a[j-1][i])
-				)/deltaY/2+(ff[j]+u[tag][j][i]*tan[j]/EARTH_RADIUS)*U[tag][j][i];
+				)/deltaY/2+(ff[j]+u[tag][j][i]*tan[j]/REarth)*U[tag][j][i];
 			}
 			
 			// left
@@ -441,7 +441,7 @@ public final class GlobalShallowWaterModel{
 			)/deltaX[j]/2+(
 				(v[tag][j+1][0]*cos[j+1]*a[j+1][0]-v[tag][j-1][0]*cos[j-1]*a[j-1][0])/cos[j]+
 				v[tag][j][0]*(a[j+1][0]-a[j-1][0])
-			)/deltaY/2+(ff[j]+u[tag][j][0]*tan[j]/EARTH_RADIUS)*U[tag][j][0];
+			)/deltaY/2+(ff[j]+u[tag][j][0]*tan[j]/REarth)*U[tag][j][0];
 			
 			// right
 			re[j][x-1]=(
@@ -452,7 +452,7 @@ public final class GlobalShallowWaterModel{
 			)/deltaX[j]/2+(
 				(v[tag][j+1][x-1]*cos[j+1]*a[j+1][x-1]-v[tag][j-1][x-1]*cos[j-1]*a[j-1][x-1])/cos[j]+
 				v[tag][j][x-1]*(a[j+1][x-1]-a[j-1][x-1])
-			)/deltaY/2+(ff[j]+u[tag][j][x-1]*tan[j]/EARTH_RADIUS)*U[tag][j][x-1];
+			)/deltaY/2+(ff[j]+u[tag][j][x-1]*tan[j]/REarth)*U[tag][j][x-1];
 		}
 		
 		smoothPolar(re);
@@ -469,7 +469,7 @@ public final class GlobalShallowWaterModel{
 				)/deltaX[j]/2+(
 					(v[tag][j+1][i]*cos[j+1]*a[j+1][i]-v[tag][j-1][i]*cos[j-1]*a[j-1][i])/cos[j]+
 					v[tag][j][i]*(a[j+1][i]-a[j-1][i])
-				)/deltaY/2-(ff[j]+u[tag][j][i]*tan[j]/EARTH_RADIUS)*V[tag][j][i];
+				)/deltaY/2-(ff[j]+u[tag][j][i]*tan[j]/REarth)*V[tag][j][i];
 			}
 			
 			// left
@@ -481,7 +481,7 @@ public final class GlobalShallowWaterModel{
 			)/deltaX[j]/2+(
 				(v[tag][j+1][0]*cos[j+1]*a[j+1][0]-v[tag][j-1][0]*cos[j-1]*a[j-1][0])/cos[j]+
 				v[tag][j][0]*(a[j+1][0]-a[j-1][0])
-			)/deltaY/2-(ff[j]+u[tag][j][0]*tan[j]/EARTH_RADIUS)*V[tag][j][0];
+			)/deltaY/2-(ff[j]+u[tag][j][0]*tan[j]/REarth)*V[tag][j][0];
 			
 			// right
 			re[j][x-1]=(
@@ -492,7 +492,7 @@ public final class GlobalShallowWaterModel{
 			)/deltaX[j]/2+(
 				(v[tag][j+1][x-1]*cos[j+1]*a[j+1][x-1]-v[tag][j-1][x-1]*cos[j-1]*a[j-1][x-1])/cos[j]+
 				v[tag][j][x-1]*(a[j+1][x-1]-a[j-1][x-1])
-			)/deltaY/2-(ff[j]+u[tag][j][x-1]*tan[j]/EARTH_RADIUS)*V[tag][j][x-1];
+			)/deltaY/2-(ff[j]+u[tag][j][x-1]*tan[j]/REarth)*V[tag][j][x-1];
 		}
 		
 		smoothPolar(re);

@@ -432,8 +432,8 @@ public final class LagrangianStatisticsByTalyor extends SingleParticleStatistics
 			for(int l=0;l<t;l++){
 				Record r=p.getRecord(l);
 				
-				udata[l][0][0][i]=r.getDataValue(Particle.UVEL);
-				vdata[l][0][0][i]=r.getDataValue(Particle.VVEL);
+				udata[l][0][0][i]=r.getData(Particle.UVEL);
+				vdata[l][0][0][i]=r.getData(Particle.VVEL);
 			}
 		}
 		

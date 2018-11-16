@@ -14,7 +14,7 @@ import miniufo.diagnosis.Variable.Dimension;
 import miniufo.geophysics.Empirical;
 import miniufo.geophysics.Empirical.Scheme;
 import miniufo.geophysics.atmos.ThermoDynamics;
-import static miniufo.diagnosis.SpatialModel.GRAVITY_ACCERLERATION;
+import static miniufo.diagnosis.SpatialModel.gEarth;
 
 
 /**
@@ -728,7 +728,7 @@ public class DynamicMethodsInCTS extends EquationInCartesianCoordinate{
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++)
 			if(vordata[l][k][j][i]!=undef&&Tedata[l][k+1][j][i]!=undef&&Tedata[l][k-1][j][i]!=undef){
-				pvdata[l][k][j][i]=-GRAVITY_ACCERLERATION*vordata[l][k][j][i]*
+				pvdata[l][k][j][i]=-gEarth*vordata[l][k][j][i]*
 				(Tedata[l][k+1][j][i]-Tedata[l][k-1][j][i])/(dz+dz);
 			}
 			
@@ -738,7 +738,7 @@ public class DynamicMethodsInCTS extends EquationInCartesianCoordinate{
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++)
 			if(vordata[k][j][i][l]!=undef&&Tedata[k+1][j][i][l]!=undef&&Tedata[k-1][j][i][l]!=undef){
-				pvdata[k][j][i][l]=-GRAVITY_ACCERLERATION*vordata[k][j][i][l]*
+				pvdata[k][j][i][l]=-gEarth*vordata[k][j][i][l]*
 				(Tedata[k+1][j][i][l]-Tedata[k-1][j][i][l])/(dz+dz);
 			}
 		}

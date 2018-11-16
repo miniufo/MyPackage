@@ -255,6 +255,65 @@ public final class Complex implements Cloneable,Operatable<Complex>{
 	}
 	
 	/**
+	 * Returns the hypotenuse of this complex number with another.
+	 *
+	 * @param z a complex number.
+	 */
+	public Complex hypotenuse(Complex z){
+		Complex tmp=square().plusEq(z.square());
+		
+		float a=tmp.getReal();
+		float b=tmp.getImag();
+		float m=cMod(a,b);
+		
+		final double de=Math.sqrt(2.0);
+		
+		float r=(float)Math.sqrt((m+a)/de);
+		float i=(float)Math.sqrt((m-a)/de);
+		
+		tmp.setRI(r,i);
+		
+		return tmp;
+	}
+	
+	public Complex hypotenuseEq(Complex z){
+		Complex tmp=squareEq().plusEq(z.square());
+		
+		float a=tmp.getReal();
+		float b=tmp.getImag();
+		float m=cMod(a,b);
+		
+		final double de=Math.sqrt(2.0);
+		
+		float r=(float)Math.sqrt((m+a)/de);
+		float i=(float)Math.sqrt((m-a)/de);
+		
+		tmp.setRI(r,i);
+		
+		return tmp;
+	}
+	
+	/**
+	 * Returns the logarithm of this complex number.
+	 */
+	public Complex logarithm(){
+		float m=cMod(re,im);
+		float a=cArg(re,im);
+		
+		return new Complex((float)Math.log(m),a);
+	}
+	
+	public Complex logarithmEq(){
+		float m=cMod(re,im);
+		float a=cArg(re,im);
+		
+		re=(float)Math.log(m);
+		im=a;
+		
+		return this;
+	}
+	
+	/**
 	 * Returns this complex number raised to the power of another.
 	 *
 	 * @param z a complex number.
@@ -326,19 +385,19 @@ public final class Complex implements Cloneable,Operatable<Complex>{
 	public Complex exp(){
 		Complex result=new Complex(this);
 		
-		result.setRI(
-			(float)(Math.exp(re)*Math.cos(im)),
-			(float)(Math.exp(re)*Math.sin(im))
-		);
+		double tmp=Math.exp(re);
+		
+		result.re=(float)(tmp*Math.cos(im));
+		result.im=(float)(tmp*Math.sin(im));
 		
 		return result;
 	}
 	
 	public Complex expEq(){
-		float retmp=re;
+		double tmp=Math.exp(re);
 		
-		re=(float)(Math.exp(retmp)*Math.cos(im));
-		im=(float)(Math.exp(retmp)*Math.sin(im));
+		re=(float)(tmp*Math.cos(im));
+		im=(float)(tmp*Math.sin(im));
 		
 		return this;
 	}
@@ -414,13 +473,11 @@ public final class Complex implements Cloneable,Operatable<Complex>{
 	
 	/** test
 	public static void main(String[] args){
-		try{
-			Complex c=new Complex(2,9);
-			float r=10;
-			float i=-0.01f;
-			System.out.println(c.cMod(r,i));
-			System.out.println(c.cMod2(r,i));
-	    	
-	    }catch(Exception ex){ ex.printStackTrace(); System.exit(0);}
+		Complex c1=new Complex(2,4);
+		
+		Complex c2=c1.exp();
+		
+		System.out.println(c2);
+		System.out.println(c2.logarithm());
 	}*/
 }

@@ -123,10 +123,10 @@ public final class CylindricalSpatialModel extends SpatialModel{
 		bsin=new float[ycount];	dxs=new float[ycount];
 		bcos=new float[ycount];
 		
-		dt=0;	dy=EARTH_RADIUS*yinc;
+		dt=0;	dy=REarth*yinc;
 		
 		for(int j=0;j<ycount;j++)
-		dxs[j]=(float)(EARTH_RADIUS*sin(ydef.getSamples()[j])*xinc);
+		dxs[j]=(float)(REarth*sin(ydef.getSamples()[j])*xinc);
 		
 		for(int j=0;j<ycount;j++){
 			bsin[j]=(float)sin(ydef.getSamples()[j]);
@@ -138,15 +138,15 @@ public final class CylindricalSpatialModel extends SpatialModel{
 		if(tcount==1){ uwhole[0]=0;	vwhole[0]=0;}
 		else{
 			for(int l=1;l<tcount-1;l++){
-				uwhole[l]=(float)((olon[l+1]-olon[l-1])*EARTH_RADIUS*cos((olat[l+1]+olat[l-1])/2f)/(dt*2f));
-				vwhole[l]=(float)((olat[l+1]-olat[l-1])*EARTH_RADIUS/(dt*2f));
+				uwhole[l]=(float)((olon[l+1]-olon[l-1])*REarth*cos((olat[l+1]+olat[l-1])/2f)/(dt*2f));
+				vwhole[l]=(float)((olat[l+1]-olat[l-1])*REarth/(dt*2f));
 			}
 			
-			uwhole[0]=(float)((olon[1]-olon[0])*EARTH_RADIUS*cos((olat[1]+olat[0])/2f)/dt);
-			vwhole[0]=(float)((olat[1]-olat[0])*EARTH_RADIUS/dt);
+			uwhole[0]=(float)((olon[1]-olon[0])*REarth*cos((olat[1]+olat[0])/2f)/dt);
+			vwhole[0]=(float)((olat[1]-olat[0])*REarth/dt);
 			
-			uwhole[tcount-1]=(float)((olon[tcount-1]-olon[tcount-2])*EARTH_RADIUS*cos((olat[tcount-1]+olat[tcount-2])/2f)/dt);
-			vwhole[tcount-1]=(float)((olat[tcount-1]-olat[tcount-2])*EARTH_RADIUS/dt);
+			uwhole[tcount-1]=(float)((olon[tcount-1]-olon[tcount-2])*REarth*cos((olat[tcount-1]+olat[tcount-2])/2f)/dt);
+			vwhole[tcount-1]=(float)((olat[tcount-1]-olat[tcount-2])*REarth/dt);
 		}
 	}
 	
@@ -283,24 +283,24 @@ public final class CylindricalSpatialModel extends SpatialModel{
 		else dz=cd.getDZDef()[0];
 		
 		dt=cd.getDTDef()[0];
-		dy=(float)(EARTH_RADIUS*PI*cd.getDYDef()[0]/180.0);
+		dy=(float)(REarth*PI*cd.getDYDef()[0]/180.0);
 		
 		for(int j=0;j<ycount;j++)
-		dxs[j]=(float)(EARTH_RADIUS*sin(ydef.getSamples()[j])*PI*cd.getDXDef()[0]/180.0);
+		dxs[j]=(float)(REarth*sin(ydef.getSamples()[j])*PI*cd.getDXDef()[0]/180.0);
 		
 		/*** calculate velocity of the model which moved as a whole ***/
 		if(tcount==1){ uwhole[0]=0;	vwhole[0]=0;}
 		else{
 			for(int l=1;l<tcount-1;l++){
-				uwhole[l]=(float)((olon[l+1]-olon[l-1])*EARTH_RADIUS*cos((olat[l+1]+olat[l-1])/2f)/(dt*2f));
-				vwhole[l]=(float)((olat[l+1]-olat[l-1])*EARTH_RADIUS/(dt*2f));
+				uwhole[l]=(float)((olon[l+1]-olon[l-1])*REarth*cos((olat[l+1]+olat[l-1])/2f)/(dt*2f));
+				vwhole[l]=(float)((olat[l+1]-olat[l-1])*REarth/(dt*2f));
 			}
 			
-			uwhole[0]=(float)((olon[1]-olon[0])*EARTH_RADIUS*cos((olat[1]+olat[0])/2f)/dt);
-			vwhole[0]=(float)((olat[1]-olat[0])*EARTH_RADIUS/dt);
+			uwhole[0]=(float)((olon[1]-olon[0])*REarth*cos((olat[1]+olat[0])/2f)/dt);
+			vwhole[0]=(float)((olat[1]-olat[0])*REarth/dt);
 			
-			uwhole[tcount-1]=(float)((olon[tcount-1]-olon[tcount-2])*EARTH_RADIUS*cos((olat[tcount-1]+olat[tcount-2])/2f)/dt);
-			vwhole[tcount-1]=(float)((olat[tcount-1]-olat[tcount-2])*EARTH_RADIUS/dt);
+			uwhole[tcount-1]=(float)((olon[tcount-1]-olon[tcount-2])*REarth*cos((olat[tcount-1]+olat[tcount-2])/2f)/dt);
+			vwhole[tcount-1]=(float)((olat[tcount-1]-olat[tcount-2])*REarth/dt);
 		}
 		
 		for(int j=0;j<ycount;j++){

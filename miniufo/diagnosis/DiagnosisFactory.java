@@ -733,25 +733,19 @@ public final class DiagnosisFactory{
 	 * 
 	 * @param	tstr	start time step (from 1), inclusive
 	 * @param	tend	end   time step (from 1), inclusive
-	 * @param	v1		the first variable name
-	 * @param	others	other names of variables
+	 * @param	vnames	variable names
 	 */
-	public Stream<Variable[]> getVariablesTimeByTime(int tstr,int tend,String v1,String... others){
+	public Stream<Variable[]> getVariablesTimeByTime(int tstr,int tend,String... vnames){
 		if(tstr<1   ) throw new IllegalArgumentException("tstr should be >= 1");
 		if(tstr>tend) throw new IllegalArgumentException("tstr should not be larger than tend");
-		
-		String[] vnames=new String[others.length+1];
-		
-		vnames[0]=v1;
-		System.arraycopy(others,0,vnames,1,others.length);
 		
 		return IntStream.range(tstr,tend+1).sequential().mapToObj(l->{
 			return getVariables(new Range("t("+l+","+l+")",dd),vnames);
 		});
 	}
 	
-	public Stream<Variable[]> getVariablesTimeByTime(String v1,String... others){
-		return getVariablesTimeByTime(1,dd.getTCount(),v1,others);
+	public Stream<Variable[]> getVariablesTimeByTime(String... vnames){
+		return getVariablesTimeByTime(1,dd.getTCount(),vnames);
 	}
 	
 	/**
@@ -760,7 +754,7 @@ public final class DiagnosisFactory{
 	 * 
 	 * @param	tstr	start time step (from 1), inclusive
 	 * @param	tend	end   time step (from 1), inclusive
-	 * @param	vname	the variable name
+	 * @param	vname	a variable name
 	 */
 	public Stream<Variable> getVariableTimeByTime(int tstr,int tend,String vname){
 		if(tstr<0   ) throw new IllegalArgumentException("tstr should be > 0");
@@ -780,31 +774,89 @@ public final class DiagnosisFactory{
 	public DataDescriptor getDataDescriptor(){ return dd;}
 	
 	public Variable[] getVariables(Range r,String... names){
-		int count=names.length;
-		
-		Variable[] v=new Variable[count];
-		
-		for(int i=0;i<count;i++) v[i]=new Variable(names[i],r);
-		
-		DataRead dr=DataIOFactory.getDataRead(dd);
-		dr.setPrinting(print);
-		dr.readData(v);	dr.closeFile();
-		
-		return v;
+		if(names!=null&&names.length!=0){
+			int count=names.length;
+			
+			Variable[] v=new Variable[count];
+			
+			for(int i=0;i<count;i++){
+				if(dd.getVarZcount(names[i])==1){
+					Range rLevel=(Range)r.clone();
+					
+					int[] rng=rLevel.getZRange();
+					
+					rng[0]=rng[1]=rng[2]=1;
+					
+					v[i]=new Variable(names[i],rLevel);
+					
+					
+				}else v[i]=new Variable(names[i],r);
+			}
+			
+			DataRead dr=DataIOFactory.getDataRead(dd);
+			dr.setPrinting(print);
+			dr.readData(v);	dr.closeFile();
+			
+			return v;
+			
+		}else{
+			String[] ns=dd.getVarNames();
+			
+			int count=ns.length;
+			
+			Variable[] v=new Variable[count];
+			
+			for(int i=0;i<count;i++){
+				if(dd.getVarZcount(ns[i])==1){
+					Range rLevel=(Range)r.clone();
+					
+					int[] rng=rLevel.getZRange();
+					
+					rng[0]=rng[1]=rng[2]=1;
+					
+					v[i]=new Variable(ns[i],rLevel);
+					
+					
+				}else v[i]=new Variable(ns[i],r);
+			}
+			
+			DataRead dr=DataIOFactory.getDataRead(dd);
+			dr.setPrinting(print);
+			dr.readData(v);	dr.closeFile();
+			
+			return v;
+		}
 	}
 	
 	public Variable[] getVariables(Range r,boolean tfirst,String... names){
-		int count=names.length;
-		
-		Variable[] v=new Variable[count];
-		
-		for(int i=0;i<count;i++) v[i]=new Variable(names[i],tfirst,r);
-		
-		DataRead dr=DataIOFactory.getDataRead(dd);
-		dr.setPrinting(print);
-		dr.readData(v);	dr.closeFile();
-		
-		return v;
+		if(names!=null){
+			int count=names.length;
+			
+			Variable[] v=new Variable[count];
+			
+			for(int i=0;i<count;i++) v[i]=new Variable(names[i],tfirst,r);
+			
+			DataRead dr=DataIOFactory.getDataRead(dd);
+			dr.setPrinting(print);
+			dr.readData(v);	dr.closeFile();
+			
+			return v;
+			
+		}else{
+			String[] ns=dd.getVarNames();
+			
+			int count=ns.length;
+			
+			Variable[] v=new Variable[count];
+			
+			for(int i=0;i<count;i++) v[i]=new Variable(ns[i],tfirst,r);
+			
+			DataRead dr=DataIOFactory.getDataRead(dd);
+			dr.setPrinting(print);
+			dr.readData(v);	dr.closeFile();
+			
+			return v;
+		}
 	}
 	
 	public void setPrinting(boolean print){ DiagnosisFactory.print=print;}

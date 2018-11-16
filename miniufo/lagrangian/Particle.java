@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 import miniufo.diagnosis.MDate;
 import miniufo.diagnosis.SpatialModel;
 
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
+import static miniufo.diagnosis.SpatialModel.REarth;
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;
 import static java.lang.Math.toRadians;
@@ -181,7 +181,7 @@ public class Particle implements Cloneable,Serializable{
 		
 		float[] dr=new float[size];
 		
-		for(int i=0;i<size;i++) dr[i]=records.get(i).getDataValues()[meta.index];
+		for(int i=0;i<size;i++) dr[i]=records.get(i).getData()[meta.index];
 		
 		return dr;
 	}
@@ -240,69 +240,16 @@ public class Particle implements Cloneable,Serializable{
 	
 	/**
 	 * compute velocity using centered difference of position
+	 * 
+	 * @param	centralDiff		using central or one-side difference scheme
 	 */
-	public void cVelocityByPosition(){
-		if(records.size()>1){
-			float dt=new MDate(records.get(1).getTime()).getDT(new MDate(records.get(0).getTime()));
-			
-			// for the first record
-			Record prev=records.get(0);
-			Record next=records.get(1);
-			Record pres=prev;
-			
-			float dX= next.getXPos()-prev.getXPos();
-			float dY= next.getYPos()-prev.getYPos();
-			float mY=(next.getYPos()+prev.getYPos())/2f;
-			
-			llpos=isLatLonPosition();
-			
-			if(llpos){
-				pres.setData(UVEL,(float)(dX/180.0*PI*EARTH_RADIUS/dt*cos(toRadians(mY))));
-				pres.setData(VVEL,(float)(dY/180.0*PI*EARTH_RADIUS/dt));
-				
-			}else{
-				pres.setData(UVEL,dX/dt);
-				pres.setData(VVEL,dY/dt);
-			}
-			
-			// for all records between
-			for(int l=1,L=records.size()-1;l<L;l++){
-				prev=records.get(l-1);
-				pres=records.get(l  );
-				next=records.get(l+1);
-				
-				dX= next.getXPos()-prev.getXPos();
-				dY= next.getYPos()-prev.getYPos();
-				mY=(next.getYPos()+prev.getYPos())/2f;
-				
-				if(llpos){
-					pres.setData(UVEL,(float)(dX/180.0*PI*EARTH_RADIUS/(dt*2.0)*cos(toRadians(mY))));
-					pres.setData(VVEL,(float)(dY/180.0*PI*EARTH_RADIUS/(dt*2.0)));
-					
-				}else{
-					pres.setData(UVEL,dX/dt/2f);
-					pres.setData(VVEL,dY/dt/2f);
-				}
-			}
-			
-			// for the last record
-			prev=records.get(records.size()-2);
-			next=records.get(records.size()-1);
-			pres=next;
-			
-			dX= next.getXPos()-prev.getXPos();
-			dY= next.getYPos()-prev.getYPos();
-			mY=(next.getYPos()+prev.getYPos())/2f;
-			
-			if(llpos){
-				pres.setData(UVEL,(float)(dX/180.0*PI*EARTH_RADIUS/dt*cos(toRadians(mY))));
-				pres.setData(VVEL,(float)(dY/180.0*PI*EARTH_RADIUS/dt));
-				
-			}else{
-				pres.setData(UVEL,dX/dt);
-				pres.setData(VVEL,dY/dt);
-			}
-		}
+	public void cVelocityByPosition(){ cVelocityByPosition(true);}
+	
+	public void cVelocityByPosition(boolean centralDiff){
+		if(centralDiff)
+			cVelocityByPositionCentralDiff();
+		else
+			cVelocityByPositionOneSideDiff();
 	}
 	
 	
@@ -426,6 +373,107 @@ public class Particle implements Cloneable,Serializable{
 	/*** helper methods ***/
 	private static int getDT(long t1,long t2){
 		return new MDate(t1).getDT(new MDate(t2));
+	}
+	
+	private void cVelocityByPositionOneSideDiff(){
+		for(Record r:records) if(r.getXPos()==Record.undef||r.getYPos()==Record.undef)
+		throw new IllegalArgumentException("undefined particle ("+id+") position ("+r.getXPos()+", "+r.getYPos()+") at "+r.getTime());
+		
+		if(records.size()>1){
+			float dt=new MDate(records.get(1).getTime()).getDT(new MDate(records.get(0).getTime()));
+			
+			// for all records between
+			for(int l=0,L=records.size()-1;l<L;l++){
+				// for the first record
+				Record prev=records.get(l);
+				Record next=records.get(l+1);
+				Record pres=prev;
+				
+				float dX=next.getXPos()-prev.getXPos();
+				float dY=next.getYPos()-prev.getYPos();
+				
+				if(llpos){
+					float mY=(next.getYPos()+prev.getYPos())/2;
+					pres.setData(UVEL,(float)(dX/180.0*PI*REarth/dt*cos(toRadians(mY))));
+					pres.setData(VVEL,(float)(dY/180.0*PI*REarth/dt));
+					
+				}else{
+					pres.setData(UVEL,dX/dt);
+					pres.setData(VVEL,dY/dt);
+				}
+			}
+			
+			Record last1=records.get(records.size()-1);
+			Record last2=records.get(records.size()-2);
+			
+			last1.setData(UVEL,last2.getData(UVEL));
+			last1.setData(VVEL,last2.getData(VVEL));
+		}
+	}
+	
+	private void cVelocityByPositionCentralDiff(){
+		for(Record r:records) if(r.getXPos()==Record.undef||r.getYPos()==Record.undef)
+		throw new IllegalArgumentException("undefined particle ("+id+") position ("+r.getXPos()+", "+r.getYPos()+") at "+r.getTime());
+		
+		if(records.size()>1){
+			float dt=new MDate(records.get(1).getTime()).getDT(new MDate(records.get(0).getTime()));
+			
+			// for the first record
+			Record prev=records.get(0);
+			Record next=records.get(1);
+			Record pres=prev;
+			
+			float dX=next.getXPos()-prev.getXPos();
+			float dY=next.getYPos()-prev.getYPos();
+			
+			if(llpos){
+				float mY=(next.getYPos()+prev.getYPos())/2f;
+				pres.setData(UVEL,(float)(dX/180.0*PI*REarth/dt*cos(toRadians(mY))));
+				pres.setData(VVEL,(float)(dY/180.0*PI*REarth/dt));
+				
+			}else{
+				pres.setData(UVEL,dX/dt);
+				pres.setData(VVEL,dY/dt);
+			}
+			
+			// for all records between
+			for(int l=1,L=records.size()-1;l<L;l++){
+				prev=records.get(l-1);
+				pres=records.get(l  );
+				next=records.get(l+1);
+				
+				dX=next.getXPos()-prev.getXPos();
+				dY=next.getYPos()-prev.getYPos();
+				
+				if(llpos){
+					float mY=(next.getYPos()+prev.getYPos())/2f;
+					pres.setData(UVEL,(float)(dX/180.0*PI*REarth/(dt*2.0)*cos(toRadians(mY))));
+					pres.setData(VVEL,(float)(dY/180.0*PI*REarth/(dt*2.0)));
+					
+				}else{
+					pres.setData(UVEL,dX/dt/2f);
+					pres.setData(VVEL,dY/dt/2f);
+				}
+			}
+			
+			// for the last record
+			prev=records.get(records.size()-2);
+			next=records.get(records.size()-1);
+			pres=next;
+			
+			dX=next.getXPos()-prev.getXPos();
+			dY=next.getYPos()-prev.getYPos();
+			
+			if(llpos){
+				float mY=(next.getYPos()+prev.getYPos())/2f;
+				pres.setData(UVEL,(float)(dX/180.0*PI*REarth/dt*cos(toRadians(mY))));
+				pres.setData(VVEL,(float)(dY/180.0*PI*REarth/dt));
+				
+			}else{
+				pres.setData(UVEL,dX/dt);
+				pres.setData(VVEL,dY/dt);
+			}
+		}
 	}
 	
 	

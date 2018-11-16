@@ -591,7 +591,7 @@ public final class AccessBestTrack{
 		// to select the records which meet the requires
 		List<Typhoon> res=getTyphoons(all,cond);
 		
-		validate(res,r->r.getDataValue(Typhoon.Vmax)==0);
+		validate(res,r->r.getData(Typhoon.Vmax)==0);
 		
 		return res;
 	}
@@ -687,7 +687,7 @@ public final class AccessBestTrack{
 			Typhoon tr=res.get(l);
 			
 			// delete records do not reach the threshold
-			if(tr.removeRecords(r->r.getDataValue(Typhoon.Vmax)<threshold).getTCount()==0){
+			if(tr.removeRecords(r->r.getData(Typhoon.Vmax)<threshold).getTCount()==0){
 				res.remove(l);
 				System.out.println("remove the "+l+"(th) record");
 				l--;
@@ -708,7 +708,7 @@ public final class AccessBestTrack{
 		for(int l=0;l<res.size();l++){
 			Typhoon tr=res.get(l);
 			
-			if(tr.removeRecords(r->r.getDataValue(Typhoon.Pmin)>threshold).getTCount()==0){
+			if(tr.removeRecords(r->r.getData(Typhoon.Pmin)>threshold).getTCount()==0){
 				res.remove(l);
 				System.out.println("remove the "+l+"(th) record");
 				l--;

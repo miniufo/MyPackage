@@ -85,7 +85,7 @@ public final class SpatialCoordinate extends Coordinate{
 	public float[] getIncrements(){
 		int len=samples.length-1;
 		
-		if(len==0) throw new IllegalArgumentException("sample length is 1");
+		if(len==0) return new float[]{1};
 		
 		float[] ds=new float[len];
 		

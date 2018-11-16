@@ -13,8 +13,9 @@ import miniufo.diagnosis.Variable.Dimension;
 import miniufo.geophysics.Empirical;
 import miniufo.geophysics.Empirical.Scheme;
 import miniufo.geophysics.atmos.ThermoDynamics;
-import static miniufo.diagnosis.SpatialModel.GRAVITY_ACCERLERATION;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
+import miniufo.mathsphysics.Integrator1D;
+import static miniufo.diagnosis.SpatialModel.gEarth;
+import static miniufo.diagnosis.SpatialModel.REarth;
 
 
 /**
@@ -65,7 +66,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						divdata[l][k][j][0]=
 							(udata[l][k][j][1]-udata[l][k][j][x-1])/(dxs[ystart-1+j]*2)+
 							(vdata[l][k][j+1][0]-vdata[l][k][j-1][0])/(dy*2)-
-							vdata[l][k][j][0]*ltan[ystart-1+j]/EARTH_RADIUS;
+							vdata[l][k][j][0]*ltan[ystart-1+j]/REarth;
 						
 					else divdata[l][k][j][0]=undef;
 					
@@ -74,7 +75,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						divdata[l][k][j][x-1]=
 							(udata[l][k][j][0]-udata[l][k][j][x-2])/(dxs[ystart-1+j]*2)+
 							(vdata[l][k][j+1][x-1]-vdata[l][k][j-1][x-1])/(dy*2)-
-							vdata[l][k][j][x-1]*ltan[ystart-1+j]/EARTH_RADIUS;
+							vdata[l][k][j][x-1]*ltan[ystart-1+j]/REarth;
 						
 					else divdata[l][k][j][x-1]=undef;
 				}
@@ -84,7 +85,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 					divdata[l][k][j][i]=
 						(udata[l][k][j][i+1]-udata[l][k][j][i-1])/(dxs[ystart-1+j]*2)+
 						(vdata[l][k][j+1][i]-vdata[l][k][j-1][i])/(dy*2)-
-						vdata[l][k][j][i]*ltan[ystart-1+j]/EARTH_RADIUS;
+						vdata[l][k][j][i]*ltan[ystart-1+j]/REarth;
 					
 				else divdata[l][k][j][i]=undef;
 			}
@@ -99,7 +100,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						divdata[k][j][0][l]=
 							(udata[k][j][1][l]-udata[k][j][x-1][l])/(dxs[ystart-1+j]*2)+
 							(vdata[k][j+1][0][l]-vdata[k][j-1][0][l])/(dy*2)-
-							vdata[k][j][0][l]*ltan[ystart-1+j]/EARTH_RADIUS;
+							vdata[k][j][0][l]*ltan[ystart-1+j]/REarth;
 						
 					else divdata[l][k][j][0]=undef;
 					
@@ -108,7 +109,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						divdata[k][j][x-1][l]=
 							(udata[k][j][0][l]-udata[k][j][x-2][l])/(dxs[ystart-1+j]*2)+
 							(vdata[k][j+1][x-1][l]-vdata[k][j-1][x-1][l])/(dy*2)-
-							vdata[k][j][x-1][l]*ltan[ystart-1+j]/EARTH_RADIUS;
+							vdata[k][j][x-1][l]*ltan[ystart-1+j]/REarth;
 						
 					else divdata[l][k][j][x-1]=undef;
 				}
@@ -118,7 +119,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 					divdata[k][j][i][l]=
 						(udata[k][j][i+1][l]-udata[k][j][i-1][l])/(dxs[ystart-1+j]*2)+
 						(vdata[k][j+1][i][l]-vdata[k][j-1][i][l])/(dy*2)-
-						(vdata[k][j][i][l]/EARTH_RADIUS)*ltan[ystart-1+j];
+						(vdata[k][j][i][l]/REarth)*ltan[ystart-1+j];
 					
 				else divdata[k][j][i][l]=undef;
 			}
@@ -146,7 +147,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 				divdata[l][k][j][i]=
 					(udata[l][k][j][i+1]-udata[l][k][j][i-1])/(dxs[ystart-1+j]*2)+
 					(vdata[l][k][j+1][i]-vdata[l][k][j-1][i])/(dy*2)-
-					vdata[l][k][j][i]*ltan[ystart-1+j]/EARTH_RADIUS+
+					vdata[l][k][j][i]*ltan[ystart-1+j]/REarth+
 					(wdata[l][k+1][j][i]-wdata[l][k-1][j][i])/(dz*2);
 			}
 			
@@ -158,7 +159,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 				divdata[k][j][i][l]=
 					(udata[k][j][i+1][l]-udata[k][j][i-1][l])/(dxs[ystart-1+j]*2)+
 					(vdata[k][j+1][i][l]-vdata[k][j-1][i][l])/(dy*2)-
-					(vdata[k][j][i][l]/EARTH_RADIUS)*ltan[ystart-1+j]+
+					(vdata[k][j][i][l]/REarth)*ltan[ystart-1+j]+
 					(wdata[k+1][j][i][l]-wdata[k-1][j][i][l])/(dz*2);
 			}
 		}
@@ -194,7 +195,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						vordata[l][k][j][0]=
 							(vdata[l][k][j][1]-vdata[l][k][j][x-1])/(dxs[ystart-1+j]*2)-
 							(udata[l][k][j+1][0]-udata[l][k][j-1][0])/(dy*2)+
-							udata[l][k][j][0]*ltan[ystart-1+j]/EARTH_RADIUS;
+							udata[l][k][j][0]*ltan[ystart-1+j]/REarth;
 						
 					else vordata[l][k][j][0]=undef;
 					
@@ -203,7 +204,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						vordata[l][k][j][x-1]=
 							(vdata[l][k][j][0]-vdata[l][k][j][x-2])/(dxs[ystart-1+j]*2)-
 							(udata[l][k][j+1][x-1]-udata[l][k][j-1][x-1])/(dy*2)+
-							udata[l][k][j][x-1]*ltan[ystart-1+j]/EARTH_RADIUS;
+							udata[l][k][j][x-1]*ltan[ystart-1+j]/REarth;
 						
 					else vordata[l][k][j][x-1]=undef;
 				}
@@ -213,7 +214,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 					vordata[l][k][j][i]=
 						(vdata[l][k][j][i+1]-vdata[l][k][j][i-1])/(dxs[ystart-1+j]*2)-
 						(udata[l][k][j+1][i]-udata[l][k][j-1][i])/(dy*2)+
-						udata[l][k][j][i]*ltan[ystart-1+j]/EARTH_RADIUS;
+						udata[l][k][j][i]*ltan[ystart-1+j]/REarth;
 					
 				else vordata[l][k][j][i]=undef;
 			}
@@ -228,7 +229,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						vordata[k][j][0][l]=
 							(vdata[k][j][1][l]-vdata[k][j][x-1][l])/(dxs[ystart-1+j]*2)-
 							(udata[k][j+1][0][l]-udata[k][j-1][0][l])/(dy*2)+
-							udata[k][j][0][l]*ltan[ystart-1+j]/EARTH_RADIUS;
+							udata[k][j][0][l]*ltan[ystart-1+j]/REarth;
 						
 					else vordata[l][k][j][0]=undef;
 					
@@ -237,7 +238,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						vordata[k][j][x-1][l]=
 							(vdata[k][j][0][l]-vdata[k][j][x-2][l])/(dxs[ystart-1+j]*2)-
 							(udata[k][j+1][x-1][l]-udata[k][j-1][x-1][l])/(dy*2)+
-							udata[k][j][x-1][l]*ltan[ystart-1+j]/EARTH_RADIUS;
+							udata[k][j][x-1][l]*ltan[ystart-1+j]/REarth;
 						
 					else vordata[l][k][j][x-1]=undef;
 				}
@@ -247,10 +248,70 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 					vordata[k][j][i][l]=
 						(vdata[k][j][i+1][l]-vdata[k][j][i-1][l])/(dxs[ystart-1+j]*2)-
 						(udata[k][j+1][i][l]-udata[k][j-1][i][l])/(dy*2)+
-						udata[k][j][i][l]*ltan[ystart-1+j]/EARTH_RADIUS;
+						udata[k][j][i][l]*ltan[ystart-1+j]/REarth;
 					
 				else vordata[k][j][i][l]=undef;
 			}
+		}
+		
+		return vor;
+	}
+	
+	/**
+     * Calculate vertical component of planetary vorticity.
+     * 
+     * @param	v	used to defined the dimensions
+     *
+     * @return	planetary vorticity (s^-1)
+     */
+	public Variable c2DPlanetaryVorticity(Variable v){
+		Variable f=new Variable("f",v);	f.setCommentAndUnit("planetary vorticity (s^-1)");
+		f.setCommentAndUnit("planetary vorticity (s^-1)");
+		
+		float[][][][] fdata=f.getData();
+		
+		if(v.isTFirst()){
+			for(int l=0;l<t;l++)
+			for(int k=0;k<z;k++)
+			for(int j=0;j<y;j++)
+			for(int i=0;i<x;i++) fdata[l][k][j][i]=f1[j];
+			
+		}else{
+			for(int l=0;l<t;l++)
+			for(int k=0;k<z;k++)
+			for(int j=0;j<y;j++)
+			for(int i=0;i<x;i++) fdata[k][j][i][l]=f1[j];
+		}
+		
+		return f;
+	}
+	
+	/**
+     * Calculate vertical component of absolute vorticity.
+     *
+     * @param	u	u-wind (m s^-1)
+     * @param	v	v-wind (m s^-1)
+     *
+     * @return	absolute vorticity (s^-1)
+     */
+	public Variable c2DAbsoluteVorticity(Variable u,Variable v){
+		Variable vor=c2DVorticity(u,v);
+		vor.setCommentAndUnit("absolute vorticity (s^-1)");
+		
+		float[][][][] vordata=vor.getData();
+		
+		// adding planetary vorticity
+		if(u.isTFirst()){
+			for(int l=0;l<t;l++)
+			for(int k=0;k<z;k++)
+			for(int j=0;j<y;j++)
+			for(int i=0;i<x;i++) vordata[l][k][j][i]+=f1[j];
+			
+		}else{
+			for(int l=0;l<t;l++)
+			for(int k=0;k<z;k++)
+			for(int j=0;j<y;j++)
+			for(int i=0;i<x;i++) vordata[k][j][i][l]+=f1[j];
 		}
 		
 		return vor;
@@ -325,7 +386,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 				vordata[l][k][j][i]=
 				(wdata[l][k][j+1][i]-wdata[l][k][j-1][i])/(dy+dy)-
 				(vdata[l][k+1][j][i]-vdata[l][k-1][j][i])/(dz+dz)+
-				wdata[l][k][j][i]*ltan[ystart-1+j]/EARTH_RADIUS;
+				wdata[l][k][j][i]*ltan[ystart-1+j]/REarth;
 			}
 			
 		}else{
@@ -337,7 +398,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 				vordata[k][j][i][l]=
 				(wdata[k][j+1][i][l]-wdata[k][j-1][i][l])/(dy+dy)-
 				(vdata[k+1][j][i][l]-vdata[k-1][j][i][l])/(dz+dz)+
-				wdata[k][j][i][l]*ltan[ystart-1+j]/EARTH_RADIUS;
+				wdata[k][j][i][l]*ltan[ystart-1+j]/REarth;
 			}
 		}
 		
@@ -422,7 +483,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						sdata[l][k][j][i]=
 						(udata[l][k][j][i+1]-udata[l][k][j][i-1])/(dxs[ystart-1+j]*2)-
 						(vdata[l][k][j+1][i]-vdata[l][k][j-1][i])/(dy*2)+
-						vdata[l][k][j][i]*ltan[ystart-1+j]/EARTH_RADIUS;
+						vdata[l][k][j][i]*ltan[ystart-1+j]/REarth;
 				}
 				
 				/*** left and right boundry ***/
@@ -431,13 +492,13 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						sdata[l][k][j][0]=
 						(udata[l][k][j  ][1]-udata[l][k][j  ][0])/dxs[ystart-1+j]-
 						(vdata[l][k][j+1][0]-vdata[l][k][j-1][0])/(dy*2)+
-						vdata[l][k][j][0]*ltan[ystart-1+j]/EARTH_RADIUS;
+						vdata[l][k][j][0]*ltan[ystart-1+j]/REarth;
 					
 					if(udata[l][k][j][x-1]!=undef&&udata[l][k][j][x-2]!=undef&&vdata[l][k][j+1][x-1]!=undef&&vdata[l][k][j-1][x-1]!=undef)
 						sdata[l][k][j][x-1]=
 						(udata[l][k][j  ][x-1]-udata[l][k][j  ][x-2])/dxs[ystart-1+j]-
 						(vdata[l][k][j+1][x-1]-vdata[l][k][j-1][x-1])/(dy*2)+
-						vdata[l][k][j][x-1]*ltan[ystart-1+j]/EARTH_RADIUS;
+						vdata[l][k][j][x-1]*ltan[ystart-1+j]/REarth;
 				}
 				
 				/*** top and bottom boundry ***/
@@ -446,13 +507,13 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						sdata[l][k][0][i]=
 						(udata[l][k][0][i+1]-udata[l][k][0][i-1])/(dxs[ystart-1]*2)-
 						(vdata[l][k][1][i  ]-vdata[l][k][0][i  ])/dy+
-						vdata[l][k][0][i]*ltan[ystart-1]/EARTH_RADIUS;
+						vdata[l][k][0][i]*ltan[ystart-1]/REarth;
 					
 					if(udata[l][k][y-1][i+1]!=undef&&udata[l][k][y-1][i-1]!=undef&&vdata[l][k][y-1][i]!=undef&&vdata[l][k][y-2][i]!=undef)
 						sdata[l][k][y-1][i]=
 						(udata[l][k][y-1][i+1]-udata[l][k][y-1][i-1])/(dxs[ystart-2+y]*2)-
 						(vdata[l][k][y-2][i  ]-vdata[l][k][y-1][i  ])/dy+
-						vdata[l][k][y-1][i]*ltan[ystart-2+y]/EARTH_RADIUS;
+						vdata[l][k][y-1][i]*ltan[ystart-2+y]/REarth;
 				}
 				
 				/*** corner points ***/{
@@ -460,25 +521,25 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						sdata[l][k][0][0]=
 						(udata[l][k][0][1]-udata[l][k][0][0])/dxs[ystart-1]-
 						(vdata[l][k][1][0]-vdata[l][k][0][0])/dy+
-						vdata[l][k][0][0]*ltan[ystart-1]/EARTH_RADIUS;
+						vdata[l][k][0][0]*ltan[ystart-1]/REarth;
 					
 					if(udata[l][k][y-1][0]!=undef&&udata[l][k][y-1][1]!=undef&&vdata[l][k][y-1][0]!=undef&&vdata[l][k][y-2][0]!=undef)
 						sdata[l][k][y-1][0]=
 						(udata[l][k][y-1][1]-udata[l][k][y-1][0])/dxs[ystart-2+y]-
 						(vdata[l][k][y-1][0]-vdata[l][k][y-2][0])/dy+
-						vdata[l][k][y-1][0]*ltan[ystart-2+y]/EARTH_RADIUS;
+						vdata[l][k][y-1][0]*ltan[ystart-2+y]/REarth;
 					
 					if(udata[l][k][y-1][x-1]!=undef&&udata[l][k][y-1][x-2]!=undef&&vdata[l][k][y-1][x-1]!=undef&&vdata[l][k][y-2][x-1]!=undef)
 						sdata[l][k][y-1][x-1]=
 						(udata[l][k][y-1][x-1]-udata[l][k][y-1][x-2])/dxs[ystart-2+y]-
 						(vdata[l][k][y-1][x-1]-vdata[l][k][y-2][x-1])/dy+
-						vdata[l][k][y-1][x-1]*ltan[ystart-2+y]/EARTH_RADIUS;
+						vdata[l][k][y-1][x-1]*ltan[ystart-2+y]/REarth;
 					
 					if(udata[l][k][0][x-1]!=undef&&udata[l][k][0][x-2]!=undef&&vdata[l][k][0][x-1]!=undef&&vdata[l][k][1][x-1]!=undef)
 						sdata[l][k][0][x-1]=
 						(udata[l][k][0][x-1]-udata[l][k][0][x-2])/dxs[ystart-1]-
 						(vdata[l][k][1][x-1]-vdata[l][k][0][x-1])/dy+
-						vdata[l][k][0][x-1]*ltan[ystart-1]/EARTH_RADIUS;
+						vdata[l][k][0][x-1]*ltan[ystart-1]/REarth;
 				}
 			}
 			
@@ -491,7 +552,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						sdata[k][j][i][l]=
 						(udata[k][j][i+1][l]-udata[k][j][i-1][l])/(dxs[ystart-1+j]*2)-
 						(vdata[k][j+1][i][l]-vdata[k][j-1][i][l])/(dy*2)+
-						(vdata[k][j][i][l]/EARTH_RADIUS)*ltan[ystart-1+j];
+						(vdata[k][j][i][l]/REarth)*ltan[ystart-1+j];
 				}
 				
 				/*** left and right boundry ***/
@@ -500,13 +561,13 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						sdata[k][j][0][l]=
 						(udata[k][j  ][1][l]-udata[k][j  ][0][l])/dxs[ystart-1+j]-
 						(vdata[k][j+1][0][l]-vdata[k][j-1][0][l])/(dy*2)+
-						vdata[k][j][0][l]*ltan[ystart-1+j]/EARTH_RADIUS;
+						vdata[k][j][0][l]*ltan[ystart-1+j]/REarth;
 					
 					if(udata[k][j][x-1][l]!=undef&&udata[k][j][x-2][l]!=undef&&vdata[k][j+1][x-1][l]!=undef&&vdata[k][j-1][x-1][l]!=undef)
 						sdata[k][j][x-1][l]=
 						(udata[k][j  ][x-1][l]-udata[k][j  ][x-2][l])/dxs[ystart-1+j]-
 						(vdata[k][j+1][x-1][l]-vdata[k][j-1][x-1][l])/(dy*2)+
-						vdata[k][j][x-1][l]*ltan[ystart-1+j]/EARTH_RADIUS;
+						vdata[k][j][x-1][l]*ltan[ystart-1+j]/REarth;
 				}
 				
 				/*** top and bottom boundry ***/
@@ -515,13 +576,13 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						sdata[k][0][i][l]=
 						(udata[k][0][i+1][l]-udata[k][0][i-1][l])/(dxs[ystart-1]*2)-
 						(vdata[k][1][i  ][l]-vdata[k][0][i  ][l])/dy+
-						vdata[k][0][i][l]*ltan[ystart-1]/EARTH_RADIUS;
+						vdata[k][0][i][l]*ltan[ystart-1]/REarth;
 					
 					if(udata[k][y-1][i+1][l]!=undef&&udata[k][y-1][i-1][l]!=undef&&vdata[k][y-1][i][l]!=undef&&vdata[k][y-2][i][l]!=undef)
 						sdata[k][y-1][i][l]=
 						(udata[k][y-1][i+1][l]-udata[k][y-1][i-1][l])/(dxs[ystart-2+y]*2)-
 						(vdata[k][y-2][i  ][l]-vdata[k][y-1][i  ][l])/dy+
-						vdata[k][y-1][i][l]*ltan[ystart-2+y]/EARTH_RADIUS;
+						vdata[k][y-1][i][l]*ltan[ystart-2+y]/REarth;
 				}
 				
 				/*** corner points ***/
@@ -529,25 +590,25 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 					sdata[k][0][0][l]=
 					(udata[k][0][1][l]-udata[k][0][0][l])/dxs[ystart-1]-
 					(vdata[k][1][0][l]-vdata[k][0][0][l])/dy+
-					vdata[k][0][0][l]*ltan[ystart-1]/EARTH_RADIUS;
+					vdata[k][0][0][l]*ltan[ystart-1]/REarth;
 				
 				if(udata[k][y-1][0][l]!=undef&&udata[k][y-1][1][l]!=undef&&vdata[k][y-1][0][l]!=undef&&vdata[k][y-2][0][l]!=undef)
 					sdata[k][y-1][0][l]=
 					(udata[k][y-1][1][l]-udata[k][y-1][0][l])/dxs[ystart-2+y]-
 					(vdata[k][y-1][0][l]-vdata[k][y-2][0][l])/dy+
-					vdata[k][y-1][0][l]*ltan[ystart-2+y]/EARTH_RADIUS;
+					vdata[k][y-1][0][l]*ltan[ystart-2+y]/REarth;
 				
 				if(udata[k][y-1][x-1][l]!=undef&&udata[k][y-1][x-2][l]!=undef&&vdata[k][y-1][x-1][l]!=undef&&vdata[k][y-2][x-1][l]!=undef)
 					sdata[k][y-1][x-1][l]=
 					(udata[k][y-1][x-1][l]-udata[k][y-1][x-2][l])/dxs[ystart-2+y]-
 					(vdata[k][y-1][x-1][l]-vdata[k][y-2][x-1][l])/dy+
-					vdata[k][y-1][x-1][l]*ltan[ystart-2+y]/EARTH_RADIUS;
+					vdata[k][y-1][x-1][l]*ltan[ystart-2+y]/REarth;
 				
 				if(udata[k][0][x-1][l]!=undef&&udata[k][0][x-2][l]!=undef&&vdata[k][0][x-1][l]!=undef&&vdata[k][1][x-1][l]!=undef)
 					sdata[k][0][x-1][l]=
 					(udata[k][0][x-1][l]-udata[k][0][x-2][l])/dxs[ystart-1]-
 					(vdata[k][1][x-1][l]-vdata[k][0][x-1][l])/dy+
-					vdata[k][0][x-1][l]*ltan[ystart-1]/EARTH_RADIUS;
+					vdata[k][0][x-1][l]*ltan[ystart-1]/REarth;
 			}
 		}
 		
@@ -583,7 +644,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 					sdata[l][k][j][i]=
 					(vdata[l][k][j][i+1]-vdata[l][k][j][i-1])/(dxs[ystart-1+j]*2)+
 					(udata[l][k][j+1][i]-udata[l][k][j-1][i])/(dy*2)-
-					udata[l][k][j][i]*ltan[ystart-1+j]/EARTH_RADIUS;
+					udata[l][k][j][i]*ltan[ystart-1+j]/REarth;
 				}
 				
 				/*** left and right boundry ***/
@@ -592,13 +653,13 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						sdata[l][k][j][0]=
 						(vdata[l][k][j][1]-vdata[l][k][j][0])/dxs[ystart-1+j]+
 						(udata[l][k][j+1][0]-udata[l][k][j-1][0])/(dy*2)-
-						udata[l][k][j][0]*ltan[ystart-1+j]/EARTH_RADIUS;
+						udata[l][k][j][0]*ltan[ystart-1+j]/REarth;
 					
 					if(vdata[l][k][j][x-1]!=undef&&vdata[l][k][j][x-2]!=undef&&udata[l][k][j+1][x-1]!=undef&&udata[l][k][j-1][x-1]!=undef)
 						sdata[l][k][j][x-1]=
 						(vdata[l][k][j  ][x-1]-vdata[l][k][j  ][x-2])/dxs[ystart-1+j]+
 						(udata[l][k][j+1][x-1]-udata[l][k][j-1][x-1])/(dy*2)-
-						udata[l][k][j][x-1]*ltan[ystart-1+j]/EARTH_RADIUS;
+						udata[l][k][j][x-1]*ltan[ystart-1+j]/REarth;
 				}
 				
 				/*** top and bottom boundry ***/
@@ -607,13 +668,13 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						sdata[l][k][0][i]=
 						(vdata[l][k][0][i+1]-vdata[l][k][0][i-1])/(dxs[ystart-1]*2)+
 						(udata[l][k][1][i  ]-udata[l][k][0][i  ])/dy-
-						udata[l][k][0][i]*ltan[ystart-1]/EARTH_RADIUS;
+						udata[l][k][0][i]*ltan[ystart-1]/REarth;
 					
 					if(vdata[l][k][y-1][i+1]!=undef&&vdata[l][k][y-1][i-1]!=undef&&udata[l][k][y-1][i]!=undef&&udata[l][k][y-2][i]!=undef)
 						sdata[l][k][y-1][i]=
 						(vdata[l][k][y-1][i+1]-vdata[l][k][y-1][i-1])/(dxs[ystart-2+y]*2)+
 						(udata[l][k][y-1][i]-udata[l][k][y-2][i])/dy-
-						udata[l][k][y-1][i]*ltan[ystart-2+y]/EARTH_RADIUS;
+						udata[l][k][y-1][i]*ltan[ystart-2+y]/REarth;
 				}
 				
 				/*** corner points ***/
@@ -621,25 +682,25 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 					sdata[l][k][0][0]=
 					(vdata[l][k][0][1]-vdata[l][k][0][0])/dxs[ystart-1]+
 					(udata[l][k][1][0]-udata[l][k][0][0])/dy-
-					udata[l][k][0][0]*ltan[ystart-1]/EARTH_RADIUS;
+					udata[l][k][0][0]*ltan[ystart-1]/REarth;
 				
 				if(vdata[l][k][0][x-1]!=undef&&vdata[l][k][0][x-2]!=undef&&udata[l][k][1][x-1]!=undef&&udata[l][k][0][x-1]!=undef)
 					sdata[l][k][0][x-1]=
 					(vdata[l][k][0][x-1]-vdata[l][k][0][x-2])/dxs[ystart-1]+
 					(udata[l][k][1][x-1]-udata[l][k][0][x-1])/dy-
-					udata[l][k][0][x-1]*ltan[ystart-1]/EARTH_RADIUS;
+					udata[l][k][0][x-1]*ltan[ystart-1]/REarth;
 				
 				if(vdata[l][k][y-1][x-1]!=undef&&vdata[l][k][y-1][x-2]!=undef&&udata[l][k][y-1][x-1]!=undef&&udata[l][k][y-2][x-1]!=undef)
 					sdata[l][k][y-1][x-1]=
 					(vdata[l][k][y-1][x-1]-vdata[l][k][y-1][x-2])/dxs[ystart-2+y]+
 					(udata[l][k][y-1][x-1]-udata[l][k][y-2][x-1])/dy-
-					udata[l][k][y-1][x-1]*ltan[ystart-2+y]/EARTH_RADIUS;
+					udata[l][k][y-1][x-1]*ltan[ystart-2+y]/REarth;
 				
 				if(vdata[l][k][y-1][1]!=undef&&vdata[l][k][y-1][0]!=undef&&udata[l][k][y-1][0]!=undef&&udata[l][k][y-2][0]!=undef)
 					sdata[l][k][y-1][0]=
 					(vdata[l][k][y-1][1]-vdata[l][k][y-1][0])/dxs[ystart-2+y]+
 					(udata[l][k][y-1][0]-udata[l][k][y-2][0])/dy-
-					udata[l][k][y-1][0]*ltan[ystart-2+y]/EARTH_RADIUS;
+					udata[l][k][y-1][0]*ltan[ystart-2+y]/REarth;
 			}
 			
 		}else{
@@ -651,7 +712,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						sdata[k][j][i][l]=
 						(vdata[k][j][i+1][l]-vdata[k][j][i-1][l])/(dxs[ystart-1+j]*2)+
 						(udata[k][j+1][i][l]-udata[k][j-1][i][l])/(dy*2)-
-						udata[k][j][i][l]*ltan[ystart-1+j]/EARTH_RADIUS;
+						udata[k][j][i][l]*ltan[ystart-1+j]/REarth;
 				}
 				
 				/*** left and right boundry ***/
@@ -660,13 +721,13 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						sdata[k][j][0][l]=
 						(vdata[k][j  ][1][l]-vdata[k][j  ][0][l])/dxs[ystart-1+j]+
 						(udata[k][j+1][0][l]-udata[k][j-1][0][l])/(dy*2)-
-						udata[k][j][0][l]*ltan[ystart-1+j]/EARTH_RADIUS;
+						udata[k][j][0][l]*ltan[ystart-1+j]/REarth;
 					
 					if(vdata[k][j][x-1][l]!=undef&&vdata[k][j][x-2][l]!=undef&&udata[k][j+1][x-1][l]!=undef&&udata[k][j-1][x-1][l]!=undef)
 						sdata[k][j][x-1][l]=
 						(vdata[k][j  ][x-1][l]-vdata[k][j  ][x-2][l])/dxs[ystart-1+j]+
 						(udata[k][j+1][x-1][l]-udata[k][j-1][x-1][l])/(dy*2)-
-						udata[k][j][x-1][l]*ltan[ystart-1+j]/EARTH_RADIUS;
+						udata[k][j][x-1][l]*ltan[ystart-1+j]/REarth;
 				}
 				
 				/*** top and bottom boundry ***/
@@ -675,13 +736,13 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 						sdata[k][0][i][l]=
 						(vdata[k][0][i+1][l]-vdata[k][0][i-1][l])/(dxs[ystart-1]*2)+
 						(udata[k][1][i  ][l]-udata[k][0][i  ][l])/dy-
-						udata[k][0][i][l]*ltan[ystart-1]/EARTH_RADIUS;
+						udata[k][0][i][l]*ltan[ystart-1]/REarth;
 					
 					if(vdata[k][y-1][i+1][l]!=undef&&vdata[k][y-1][i-1][l]!=undef&&udata[k][y-1][i][l]!=undef&&udata[k][y-2][i][l]!=undef)
 						sdata[k][y-1][i][l]=
 						(vdata[k][y-1][i+1][l]-vdata[k][y-1][i-1][l])/(dxs[ystart-2+y]*2)+
 						(udata[k][y-1][i][l]-udata[k][y-2][i][l])/dy-
-						udata[k][y-1][i][l]*ltan[ystart-2+y]/EARTH_RADIUS;
+						udata[k][y-1][i][l]*ltan[ystart-2+y]/REarth;
 				}
 				
 				/*** corner points ***/
@@ -689,25 +750,25 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 					sdata[k][0][0][l]=
 					(vdata[k][0][1][l]-vdata[k][0][0][l])/dxs[ystart-1]+
 					(udata[k][1][0][l]-udata[k][0][0][l])/dy-
-					udata[k][0][0][l]*ltan[ystart-1]/EARTH_RADIUS;
+					udata[k][0][0][l]*ltan[ystart-1]/REarth;
 				
 				if(vdata[k][0][x-1][l]!=undef&&vdata[k][0][x-2][l]!=undef&&udata[k][1][x-1][l]!=undef&&udata[k][0][x-1][l]!=undef)
 					sdata[k][0][x-1][l]=
 					(vdata[k][0][x-1][l]-vdata[k][0][x-2][l])/dxs[ystart-1]+
 					(udata[k][1][x-1][l]-udata[k][0][x-1][l])/dy-
-					udata[k][0][x-1][l]*ltan[ystart-1]/EARTH_RADIUS;
+					udata[k][0][x-1][l]*ltan[ystart-1]/REarth;
 				
 				if(vdata[k][y-1][x-1][l]!=undef&&vdata[k][y-1][x-2][l]!=undef&&udata[k][y-1][x-1][l]!=undef&&udata[k][y-2][x-1][l]!=undef)
 					sdata[k][y-1][x-1][l]=
 					(vdata[k][y-1][x-1][l]-vdata[k][y-1][x-2][l])/dxs[ystart-2+y]+
 					(udata[k][y-1][x-1][l]-udata[k][y-2][x-1][l])/dy-
-					udata[k][y-1][x-1][l]*ltan[ystart-2+y]/EARTH_RADIUS;
+					udata[k][y-1][x-1][l]*ltan[ystart-2+y]/REarth;
 				
 				if(vdata[k][y-1][1][l]!=undef&&vdata[k][y-1][0][l]!=undef&&udata[k][y-1][0][l]!=undef&&udata[k][y-2][0][l]!=undef)
 					sdata[k][y-1][0][l]=
 					(vdata[k][y-1][1][l]-vdata[k][y-1][0][l])/dxs[ystart-2+y]+
 					(udata[k][y-1][0][l]-udata[k][y-2][0][l])/dy-
-					udata[k][y-1][0][l]*ltan[ystart-2+y]/EARTH_RADIUS;
+					udata[k][y-1][0][l]*ltan[ystart-2+y]/REarth;
 			}
 		}
 		
@@ -800,7 +861,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++)
 			if(vordata[l][k][j][i]!=undef&&Tedata[l][k+1][j][i]!=undef&&Tedata[l][k-1][j][i]!=undef){
-				pvdata[l][k][j][i]=-GRAVITY_ACCERLERATION*vordata[l][k][j][i]*
+				pvdata[l][k][j][i]=-gEarth*vordata[l][k][j][i]*
 				(Tedata[l][k+1][j][i]-Tedata[l][k-1][j][i])/(dz+dz);
 			}
 			
@@ -810,7 +871,7 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++)
 			if(vordata[k][j][i][l]!=undef&&Tedata[k+1][j][i][l]!=undef&&Tedata[k-1][j][i][l]!=undef){
-				pvdata[k][j][i][l]=-GRAVITY_ACCERLERATION*vordata[k][j][i][l]*
+				pvdata[k][j][i][l]=-gEarth*vordata[k][j][i][l]*
 				(Tedata[k+1][j][i][l]-Tedata[k-1][j][i][l])/(dz+dz);
 			}
 		}
@@ -1176,6 +1237,53 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
      * Calculate vertical velocity according to the continuity equation.
      *
      * @param	div		horizontal divergence (s^-1)
+     * @param	wb		prescribed omega as upper and lower boundary condition (Pa s^-1)
+     *
+     * @return	w		vertical velocity in pressure coordinate (Pa s^-1)
+     */
+	public Variable cOmega(Variable div,Variable wb){
+		checkDimensions(div,wb);
+		assignSubDomainParams(div);
+		
+		Variable w=new Variable("omega",div);	w.setCommentAndUnit("vertical velocity (Pa s^-1)");
+		
+		float[][][][]  wbdata= wb.getData();
+		float[][][][]   wdata=  w.getData();
+		float[][][][] divdata=div.getData();
+		
+		if(div.isTFirst()){
+			for(int l=0;l<t;l++)
+			for(int j=0;j<y;j++)
+			for(int i=0;i<x;i++){
+				float[] der=new float[z];
+				for(int k=0;k<z;k++) der[k]=-divdata[l][k][j][i];
+				
+				float[] re=Integrator1D.integrateForward(dz,der,wbdata[l][0][j][i],wbdata[l][z-1][j][i]);
+				
+				for(int k=0;k<z;k++) wdata[l][k][j][i]=re[k];
+			}
+			
+		}else{
+			for(int l=0;l<t;l++)
+			for(int j=0;j<y;j++)
+			for(int i=0;i<x;i++){
+				float[] der=new float[z];
+				for(int k=0;k<z;k++) der[k]=-divdata[k][j][i][l];
+				
+				float[] re=Integrator1D.integrateForward(dz,der,wbdata[0][j][i][l],wbdata[z-1][j][i][l]);
+				
+				for(int k=0;k<z;k++) wdata[k][j][i][l]=re[k];
+			}
+		}
+		
+		return w;
+	}
+	
+	/**
+     * Calculate vertical velocity according to the continuity equation.
+     * The values at upper and lower boundaries are set to zero.
+     *
+     * @param	div		horizontal divergence (s^-1)
      *
      * @return	w		vertical velocity in pressure coordinate (Pa s^-1)
      */
@@ -1184,208 +1292,35 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 		
 		Variable w=new Variable("omega",div);	w.setCommentAndUnit("vertical velocity (Pa s^-1)");
 		
-		float[][][][] wdata  =w.getData();
+		float[][][][]   wdata=  w.getData();
 		float[][][][] divdata=div.getData();
 		
 		if(div.isTFirst()){
 			for(int l=0;l<t;l++)
-			for(int k=1;k<z;k++)
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
-				if(divdata[l][k-1][j][i]!=undef&&divdata[l][k][j][i]!=undef)
-					if(wdata[l][k-1][j][i]!=undef)
-						wdata[l][k][j][i]=wdata[l][k-1][j][i]+
-						(divdata[l][k][j][i]+divdata[l][k-1][j][i])/2*dz;
-					else
-						wdata[l][k][j][i]=
-						(divdata[l][k][j][i]+divdata[l][k-1][j][i])/2*dz;
-						
-				else wdata[l][k][j][i]=undef;
+				float[] der=new float[z];
+				for(int k=0;k<z;k++) der[k]=-divdata[l][k][j][i];
+				
+				float[] re=Integrator1D.integrateForward(dz,der,0,0);
+				
+				for(int k=0;k<z;k++) wdata[l][k][j][i]=re[k];
 			}
 			
 		}else{
 			for(int l=0;l<t;l++)
-			for(int k=1;k<z;k++)
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
-				if(divdata[i][j][k-1][l]!=undef&&divdata[k][j][i][l]!=undef)
-					if(wdata[k-1][j][i][l]!=undef)
-						wdata[k][j][i][l]=wdata[k-1][j][i][l]+
-						(divdata[k][j][i][l]+divdata[k-1][j][i][l])/2*dz;
-					else
-						wdata[k][j][i][l]=
-						(divdata[k][j][i][l]+divdata[k-1][j][i][l])/2*dz;
+				float[] der=new float[z];
+				for(int k=0;k<z;k++) der[k]=-divdata[k][j][i][l];
 				
-				else wdata[k][j][i][l]=undef;
+				float[] re=Integrator1D.integrateForward(dz,der,0,0);
+				
+				for(int k=0;k<z;k++) wdata[k][j][i][l]=re[k];
 			}
 		}
 		
 		return w;
-	}
-	
-	
-	/**
-     * Correct vertical velocity through error redistribution.
-     *
-     * @param	correct_type	different type of correction
-     * @param	w				vertical velocity (Pa s^-1)
-     */
-	public void correctOmega(int correct_type,Variable w){
-		assignSubDomainParams(w);
-		
-		SphericalSpatialModel ssm=(SphericalSpatialModel)sm;
-		
-		float[] max=new float[t];
-		float[]  a =new float[t];
-		float[][][] tmp_top_w=new float[t][y][x];
-		float[][][][] wdata=w.getData();
-		
-		if(w.isTFirst()){
-			for(int l=0;l<t;l++){
-				a[l]=1;
-				max[l]=Float.MIN_VALUE;
-				
-				for(int j=0;j<y;j++)
-				for(int i=0;i<x;i++){
-					float b=(wdata[l][z-1][j][i]<0)?(-wdata[l][z-1][j][i]):wdata[l][z-1][j][i];
-					if(b>max[l]) max[l]=b;
-				}
-				
-				while(max[l]>=0.1){ a[l]*=0.1f; max[l]*=a[l];}
-				
-				for(int j=0;j<y;j++)
-				for(int i=0;i<x;i++){
-					tmp_top_w[l][j][i]=wdata[l][z-1][j][i];
-					wdata[l][z-1][j][i]*=a[l];
-				}
-			}
-			
-			float[] sum={0f,0f};
-			switch(correct_type){
-				case 1:
-					for(int k=0;k<z-1;k++) sum[1]+=dz;
-					
-					for(int l=0;l<t;l++){
-						for(int k=0;k<z-1;k++){
-							sum[0]+=dz*100;
-							
-							for(int j=0;j<y;j++)
-							for(int i=0;i<x;i++)
-							wdata[l][k][j][i]-=(1-a[l])*tmp_top_w[l][j][i]*sum[0]/
-								(zdef[zstart-1]-zdef[zstart-2+ssm.getZCount()]);
-						}
-						
-						sum[0]=0;
-					}
-				
-					break;
-					
-				case 2:
-					for(int k=0;k<z-1;k++) sum[1]+=k*dz;
-					
-					for(int l=0;l<t;l++){
-						for(int k=0;k<z-1;k++){
-							sum[0]+=k*dz;
-							
-							for(int j=0;j<y;j++)
-							for(int i=0;i<x;i++)
-							wdata[l][k][j][i]-=(1-a[l])*tmp_top_w[l][j][i]*sum[0]/sum[1];
-						}
-							
-						sum[0]=0;
-					}
-					
-					break;
-				
-				default:
-					for(int k=0;k<z-1;k++) sum[1]+=(1-2*k)*dz;
-					
-					for(int l=0;l<t;l++){
-						for(int k=0;k<z-1;k++){
-							sum[0]+=(1-2*k)*dz;
-							
-							for(int j=0;j<y;j++)
-							for(int i=0;i<x;i++)
-							wdata[l][k][j][i]-=(1-a[l])*tmp_top_w[l][j][i]*sum[0]/sum[1];
-						}
-						
-						sum[0]=0;
-					}
-			}
-			
-		}else{
-			for(int l=0;l<t;l++){
-				a[l]=1;
-				max[l]=Float.MIN_VALUE;
-				
-				for(int j=0;j<y;j++)
-				for(int i=0;i<x;i++){
-					float b=(wdata[z-1][j][i][l]<0)?(-wdata[z-1][j][i][l]):wdata[z-1][j][i][l];
-					if(b>max[l]) max[l]=b;
-				}
-				
-				while(max[l]>=0.1){ a[l]*=0.1f; max[l]*=a[l];}
-				
-				for(int j=0;j<y;j++)
-				for(int i=0;i<x;i++){
-					tmp_top_w[j][i][l]=wdata[z-1][j][i][l];
-					wdata[z-1][j][i][l]*=a[l];
-				}
-			}
-			
-			float[] sum={0f,0f};
-			switch(correct_type){
-				case 1:
-					for(int k=0;k<z-1;k++) sum[1]+=dz;
-					
-					for(int l=0;l<t;l++){
-						for(int k=0;k<z-1;k++){
-							sum[0]+=dz;
-							
-							for(int j=0;j<y;j++)
-							for(int i=0;i<x;i++)
-							wdata[k][j][i][l]-=(1-a[l])*tmp_top_w[j][i][l]*sum[0]/
-								(zdef[zstart-1]-zdef[zstart-2+ssm.getZCount()]);
-						}
-						
-						sum[0]=0;
-					}
-				
-					break;
-					
-				case 2:
-					for(int k=0;k<z-1;k++) sum[1]+=(k+1)*dz;
-					
-					for(int l=0;l<t;l++){
-						for(int k=0;k<z-1;k++){
-							sum[0]+=(k+1)*dz;
-							
-							for(int j=0;j<y;j++)
-							for(int i=0;i<x;i++)
-							wdata[k][j][i][l]-=(1-a[l])*tmp_top_w[j][i][l]*sum[0]/sum[1];
-						}
-							
-						sum[0]=0;
-					}
-					
-					break;
-				
-				default:
-					for(int k=0;k<z-1;k++) sum[1]+=(1-2*(k+1))*dz;
-					
-					for(int l=0;l<t;l++){
-						for(int k=0;k<z-1;k++){
-							sum[0]+=(1-2*(k+1))*dz;
-							
-							for(int j=0;j<y;j++)
-							for(int i=0;i<x;i++)
-							wdata[k][j][i][l]-=(1-a[l])*tmp_top_w[j][i][l]*sum[0]/sum[1];
-						}
-						
-						sum[0]=0;
-					}
-			}
-		}
 	}
 	
 	
@@ -1751,18 +1686,29 @@ public class DynamicMethodsInSC extends EquationInSphericalCoordinate{
 	
 	/** test
 	public static void main(String arg[]){
-		DiagnosisFactory dfu=DiagnosisFactory.parseFile("d:/Data/NCEP/OriginalNC/uwnd.sig995.mon.mean.nc");
-		DataDescriptor dd=dfu.getDataDescriptor();
+		DiagnosisFactory df=DiagnosisFactory.parseFile("d:/Data/DiagnosisVortex/Haima/Haima.ctl");
+		DataDescriptor dd=df.getDataDescriptor();
 		
-		Variable u=dfu.getVariables(new Range("t(1,60)",dd),"uwnd")[0];
-		Variable v=DiagnosisFactory.getVariables("d:/Data/NCEP/OriginalNC/vwnd.sig995.mon.mean.nc","t(1,60)","vwnd")[0];
+		Variable[] vs=df.getVariables(new Range("t(1,1)",dd),"u","v","w");
 		
-		SphericalSpacialModel ssm=new SphericalSpacialModel(dd);
+		SphericalSpatialModel ssm=new SphericalSpatialModel(dd);
 		DynamicMethodsInSC dm=new DynamicMethodsInSC(ssm);
 		
-		Variable[] ek=dm.cEkmanCurrent(u,v);
+		Variable div=dm.c2DDivergence(vs[0],vs[1]);
+		Variable w1=dm.cOmega(div);
+		Variable w1c1=w1.copy(); dm.correctOmega(1,w1c1);
+		Variable w1c2=w1.copy(); dm.correctOmega(2,w1c2);
+		Variable w1c3=w1.copy(); dm.correctOmega(3,w1c3);
+		Variable w2=dm.cOmega2(div,vs[2]);
 		
-		DataWrite dw=DataIOFactory.getDataWrite(dd,"d:/Ekman.dat");
-		dw.writeData(dd,u,v,ek[0],ek[1]);	dw.closeFile();
+		w1.setName("w1");
+		w1c1.setName("w1c1");
+		w1c2.setName("w1c2");
+		w1c3.setName("w1c3");
+		w2.setName("w2");
+		
+		DataWrite dw=DataIOFactory.getDataWrite(dd,"d:/w.dat");
+		dw.writeData(dd,vs[0],vs[1],vs[2],div,w1,w1c1,w1c2,w1c3,w2);
+		dw.closeFile();
 	}*/
 }

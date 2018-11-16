@@ -9,9 +9,9 @@ package miniufo.application.basic;
 import miniufo.diagnosis.Variable;
 import miniufo.diagnosis.CartesianSpatialModel;
 import miniufo.application.EquationInCartesianCoordinate;
-import miniufo.application.advanced.EllipticEqSORSolver.DimCombination;
+import miniufo.application.advanced.EllipticEqSORSolver2D.DimCombination;
 import static java.lang.Math.abs;
-import static miniufo.diagnosis.SpatialModel.GRAVITY_ACCERLERATION;
+import static miniufo.diagnosis.SpatialModel.gEarth;
 
 
 /**
@@ -69,10 +69,10 @@ public class VelocityFieldInCTS extends EquationInCartesianCoordinate{
 			for(int j=1,J=y-1;j<J;j++){
 				for(int i=1,I=x-1;i<I;i++){
 					if(hgtdata[l][k][j+1][i]!=undef&&hgtdata[l][k][j-1][i]!=undef)
-					Ugdata[l][k][j][i]=-(hgtdata[l][k][j+1][i]-hgtdata[l][k][j-1][i])*GRAVITY_ACCERLERATION/(dy*2*fCor[ystart-1+j]);
+					Ugdata[l][k][j][i]=-(hgtdata[l][k][j+1][i]-hgtdata[l][k][j-1][i])*gEarth/(dy*2*fCor[ystart-1+j]);
 					
 					if(hgtdata[l][k][j][i+1]!=undef&&hgtdata[l][k][j][i-1]!=undef)
-					Vgdata[l][k][j][i]=(hgtdata[l][k][j][i+1]-hgtdata[l][k][j][i-1])*GRAVITY_ACCERLERATION/(dx*2*fCor[ystart-1+j]);
+					Vgdata[l][k][j][i]=(hgtdata[l][k][j][i+1]-hgtdata[l][k][j][i-1])*gEarth/(dx*2*fCor[ystart-1+j]);
 				}
 			}
 			
@@ -81,10 +81,10 @@ public class VelocityFieldInCTS extends EquationInCartesianCoordinate{
 			for(int k=0;k<z;k++)
 			for(int j=1,J=y-1;j<J;j++){for(int i=1,I=x-1;i<I;i++){
 					if(hgtdata[k][j+1][i][l]!=undef&&hgtdata[k][j-1][i][l]!=undef)
-					Ugdata[k][j][i][l]=-(hgtdata[k][j+1][i][l]-hgtdata[k][j-1][i][l])*GRAVITY_ACCERLERATION/(dy*2*fCor[ystart-1+j]);
+					Ugdata[k][j][i][l]=-(hgtdata[k][j+1][i][l]-hgtdata[k][j-1][i][l])*gEarth/(dy*2*fCor[ystart-1+j]);
 					
 					if(hgtdata[k][j][i+1][l]!=undef&&hgtdata[k][j][i-1][l]!=undef)
-					Vgdata[k][j][i][l]=(hgtdata[k][j][i+1][l]-hgtdata[k][j][i-1][l])*GRAVITY_ACCERLERATION/(dx*2*fCor[ystart-1+j]);
+					Vgdata[k][j][i][l]=(hgtdata[k][j][i+1][l]-hgtdata[k][j][i-1][l])*gEarth/(dx*2*fCor[ystart-1+j]);
 				}
 			}
 		}

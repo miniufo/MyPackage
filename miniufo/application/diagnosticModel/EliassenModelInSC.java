@@ -12,11 +12,11 @@ import miniufo.diagnosis.Variable;
 import miniufo.diagnosis.SphericalSpatialModel;
 import static java.lang.Math.cos;
 import static java.lang.Math.pow;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
-import static miniufo.diagnosis.SpatialModel.EARTH_ROTATE_SPEED;
+import static miniufo.diagnosis.SpatialModel.REarth;
+import static miniufo.diagnosis.SpatialModel.omegaEarth;
 import static miniufo.geophysics.atmos.ThermoDynamics.Cp;
 import static miniufo.geophysics.atmos.ThermoDynamics.Rd;
-import static miniufo.geophysics.atmos.ThermoDynamics.kp;
+import static miniufo.geophysics.atmos.ThermoDynamics.kappa;
 
 
 /**
@@ -66,7 +66,7 @@ implements EllipticEquationInterface{
 				for(int l=0;l<t;l++)
 				for(int k=0;k<z;k++)
 				for(int i=0;i<x;i++)
-				Mdata[l][k][j][i]=(udata[l][k][j][i]+EARTH_ROTATE_SPEED*r)*r;
+				Mdata[l][k][j][i]=(udata[l][k][j][i]+omegaEarth*r)*r;
 			}
 			
 		}else{
@@ -76,7 +76,7 @@ implements EllipticEquationInterface{
 				for(int l=0;l<t;l++)
 				for(int k=0;k<z;k++)
 				for(int i=0;i<x;i++)
-				Mdata[k][j][i][l]=(udata[k][j][i][l]+EARTH_ROTATE_SPEED*r)*r;
+				Mdata[k][j][i][l]=(udata[k][j][i][l]+omegaEarth*r)*r;
 			}
 		}
 		
@@ -113,7 +113,7 @@ implements EllipticEquationInterface{
 				/((lcos[ystart-1+j+1]+lcos[ystart-1+j])/2f)-
 				(tvdata[l][k][j][0]*lcos[ystart-1+j]-tvdata[l][k][j-1][0]*lcos[ystart-1+j-1])
 				/((lcos[ystart-1+j]+lcos[ystart-1+j-1])/2f)
-			)/(dy*dy)*Rd*(float)pow(zdef[zstart-1+k]/100000.0,kp)/zdef[zstart-1+k];
+			)/(dy*dy)*Rd*(float)pow(zdef[zstart-1+k]/100000.0,kappa)/zdef[zstart-1+k];
 			
 		}else{
 			for(int l=0;l<t;l++)
@@ -125,7 +125,7 @@ implements EllipticEquationInterface{
 				/((lcos[ystart-1+j+1]+lcos[ystart-1+j])/2f)-
 				(tvdata[k][j][0][l]*lcos[ystart-1+j]-tvdata[k][j-1][0][l]*lcos[ystart-1+j-1])
 				/((lcos[ystart-1+j]+lcos[ystart-1+j-1])/2f)
-			)/(dy*dy)*Rd*(float)pow(zdef[zstart-1+k]/100000.0,kp)/zdef[zstart-1+k];
+			)/(dy*dy)*Rd*(float)pow(zdef[zstart-1+k]/100000.0,kappa)/zdef[zstart-1+k];
 		}
 		
 		return f;
@@ -159,7 +159,7 @@ implements EllipticEquationInterface{
 			fdata[l][k][j][0]=(
 				(twdata[l][k+1][j+1][0]-twdata[l][k-1][j+1][0])/(2f*dz)-
 				(twdata[l][k+1][j-1][0]-twdata[l][k-1][j-1][0])/(2f*dz)
-			)/(2f*dy)*Rd*(float)pow(zdef[zstart-1+k]/100000.0,kp)/zdef[zstart-1+k];
+			)/(2f*dy)*Rd*(float)pow(zdef[zstart-1+k]/100000.0,kappa)/zdef[zstart-1+k];
 			
 		}else{
 			for(int l=0;l<t;l++)
@@ -170,7 +170,7 @@ implements EllipticEquationInterface{
 			fdata[k][j][0][l]=(
 				(twdata[k+1][j+1][0][l]-twdata[k-1][j+1][0][l])/(2f*dz)-
 				(twdata[k+1][j-1][0][l]-twdata[k-1][j-1][0][l])/(2f*dz)
-			)/(2f*dy)*Rd*(float)pow(zdef[zstart-1+k]/100000.0,kp)/zdef[zstart-1+k];
+			)/(2f*dy)*Rd*(float)pow(zdef[zstart-1+k]/100000.0,kappa)/zdef[zstart-1+k];
 		}
 		
 		return f;
@@ -201,14 +201,14 @@ implements EllipticEquationInterface{
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++)
 			if(hdata[l][k][j][0]!=undef) fdata[l][k][j][0]=
-			hdata[l][k][j][0]*Rd*(float)pow(zdef[zstart-1+k]/100000.0,kp)/zdef[zstart-1+k];
+			hdata[l][k][j][0]*Rd*(float)pow(zdef[zstart-1+k]/100000.0,kappa)/zdef[zstart-1+k];
 			
 		}else{
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++)
 			if(hdata[k][j][0][l]!=undef) fdata[k][j][0][l]=
-			hdata[k][j][0][l]*Rd*(float)pow(zdef[zstart-1+k]/100000.0,kp)/zdef[zstart-1+k];
+			hdata[k][j][0][l]*Rd*(float)pow(zdef[zstart-1+k]/100000.0,kappa)/zdef[zstart-1+k];
 		}
 		
 		return ff;
@@ -237,13 +237,13 @@ implements EllipticEquationInterface{
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++) if(Qdata[l][k][j][0]!=undef)
-			fdata[l][k][j][0]=-Qdata[l][k][j][0]/Cp/(float)pow(zdef[zstart-1+k]/100000.0,kp);
+			fdata[l][k][j][0]=-Qdata[l][k][j][0]/Cp/(float)pow(zdef[zstart-1+k]/100000.0,kappa);
 			
 		}else{
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++) if(Qdata[k][j][0][l]!=undef)
-			fdata[k][j][0][l]=-Qdata[k][j][0][l]/Cp/(float)pow(zdef[zstart-1+k]/100000.0,kp);
+			fdata[k][j][0][l]=-Qdata[k][j][0][l]/Cp/(float)pow(zdef[zstart-1+k]/100000.0,kappa);
 		}
 		
 		return f;
@@ -1185,7 +1185,7 @@ implements EllipticEquationInterface{
 		float[][][][] vsdata=EP[3].getData();
 		
 		float denomZ=Math.abs(zdef[z-1]-zdef[0])/rZToY;
-		float denomY=Math.abs(ydef[y-1]-ydef[0])*EARTH_RADIUS;
+		float denomY=Math.abs(ydef[y-1]-ydef[0])*REarth;
 		
 		System.out.println(dz);
 		System.out.println(dy);
@@ -1264,18 +1264,18 @@ implements EllipticEquationInterface{
 				// south boundary (j==0), not used in inversion
 				if(tdata[l][k][0][0]!=undef&&tdata[l][k][1][0]!=undef)
 				Bdata[l][k][0][0]=(tdata[l][k][1][0]-tdata[l][k][0][0])/dy/((lcos[ystart-1]+lcos[ystart-1+1])/2f)*
-				Rd*(float)pow(zdef[zstart-1+k]/100000.0,kp)/zdef[zstart-1+k];
+				Rd*(float)pow(zdef[zstart-1+k]/100000.0,kappa)/zdef[zstart-1+k];
 				
 				// inner region
 				for(int j=1,J=y-1;j<J;j++)
 				if(tdata[l][k][j+1][0]!=undef&&tdata[l][k][j-1][0]!=undef)
 				Bdata[l][k][j][0]=(tdata[l][k][j+1][0]-tdata[l][k][j-1][0])/(2f*dy)/lcos[ystart-1+j]*
-				Rd*(float)pow(zdef[zstart-1+k]/100000.0,kp)/zdef[zstart-1+k];
+				Rd*(float)pow(zdef[zstart-1+k]/100000.0,kappa)/zdef[zstart-1+k];
 				
 				// north boundary (j==y-1), not used in inversion
 				if(tdata[l][k][y-1][0]!=undef&&tdata[l][k][y-2][0]!=undef)
 				Bdata[l][k][y-1][0]=(tdata[l][k][y-1][0]-tdata[l][k][y-2][0])/dy/((lcos[ystart-1+y-1]+lcos[ystart-1+y-2])/2f)*
-				Rd*(float)pow(zdef[zstart-1+k]/100000.0,kp)/zdef[zstart-1+k];
+				Rd*(float)pow(zdef[zstart-1+k]/100000.0,kappa)/zdef[zstart-1+k];
 			}
 			
 		}else{
@@ -1284,18 +1284,18 @@ implements EllipticEquationInterface{
 				// south boundary (j==0), not used in inversion
 				if(tdata[k][0][0][l]!=undef&&tdata[k][1][0][l]!=undef)
 				Bdata[k][0][0][l]=(tdata[k][1][0][l]-tdata[k][0][0][l])/dy/((lcos[ystart-1]+lcos[ystart-1+1])/2f)*
-				Rd*(float)pow(zdef[zstart-1+k]/100000.0,kp)/zdef[zstart-1+k];
+				Rd*(float)pow(zdef[zstart-1+k]/100000.0,kappa)/zdef[zstart-1+k];
 				
 				// inner region
 				for(int j=1,J=y-1;j<J;j++)
 				if(tdata[k][j+1][0][l]!=undef&&tdata[k][j-1][0][l]!=undef)
 				Bdata[k][j][0][l]=(tdata[k][j+1][0][l]-tdata[k][j-1][0][l])/(2f*dy)/lcos[ystart-1+j]*
-				Rd*(float)pow(zdef[zstart-1+k]/100000.0,kp)/zdef[zstart-1+k];
+				Rd*(float)pow(zdef[zstart-1+k]/100000.0,kappa)/zdef[zstart-1+k];
 				
 				// north boundary (j==y-1), not used in inversion
 				if(tdata[k][y-1][0][l]!=undef&&tdata[k][y-2][0][l]!=undef)
 				Bdata[k][y-1][0][l]=(tdata[k][y-1][0][l]-tdata[k][y-2][0][l])/dy/((lcos[ystart-1+y-1]+lcos[ystart-1+y-2])/2f)*
-				Rd*(float)pow(zdef[zstart-1+k]/100000.0,kp)/zdef[zstart-1+k];
+				Rd*(float)pow(zdef[zstart-1+k]/100000.0,kappa)/zdef[zstart-1+k];
 			}
 		}
 		

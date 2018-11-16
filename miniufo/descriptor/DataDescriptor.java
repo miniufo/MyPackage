@@ -52,6 +52,8 @@ public abstract class DataDescriptor{
 	
 	protected DataType dataType=DataType.OTHERS;
 	
+	protected enum IncreType{mn,hr,dy,mo,yr};
+	
 	public enum DataType{ANNUAL,SEASONAL,MONTHLY,DAILY,DAILY4,HOURLY,OTHERS}
 	
 	
@@ -168,6 +170,16 @@ public abstract class DataDescriptor{
 	public float[] getDXDef(){return dxdef;}
 	
 	public   Var[] getVDef(){ return vdef ;}
+	
+	public String[] getVarNames(){
+		int len=vdef.length;
+		
+		String[] names=new String[len];
+		
+		for(int i=0;i<len;i++) names[i]=vdef[i].vname;
+		
+		return names;
+	}
 	
 	public String getTitle(){ return title;}
 	

@@ -15,9 +15,9 @@ import miniufo.statistics.StatisticsUtil;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
-import static miniufo.diagnosis.SpatialModel.EARTH_ROTATE_SPEED;
-import static miniufo.diagnosis.SpatialModel.GRAVITY_ACCERLERATION;
+import static miniufo.diagnosis.SpatialModel.REarth;
+import static miniufo.diagnosis.SpatialModel.omegaEarth;
+import static miniufo.diagnosis.SpatialModel.gEarth;
 import static miniufo.geophysics.atmos.ThermoDynamics.Rd;
 
 
@@ -127,7 +127,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
 				double Fi=
-				(EARTH_ROTATE_SPEED*(sin(fi[l][j][i])+sin(fi0[l]))*(1.0-cos(beta[j]))*EARTH_RADIUS*EARTH_RADIUS);
+				(omegaEarth*(sin(fi[l][j][i])+sin(fi0[l]))*(1.0-cos(beta[j]))*REarth*REarth);
 				
 				for(int k=0;k<z;k++)
 				if(udata[l][k][j][i]!=undef) adata[l][k][j][i]=(float)(udata[l][k][j][i]*rs[j]+Fi);
@@ -138,7 +138,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
 				double Fi=
-				(EARTH_ROTATE_SPEED*(sin(fi[l][j][i])+sin(fi0[l]))*(1.0-cos(beta[j]))*EARTH_RADIUS*EARTH_RADIUS);
+				(omegaEarth*(sin(fi[l][j][i])+sin(fi0[l]))*(1.0-cos(beta[j]))*REarth*REarth);
 				
 				for(int k=0;k<z;k++)
 				if(udata[k][j][i][l]!=undef) adata[k][j][i][l]=(float)(udata[k][j][i][l]*rs[j]+Fi);
@@ -176,7 +176,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int l=0;l<t;l++)
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
-				double Fi=EARTH_ROTATE_SPEED*(sin(fi[l][j][i])+sin(fi0[l]))*rs[j]*rs[j]/2.0;
+				double Fi=omegaEarth*(sin(fi[l][j][i])+sin(fi0[l]))*rs[j]*rs[j]/2.0;
 				
 				for(int k=0;k<z;k++)
 				if(udata[l][k][j][i]!=undef) adata[l][k][j][i]=(float)(udata[l][k][j][i]*rs[j]+Fi);
@@ -186,7 +186,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int l=0;l<t;l++)
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
-				double Fi=EARTH_ROTATE_SPEED*(sin(fi[l][j][i])+sin(fi0[l]))*rs[j]*rs[j]/2.0;
+				double Fi=omegaEarth*(sin(fi[l][j][i])+sin(fi0[l]))*rs[j]*rs[j]/2.0;
 				
 				for(int k=0;k<z;k++)
 				if(udata[k][j][i][l]!=undef) adata[k][j][i][l]=(float)(udata[k][j][i][l]*rs[j]+Fi);
@@ -219,7 +219,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int l=0;l<t;l++)
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
-				double Fi=EARTH_ROTATE_SPEED*sin(fi0[l])*rs[j]*rs[j];
+				double Fi=omegaEarth*sin(fi0[l])*rs[j]*rs[j];
 				
 				for(int k=0;k<z;k++)
 				if(udata[l][k][j][i]!=undef) adata[l][k][j][i]=(float)(udata[l][k][j][i]*rs[j]+Fi);
@@ -229,7 +229,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int l=0;l<t;l++)
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
-				double Fi=EARTH_ROTATE_SPEED*sin(fi0[l])*rs[j]*rs[j];
+				double Fi=omegaEarth*sin(fi0[l])*rs[j]*rs[j];
 				
 				for(int k=0;k<z;k++)
 				if(udata[k][j][i][l]!=undef) adata[k][j][i][l]=(float)(udata[k][j][i][l]*rs[j]+Fi);
@@ -261,7 +261,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int l=0;l<t;l++)
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
-				float f1=2f*EARTH_ROTATE_SPEED*(float)sin(fi[l][j][i]);
+				float f1=2f*omegaEarth*(float)sin(fi[l][j][i]);
 				
 				for(int k=0;k<z;k++)
 				if(udata[l][k][j][i]!=undef) wdata[l][k][j][i]=udata[l][k][j][i]/rs[j]+f1/2f;
@@ -271,7 +271,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int l=0;l<t;l++)
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
-				float f1=2f*EARTH_ROTATE_SPEED*(float)sin(fi[l][j][i]);
+				float f1=2f*omegaEarth*(float)sin(fi[l][j][i]);
 				
 				for(int k=0;k<z;k++)
 				if(udata[k][j][i][l]!=undef) wdata[k][j][i][l]=udata[k][j][i][l]/rs[j]+f1/2f;
@@ -305,7 +305,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++){
 				/*** j==0 ***/
-				float f1=2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][0][0]);
+				float f1=2f*omegaEarth*(float)sin(lats[l][0][0]);
 				float um=0; int count=0;
 				for(int i=0;i<x;i++) if(udata[l][k][1][i]!=undef){ um+=udata[l][k][1][i]; count++;}
 				
@@ -315,21 +315,21 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 				for(int j=1;j<y-1;j++){
 					/*** i==0 ***/
 					if(udata[l][k][j][0]!=undef) edata[l][k][j][0]=
-						2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][j][0])+
+						2f*omegaEarth*(float)sin(lats[l][j][0])+
 						(udata[l][k][j+1][0]-udata[l][k][j-1][0])/(dy*2)+udata[l][k][j][0]/rs[j]-
 						(vdata[l][k][j  ][1]-vdata[l][k][j][x-1])/(dxs[j]*2);
 					else edata[l][k][j][0]=undef;
 					
 					for(int i=1;i<x-1;i++)
 					if(udata[l][k][j][i]!=undef) edata[l][k][j][i]=
-						2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][j][i])+
+						2f*omegaEarth*(float)sin(lats[l][j][i])+
 						(udata[l][k][j+1][i]-udata[l][k][j-1][i])/(dy*2)+udata[l][k][j][i]/rs[j]-
 						(vdata[l][k][j][i+1]-vdata[l][k][j][i-1])/(dxs[j]*2);
 					else edata[l][k][j][i]=undef;
 					
 					/*** i==x-1 ***/
 					if(udata[l][k][j][x-1]!=undef) edata[l][k][j][x-1]=
-						2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][j][x-1])+
+						2f*omegaEarth*(float)sin(lats[l][j][x-1])+
 						(udata[l][k][j+1][x-1]-udata[l][k][j-1][x-1])/(dy*2)+udata[l][k][j][x-1]/rs[j]-
 						(vdata[l][k][j  ][0  ]-vdata[l][k][j  ][x-2])/(dxs[j]*2);
 					else edata[l][k][j][x-1]=undef;
@@ -337,20 +337,20 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 				
 				/*** j==y-1 ***/
 				if(udata[l][k][y-1][0]!=undef) edata[l][k][y-1][0]=
-					2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][y-1][0])+
+					2f*omegaEarth*(float)sin(lats[l][y-1][0])+
 					(udata[l][k][y-1][0]-udata[l][k][y-2][0  ])/dy+udata[l][k][y-1][0]/rs[y-1]-
 					(vdata[l][k][y-1][1]-vdata[l][k][y-1][x-1])/(dxs[y-1]*2);
 				else edata[l][k][y-1][0]=undef;
 				
 				for(int i=1;i<x-1;i++)
 				if(udata[l][k][y-1][i]!=undef) edata[l][k][y-1][i]=
-					2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][y-1][i])+
+					2f*omegaEarth*(float)sin(lats[l][y-1][i])+
 					(udata[l][k][y-1][i  ]-udata[l][k][y-2][i  ])/dy+udata[l][k][y-1][i]/rs[y-1]-
 					(vdata[l][k][y-1][i+1]-vdata[l][k][y-1][i-1])/(dxs[y-1]*2);
 				else edata[l][k][y-1][i]=undef;
 				
 				if(udata[l][k][y-1][x-1]!=undef) edata[l][k][y-1][x-1]=
-					2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][y-1][x-1])+
+					2f*omegaEarth*(float)sin(lats[l][y-1][x-1])+
 					(udata[l][k][y-1][x-1]-udata[l][k][y-2][x-1])/dy+udata[l][k][y-1][x-1]/rs[y-1]-
 					(vdata[l][k][y-1][0]-vdata[l][k][y-1][x-2])/(dxs[y-1]*2);
 				else edata[l][k][y-1][x-1]=undef;
@@ -360,7 +360,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++){
 				/*** j==0 ***/
-				float f1=2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][0][0]);
+				float f1=2f*omegaEarth*(float)sin(lats[l][0][0]);
 				float um=0; int count=0;
 				for(int i=0;i<x;i++) if(udata[k][1][i][l]!=undef){ um+=udata[k][1][i][l]; count++;}
 				
@@ -370,21 +370,21 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 				for(int j=1;j<y-1;j++){
 					/*** i==0 ***/
 					if(udata[k][j][0][l]!=undef) edata[k][j][0][l]=
-						2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][j][0])+
+						2f*omegaEarth*(float)sin(lats[l][j][0])+
 						(udata[k][j+1][0][l]-udata[k][j-1][0][l])/(dy*2)+udata[k][j][0][l]/rs[j]-
 						(vdata[k][j  ][1][l]-vdata[k][j][x-1][l])/(dxs[j]*2);
 					else edata[k][j][0][l]=undef;
 					
 					for(int i=1;i<x-1;i++)
 					if(udata[k][j][i][l]!=undef) edata[k][j][i][l]=
-						2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][j][i])+
+						2f*omegaEarth*(float)sin(lats[l][j][i])+
 						(udata[k][j+1][i][l]-udata[k][j-1][i][l])/(dy*2)+udata[k][j][i][l]/rs[j]-
 						(vdata[k][j][i+1][l]-vdata[k][j][i-1][l])/(dxs[j]*2);
 					else edata[k][j][i][l]=undef;
 					
 					/*** i==x-1 ***/
 					if(udata[k][j][x-1][l]!=undef) edata[k][j][x-1][l]=
-						2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][j][x-1])+
+						2f*omegaEarth*(float)sin(lats[l][j][x-1])+
 						(udata[k][j+1][x-1][l]-udata[k][j-1][x-1][l])/(dy*2)+udata[k][j][x-1][l]/rs[j]-
 						(vdata[k][j  ][0  ][l]-vdata[k][j  ][x-2][l])/(dxs[j]*2);
 					else edata[k][j][x-1][l]=undef;
@@ -392,20 +392,20 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 				
 				/*** j==y-1 ***/
 				if(udata[k][y-1][0][l]!=undef) edata[k][y-1][0][l]=
-					2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][y-1][0])+
+					2f*omegaEarth*(float)sin(lats[l][y-1][0])+
 					(udata[k][y-1][0][l]-udata[k][y-2][0  ][l])/dy+udata[k][y-1][0][l]/rs[y-1]-
 					(vdata[k][y-1][1][l]-vdata[k][y-1][x-1][l])/(dxs[y-1]*2);
 				else edata[k][y-1][0][l]=undef;
 				
 				for(int i=1;i<x-1;i++)
 				if(udata[k][y-1][i][l]!=undef) edata[k][y-1][i][l]=
-					2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][y-1][i])+
+					2f*omegaEarth*(float)sin(lats[l][y-1][i])+
 					(udata[k][y-1][i  ][l]-udata[k][y-2][i  ][l])/dy+udata[k][y-1][i][l]/rs[y-1]-
 					(vdata[k][y-1][i+1][l]-vdata[k][y-1][i-1][l])/(dxs[y-1]*2);
 				else edata[k][y-1][i][l]=undef;
 				
 				if(udata[k][y-1][x-1][l]!=undef) edata[k][y-1][x-1][l]=
-					2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][y-1][x-1])+
+					2f*omegaEarth*(float)sin(lats[l][y-1][x-1])+
 					(udata[k][y-1][x-1][l]-udata[k][y-2][x-1][l])/dy+udata[k][y-1][x-1][l]/rs[y-1]-
 					(vdata[k][y-1][0][l]-vdata[k][y-1][x-2][l])/(dxs[y-1]*2);
 				else edata[k][y-1][x-1][l]=undef;
@@ -489,7 +489,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int l=0;l<t;l++)
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
-				double f2=2f*EARTH_ROTATE_SPEED*sin(lats[l][j][i]); f2*=f2;
+				double f2=2f*omegaEarth*sin(lats[l][j][i]); f2*=f2;
 				
 				if(f2!=0) for(int k=0;k<z;k++) idata[l][k][j][i]/=f2;
 				else for(int k=0;k<z;k++) idata[l][k][j][i]=undef;
@@ -499,7 +499,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int l=0;l<t;l++)
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
-				double f2=2f*EARTH_ROTATE_SPEED*sin(lats[l][j][i]); f2*=f2;
+				double f2=2f*omegaEarth*sin(lats[l][j][i]); f2*=f2;
 				
 				if(f2!=0) for(int k=0;k<z;k++) idata[k][j][i][l]/=f2;
 				else for(int k=0;k<z;k++) idata[k][j][i][l]=undef;
@@ -552,7 +552,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 				
 				for(int j=1;j<y-1;j++)
 				for(int i=0;i<x;i++){
-					double tmp=EARTH_ROTATE_SPEED*(sin(olats[l])+sin(lats[l][j][i]))*rs[j]/2.0;
+					double tmp=omegaEarth*(sin(olats[l])+sin(lats[l][j][i]))*rs[j]/2.0;
 					
 					for(int k=0;k<z;k++){
 						float re=(float)(sqrt(
@@ -581,7 +581,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 				
 				for(int j=1;j<y-1;j++)
 				for(int i=0;i<x;i++){
-					double tmp=EARTH_ROTATE_SPEED*(sin(olats[l])+sin(lats[l][j][i]))*rs[j]/2;
+					double tmp=omegaEarth*(sin(olats[l])+sin(lats[l][j][i]))*rs[j]/2;
 					
 					for(int k=0;k<z;k++){
 						float re=(float)(sqrt(
@@ -622,7 +622,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int l=0;l<t;l++)
 			for(int i=0;i<x;i++)
 			for(int j=1;j<y-1;j++){
-				double tmp=EARTH_ROTATE_SPEED*sin(lats[l][j][i])*rs[j];
+				double tmp=omegaEarth*sin(lats[l][j][i])*rs[j];
 				
 				for(int k=0;k<z;k++){
 					float re=(float)(-tmp+sqrt(
@@ -637,7 +637,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int l=0;l<t;l++)
 			for(int i=0;i<x;i++)
 			for(int j=1;j<y-1;j++){
-				double tmp=EARTH_ROTATE_SPEED*sin(lats[l][j][i])*rs[j];
+				double tmp=omegaEarth*sin(lats[l][j][i])*rs[j];
 				
 				for(int k=0;k<z;k++){
 					float re=(float)(-tmp+sqrt(
@@ -676,7 +676,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int l=0;l<t;l++)
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
-				double f1=2.0*EARTH_ROTATE_SPEED*sin(fi[l][j][i]);
+				double f1=2.0*omegaEarth*sin(fi[l][j][i]);
 				
 				for(int k=0;k<z;k++) if(udata[l][k][j][i]!=undef&&rs[j]!=0)
 				wdata[l][k][j][i]=(float)(udata[l][k][j][i]/rs[j]+f1)*udata[l][k][j][i];
@@ -686,7 +686,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int l=0;l<t;l++)
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
-				double f1=2.0*EARTH_ROTATE_SPEED*sin(fi[l][j][i]);
+				double f1=2.0*omegaEarth*sin(fi[l][j][i]);
 				
 				for(int k=0;k<z;k++) if(udata[k][j][i][l]!=undef&&rs[j]!=0)
 				wdata[k][j][i][l]=(float)(udata[k][j][i][l]/rs[j]+f1)*udata[k][j][i][l];
@@ -722,7 +722,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
 				if(wdata[l][k][j][i]!=undef) odata[l][k][j][i]=
-					-zdef[zstart-1+k]*GRAVITY_ACCERLERATION*wdata[l][k][j][i]/Rd/Tdata[l][k][j][i];
+					-zdef[zstart-1+k]*gEarth*wdata[l][k][j][i]/Rd/Tdata[l][k][j][i];
 				else odata[l][k][j][i]=undef;
 			}
 			
@@ -732,7 +732,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
 				if(wdata[k][j][i][l]!=undef) odata[k][j][i][l]=
-					-zdef[zstart-1+k]*GRAVITY_ACCERLERATION*wdata[k][j][i][l]/Rd/Tdata[k][j][i][l];
+					-zdef[zstart-1+k]*gEarth*wdata[k][j][i][l]/Rd/Tdata[k][j][i][l];
 				else odata[k][j][i][l]=undef;
 			}
 		}
@@ -998,7 +998,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 					float[] f=new float[x];
 					
 					for(int i=0;i<x;i++)
-					f[i]=2*EARTH_ROTATE_SPEED*(float)sin(lats[l][j][i]);
+					f[i]=2*omegaEarth*(float)sin(lats[l][j][i]);
 					
 					int count=0;	float fm=StatisticsUtil.cArithmeticMean(f);
 					for(int i=0;i<x;i++)
@@ -1019,7 +1019,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 					float[] f=new float[x];
 					
 					for(int i=0;i<x;i++)
-					f[i]=2*EARTH_ROTATE_SPEED*(float)sin(lats[l][j][i]);
+					f[i]=2*omegaEarth*(float)sin(lats[l][j][i]);
 					
 					int count=0;	float fm=StatisticsUtil.cArithmeticMean(f);
 					for(int i=0;i<x;i++)
@@ -1115,6 +1115,36 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 		AEFC.getRange().setZRange(aa.getRange());
 		
 		return AEFC;
+	}
+	
+	/**
+     * Calculate upper-level forcing index by Qian et al. (2016, WAF)
+     *
+     * @param	utr		storm-relative tangential wind (m s^-1)
+     * @param	vrr		storm-relative radial wind (m s^-1)
+     * @param	vr		original radial wind (m s^-1)
+     *
+     * @return	ULFI	upper-level forcing index (m s^-1)
+     */
+	public Variable cULFI(Variable utr,Variable vrr,Variable vr){
+		checkDimensions(utr,vrr,vr);
+		assignSubDomainParams(utr);
+		
+		Variable utrcp=utr.copy();
+		Variable vrrcp=vrr.copy();
+		Variable vrcp = vr.copy();
+		
+		Variable utm=utrcp.anomalizeX();	vrrcp.anomalizeX();
+		Variable uta=utrcp;					 vrcp.anomalizeX();
+		Variable vra=vrrcp;
+		
+		Variable ULFI=cREFC(uta,vra).plusEq(cPEFC(vrcp)).divideEq(cMeanAbsoluteVorticity(utm)).divideEq(86400);
+		
+		ULFI.setName("ULFI");
+		ULFI.setUndef(undef);
+		ULFI.setCommentAndUnit("upper-level forcing index (m s^-1)");
+		
+		return ULFI;
 	}
 	
 	/**
@@ -1502,7 +1532,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 				double Fi=0;
 				
 				for(int i=0,I=sm.getXCount();i<I;i++)
-				Fi+=EARTH_ROTATE_SPEED*(sin(fi[l][j][i])+sin(fi0[l]))*(1.0-cos(beta[j]))*EARTH_RADIUS*EARTH_RADIUS;
+				Fi+=omegaEarth*(sin(fi[l][j][i])+sin(fi0[l]))*(1.0-cos(beta[j]))*REarth*REarth;
 				Fi/=sm.getXCount();
 				
 				for(int k=0;k<z;k++)
@@ -1515,7 +1545,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 				double Fi=0;
 				
 				for(int i=0,I=sm.getXCount();i<I;i++)
-				Fi+=EARTH_ROTATE_SPEED*(sin(fi[l][j][i])+sin(fi0[l]))*(1.0-cos(beta[j]))*EARTH_RADIUS*EARTH_RADIUS;
+				Fi+=omegaEarth*(sin(fi[l][j][i])+sin(fi0[l]))*(1.0-cos(beta[j]))*REarth*REarth;
 				Fi/=sm.getXCount();
 				
 				for(int k=0;k<z;k++)
@@ -1549,7 +1579,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 		if(utm.isTFirst()){
 			for(int l=0;l<t;l++)
 			for(int j=0;j<y;j++){
-				double Fi=EARTH_ROTATE_SPEED*sin(olat[l])*rs[j]*rs[j];
+				double Fi=omegaEarth*sin(olat[l])*rs[j]*rs[j];
 				
 				for(int k=0;k<z;k++) if(udata[l][k][j][0]!=undef)
 				adata[l][k][j][0]=(float)(udata[l][k][j][0]*rs[j]+Fi);
@@ -1558,7 +1588,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 		}else{
 			for(int l=0;l<t;l++)
 			for(int j=0;j<y;j++){
-				double Fi=EARTH_ROTATE_SPEED*sin(olat[l])*rs[j]*rs[j];
+				double Fi=omegaEarth*sin(olat[l])*rs[j]*rs[j];
 				
 				for(int k=0;k<z;k++) if(udata[k][j][0][l]!=undef)
 				adata[k][j][0][l]=(float)(udata[k][j][0][l]*rs[j]+Fi);
@@ -1594,7 +1624,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 		if(fm.isTFirst()){
 			for(int l=0;l<t;l++)
 			for(int j=1;j<y-1;j++){
-				double tmp=EARTH_ROTATE_SPEED*sin(olats[l])*rs[j];
+				double tmp=omegaEarth*sin(olats[l])*rs[j];
 				
 				for(int k=0;k<z;k++)
 				adata[l][k][j][0]=(float)(sqrt(
@@ -1605,7 +1635,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 		}else{
 			for(int l=0;l<t;l++)
 			for(int j=1;j<y-1;j++){
-				double tmp=EARTH_ROTATE_SPEED*sin(olats[l])*rs[j];
+				double tmp=omegaEarth*sin(olats[l])*rs[j];
 				
 				for(int k=0;k<z;k++)
 				adata[k][j][0][l]=(float)(sqrt(
@@ -1644,7 +1674,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int j=0;j<y;j++){
 				float f1=0;
 				
-				for(int i=0,I=sm.getXCount();i<I;i++) f1+=2f*EARTH_ROTATE_SPEED*(float)sin(fi[l][j][i]);
+				for(int i=0,I=sm.getXCount();i<I;i++) f1+=2f*omegaEarth*(float)sin(fi[l][j][i]);
 				f1/=sm.getXCount();
 				
 				for(int k=0;k<z;k++)
@@ -1656,7 +1686,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int j=0;j<y;j++){
 				float f1=0;
 				
-				for(int i=0,I=sm.getXCount();i<I;i++) f1+=2f*EARTH_ROTATE_SPEED*(float)sin(fi[l][j][i]);
+				for(int i=0,I=sm.getXCount();i<I;i++) f1+=2f*omegaEarth*(float)sin(fi[l][j][i]);
 				f1/=sm.getXCount();
 				
 				for(int k=0;k<z;k++)
@@ -1691,12 +1721,12 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++){
 				/*** j==0 ***/
-				float f1=2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][0][0]);
+				float f1=2f*omegaEarth*(float)sin(lats[l][0][0]);
 				if(udata[l][k][1][0]!=0) edata[l][k][0][0]=f1+2*udata[l][k][1][0]/rs[1];
 				
 				for(int j=1;j<y-1;j++){
 					f1=0;
-					for(int i=0;i<sm.getXCount();i++) f1+=2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][j][i]);
+					for(int i=0;i<sm.getXCount();i++) f1+=2f*omegaEarth*(float)sin(lats[l][j][i]);
 					f1/=sm.getXCount();
 					
 					if(udata[l][k][j][0]!=undef) edata[l][k][j][0]=f1+
@@ -1705,7 +1735,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 				
 				/*** j==y-1 ***/
 				f1=0;
-				for(int i=0;i<sm.getXCount();i++) f1+=2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][y-1][i]);
+				for(int i=0;i<sm.getXCount();i++) f1+=2f*omegaEarth*(float)sin(lats[l][y-1][i]);
 				f1/=sm.getXCount();
 				
 				if(udata[l][k][y-1][0]!=undef) edata[l][k][y-1][0]=f1+
@@ -1716,12 +1746,12 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++){
 				/*** j==0 ***/
-				float f1=2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][0][0]);
+				float f1=2f*omegaEarth*(float)sin(lats[l][0][0]);
 				if(udata[k][1][0][l]!=0) edata[k][0][0][l]=f1+2*udata[k][1][0][l]/rs[1];
 				
 				for(int j=1;j<y-1;j++){
 					f1=0;
-					for(int i=0;i<sm.getXCount();i++) f1+=2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][j][i]);
+					for(int i=0;i<sm.getXCount();i++) f1+=2f*omegaEarth*(float)sin(lats[l][j][i]);
 					f1/=sm.getXCount();
 					
 					if(udata[k][j][0][l]!=undef) edata[k][j][0][l]=f1+
@@ -1730,7 +1760,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 				
 				/*** j==y-1 ***/
 				f1=0;
-				for(int i=0;i<sm.getXCount();i++) f1+=2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][y-1][i]);
+				for(int i=0;i<sm.getXCount();i++) f1+=2f*omegaEarth*(float)sin(lats[l][y-1][i]);
 				f1/=sm.getXCount();
 				
 				if(udata[k][y-1][0][l]!=undef) edata[k][y-1][0][l]=f1+
@@ -1815,17 +1845,17 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++){
 				/*** j==0 ***/
-				edata[l][k][0][0]=2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][0][0]);
+				edata[l][k][0][0]=2f*omegaEarth*(float)sin(lats[l][0][0]);
 				
 				for(int j=1;j<y-1;j++){
 					float f1=0;
-					for(int i=0;i<sm.getXCount();i++) f1+=2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][j][i]);
+					for(int i=0;i<sm.getXCount();i++) f1+=2f*omegaEarth*(float)sin(lats[l][j][i]);
 					edata[l][k][j][0]=f1/sm.getXCount();
 				}
 				
 				/*** j==y-1 ***/
 				float f1=0;
-				for(int i=0;i<sm.getXCount();i++) f1+=2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][y-1][i]);
+				for(int i=0;i<sm.getXCount();i++) f1+=2f*omegaEarth*(float)sin(lats[l][y-1][i]);
 				edata[l][k][y-1][0]=f1/sm.getXCount();
 			}
 			
@@ -1833,17 +1863,17 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++){
 				/*** j==0 ***/
-				edata[k][0][0][l]=2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][0][0]);
+				edata[k][0][0][l]=2f*omegaEarth*(float)sin(lats[l][0][0]);
 				
 				for(int j=1;j<y-1;j++){
 					float f1=0;
-					for(int i=0;i<sm.getXCount();i++) f1+=2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][j][i]);
+					for(int i=0;i<sm.getXCount();i++) f1+=2f*omegaEarth*(float)sin(lats[l][j][i]);
 					edata[k][j][0][l]=f1/sm.getXCount();
 				}
 				
 				/*** j==y-1 ***/
 				float f1=0;
-				for(int i=0;i<sm.getXCount();i++) f1+=2f*EARTH_ROTATE_SPEED*(float)sin(lats[l][y-1][i]);
+				for(int i=0;i<sm.getXCount();i++) f1+=2f*omegaEarth*(float)sin(lats[l][y-1][i]);
 				edata[k][y-1][0][l]=f1/sm.getXCount();
 			}
 		}
@@ -1891,7 +1921,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 				}
 				
 				for(int j=1;j<y-1;j++){
-					double tmp=2.0*EARTH_ROTATE_SPEED*sin(olats[l])*rs[j]/2.0;
+					double tmp=2.0*omegaEarth*sin(olats[l])*rs[j]/2.0;
 					
 					for(int k=0;k<z;k++){
 						float re=(float)(sqrt(
@@ -1921,7 +1951,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 				}
 				
 				for(int j=1;j<y-1;j++){
-					double tmp=2.0*EARTH_ROTATE_SPEED*sin(olats[l])*rs[j]/2.0;
+					double tmp=2.0*omegaEarth*sin(olats[l])*rs[j]/2.0;
 					
 					for(int k=0;k<z;k++){
 						float re=(float)(sqrt(
@@ -1962,7 +1992,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 		if(fm.isTFirst()){
 			for(int l=0;l<t;l++)
 			for(int j=1;j<y-1;j++){
-				double tmp=2.0*EARTH_ROTATE_SPEED*sin(olats[l])*rs[j]/2.0;
+				double tmp=2.0*omegaEarth*sin(olats[l])*rs[j]/2.0;
 				
 				for(int k=0;k<z;k++)
 				gdata[l][k][j][0]=(float)(sqrt(
@@ -1973,7 +2003,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 		}else{
 			for(int l=0;l<t;l++)
 			for(int j=1;j<y-1;j++){
-				double tmp=2.0*EARTH_ROTATE_SPEED*sin(olats[l])*rs[j]/2.0;
+				double tmp=2.0*omegaEarth*sin(olats[l])*rs[j]/2.0;
 				
 				for(int k=0;k<z;k++)
 				gdata[k][j][0][l]=(float)(sqrt(
@@ -2011,7 +2041,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 		if(aamm.isTFirst()){
 			for(int l=0;l<t;l++)
 			for(int j=1;j<y;j++){
-				double tmp=EARTH_ROTATE_SPEED*sin(olats[l])*rs[j];
+				double tmp=omegaEarth*sin(olats[l])*rs[j];
 				
 				for(int k=0;k<z;k++) if(adata[l][k][j][0]!=undef)
 				udata[l][k][j][0]=(float)(adata[l][k][j][0]/rs[j]-tmp);
@@ -2020,7 +2050,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 		}else{
 			for(int l=0;l<t;l++)
 			for(int j=1;j<y;j++){
-				double tmp=EARTH_ROTATE_SPEED*sin(olats[l])*rs[j];
+				double tmp=omegaEarth*sin(olats[l])*rs[j];
 				
 				for(int k=0;k<z;k++) if(adata[k][j][0][l]!=undef)
 				udata[k][j][0][l]=(float)(adata[k][j][0][l]/rs[j]-tmp);
@@ -2114,7 +2144,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 				float[] deriv=new float[y];
 				
 				for(int j=1;j<y;j++){
-					double tmp=EARTH_ROTATE_SPEED*sin(olats[l]);
+					double tmp=omegaEarth*sin(olats[l]);
 					
 					deriv[j]=(float)(Math.pow(adata[l][k][j][0]/rs[j],2.0)/rs[j]-tmp*tmp*rs[j])*bcos[j];
 				}
@@ -2130,7 +2160,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 				float[] deriv=new float[y];
 				
 				for(int j=1;j<y;j++){
-					double tmp=EARTH_ROTATE_SPEED*sin(olats[l]);
+					double tmp=omegaEarth*sin(olats[l]);
 					
 					deriv[j]=(float)(Math.pow(adata[k][j][0][l]/rs[j],2.0)/rs[j]-tmp*tmp*rs[j])*bcos[j];
 				}
@@ -2168,7 +2198,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 		
 		if(utm.isTFirst()){
 			for(int l=0;l<t;l++){
-				double f1=2f*EARTH_ROTATE_SPEED*sin(olats[l]);
+				double f1=2f*omegaEarth*sin(olats[l]);
 				
 				for(int j=0;j<y;j++)
 				for(int k=0;k<z;k++) if(udata[l][k][j][0]!=undef&&rs[j]!=0)
@@ -2177,7 +2207,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			
 		}else{
 			for(int l=0;l<t;l++){
-				double f1=2f*EARTH_ROTATE_SPEED*sin(olats[l]);
+				double f1=2f*omegaEarth*sin(olats[l]);
 				
 				for(int j=0;j<y;j++)
 				for(int k=0;k<z;k++) if(udata[k][j][0][l]!=undef&&rs[j]!=0)
@@ -2216,7 +2246,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int j=1;j<y-1;j++){
 				float f1=0;
 				
-				for(int i=0,I=sm.getXCount();i<I;i++) f1+=2f*EARTH_ROTATE_SPEED*(float)sin(fi[l][j][i]);
+				for(int i=0,I=sm.getXCount();i<I;i++) f1+=2f*omegaEarth*(float)sin(fi[l][j][i]);
 				f1/=sm.getXCount();
 				
 				for(int k=0;k<z;k++) if(udata[l][k][j][0]!=undef) idata[l][k][j][0]=
@@ -2228,7 +2258,7 @@ public class DynamicMethodsInCC extends EquationInCylindricalCoordinate{
 			for(int j=1;j<y-1;j++){
 				float f1=0;
 				
-				for(int i=0,I=sm.getXCount();i<I;i++) f1+=2f*EARTH_ROTATE_SPEED*(float)sin(fi[l][j][i]);
+				for(int i=0,I=sm.getXCount();i<I;i++) f1+=2f*omegaEarth*(float)sin(fi[l][j][i]);
 				f1/=sm.getXCount();
 				
 				for(int k=0;k<z;k++) if(udata[k][j][0][l]!=undef) idata[k][j][0][l]=

@@ -183,38 +183,37 @@ public final class VerticalModeDecomposition{
 	
 	/** test
 	public static void main(String[] args){
-		DiagnosisFactory df=DiagnosisFactory.parseFile("/lustre/home/qianyk/Data/Haima.ctl");
-		DataDescriptor dd=df.getDataDescriptor();
+		float[][] data=TextReader.readColumnsF("d:/LeiCasshow/data.txt",false,1,2);
 		
-		SphericalSpacialModel ssm=new SphericalSpacialModel(dd);
-		ThermoMethodsInSC tm=new ThermoMethodsInSC(ssm);
+		float[] vel=data[0];
+		float[] N2S=data[1];
+		float[] N2=new float[N2S.length-1];
 		
-		Variable T=df.getVariables(new Range("lon(120,120);lat(20,20);t(1,1)",dd),"t")[0];
-		Variable S=tm.cStaticStabilityArgByT(T);
+		System.arraycopy(N2S,0,N2,0,N2.length);
 		
-		float[] N2=new float[S.getZCount()-1];
+		VerticalModeDecomposition vmd=new VerticalModeDecomposition(vel.length);
+		vmd.updateNSquare(N2,5);
 		
-		for(int i=0;i<N2.length;i++) N2[i]=S.getData()[0][i][0][0];
+		float[][] vecs=vmd.decompose(vel,20);
 		
-		VerticalModeDecomposition vmd=new VerticalModeDecomposition(S.getZCount());
-		vmd.updateNSquare(N2,dd.getDZDef()[0]);
+		Variable[] ms=new Variable[20];
 		
-		float[] Tdata=new float[S.getZCount()];
+		Variable v1=new Variable("vel",new Range(1,vel.length,1,1));
+		Variable v2=new Variable("N2",new Range(1,vel.length,1,1));
 		
-		for(int k=0;k<S.getZCount();k++) Tdata[k]=T.getData()[0][k][0][0];
+		for(int k=0;k<v1.getZCount();k++) v1.getData()[0][k][0][0]=vel[k];
+		for(int k=0;k<v1.getZCount()-1;k++) v2.getData()[0][k][0][0]=N2[k];
 		
-		float[][] vecs=vmd.decompose(Tdata,S.getZCount());
-		
-		Variable[] ms=new Variable[S.getZCount()];
+		v2.getData()[0][v1.getZCount()-1][0][0]=N2[v1.getZCount()-2];
 		
 		for(int i=0;i<ms.length;i++){
-			ms[i]=new Variable("m"+(i+1),S);
+			ms[i]=new Variable("m"+(i+1),new Range(1,vel.length,1,1));
 			
-			for(int k=0;k<S.getZCount();k++) ms[i].getData()[0][k][0][0]=vecs[i][k];
+			for(int k=0;k<ms[i].getZCount();k++) ms[i].getData()[0][k][0][0]=vecs[i][k];
 		}
 		
-		DataWrite dw=DataIOFactory.getDataWrite(dd,"/lustre/home/qianyk/Data/VMD.dat");
-		dw.writeData(dd,ArrayUtil.concatAll(Variable.class,new Variable[]{T,S},ms));
+		CtlDataWriteStream dw=new CtlDataWriteStream("d:/LeiCasshow/VMD.dat");
+		dw.writeData(ArrayUtil.concatAll(Variable.class,new Variable[]{v1,v2},ms));
 		dw.closeFile();
 	}*/
 }

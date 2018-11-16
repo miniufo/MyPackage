@@ -61,7 +61,7 @@ public final class FileWriteInterface{
 			bb:	while(true){
 					System.out.println("Input A(a) to append the file");
 					System.out.println("Input O(o) to overwrite the existing file");
-					System.out.println("Input R(r) to rename the file to be written(30chars)");
+					System.out.println("Input R(r) to rename the file to be written (30 chars)");
 					System.out.println("Input S(s) to skip writing this file");
 					System.out.println("Input T(t) to terminate the program without writing");
 					System.in.skip(System.in.available());

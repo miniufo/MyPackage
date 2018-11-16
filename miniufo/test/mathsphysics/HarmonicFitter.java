@@ -55,7 +55,7 @@ public final class HarmonicFitter extends Fitter{
 		initTRelatedBuffer(x);
 	}
 	
-	public HarmonicFitter(float T,int len){ this(T,ArrayUtil.newMonotonousArray(len,1));}
+	public HarmonicFitter(float T,int len){ this(T,ArrayUtil.newMonotonicArray(len,1));}
 	
 	
 	/**

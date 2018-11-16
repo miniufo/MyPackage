@@ -15,8 +15,8 @@ import static java.lang.Math.tan;
 import static java.lang.Math.sqrt;
 import static java.lang.Math.toDegrees;
 import static java.lang.Math.toRadians;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
-import static miniufo.diagnosis.SpatialModel.EARTH_ROTATE_SPEED;
+import static miniufo.diagnosis.SpatialModel.REarth;
+import static miniufo.diagnosis.SpatialModel.omegaEarth;
 
 
 /**
@@ -58,8 +58,8 @@ public final class GlobalShallowWaterModelA extends ShallowWaterModel2D{
 		dlon=(float)toRadians(dlon);
 		dlat=(float)toRadians(dlat);
 		
-		deltaY=EARTH_RADIUS*dlat;
-		deltaX=EARTH_RADIUS*dlon;
+		deltaY=REarth*dlat;
+		deltaX=REarth*dlon;
 		
 		f  =new float[y];
 		cos=new float[y];
@@ -70,7 +70,7 @@ public final class GlobalShallowWaterModelA extends ShallowWaterModel2D{
 			
 			  cos[j]=(float)cos(lat);
 			  tan[j]=(float)tan(lat);
-			    f[j]=2*EARTH_ROTATE_SPEED*(float)sin(lat);
+			    f[j]=2*omegaEarth*(float)sin(lat);
 		}
 		
 		float dtmax=deltaX*cos[1]/350/1.414f;
@@ -275,7 +275,7 @@ public final class GlobalShallowWaterModelA extends ShallowWaterModel2D{
 		
 		for(int j=2;j<y;j++)
 		for(int i=1;i<=x;i++)
-		re[j][i]+=(f[j-1]+usrc[j][i]*tan[j-1]/EARTH_RADIUS)*usrc[j][i]*H[j][i];
+		re[j][i]+=(f[j-1]+usrc[j][i]*tan[j-1]/REarth)*usrc[j][i]*H[j][i];
 	}
 	
 	private void cPressureGradientY(float[][] re,int tag){
@@ -310,7 +310,7 @@ public final class GlobalShallowWaterModelA extends ShallowWaterModel2D{
 		
 		for(int j=2;j<y;j++)
 		for(int i=1;i<=x;i++)
-		re[j][i]-=(f[j-1]+usrc[j][i]*tan[j-1]/EARTH_RADIUS)*vsrc[j][i]*H[j][i];
+		re[j][i]-=(f[j-1]+usrc[j][i]*tan[j-1]/REarth)*vsrc[j][i]*H[j][i];
 	}
 	
 	private void cPressureGradientX(float[][] re,int tag){

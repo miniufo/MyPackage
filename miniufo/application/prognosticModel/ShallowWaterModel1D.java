@@ -15,7 +15,7 @@ import static java.lang.Math.cos;
 import static java.lang.Math.sqrt;
 import static java.lang.Math.toDegrees;
 import static java.lang.Math.toRadians;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
+import static miniufo.diagnosis.SpatialModel.REarth;
 
 
 /**
@@ -61,7 +61,7 @@ public final class ShallowWaterModel1D{
 		
 		float dlon=(float)toRadians(360f/x);
 		
-		deltaX=EARTH_RADIUS*dlon;
+		deltaX=REarth*dlon;
 		ratio =deltaT/(2*deltaX);
 		
 		float dtmax=deltaX/350;

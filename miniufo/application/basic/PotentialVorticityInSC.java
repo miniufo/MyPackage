@@ -13,7 +13,7 @@ import static java.lang.Math.log;
 import static java.lang.Math.pow;
 import static miniufo.geophysics.atmos.ThermoDynamics.Rd;
 import static miniufo.geophysics.atmos.ThermoDynamics.Cp;
-import static miniufo.diagnosis.SpatialModel.GRAVITY_ACCERLERATION;
+import static miniufo.diagnosis.SpatialModel.gEarth;
 
 
 /**
@@ -215,7 +215,7 @@ public final class PotentialVorticityInSC extends EquationInSphericalCoordinate{
 					);
 				}
 				
-				if(edata[l][k][j][i]!=undef) edata[l][k][j][i]*=-GRAVITY_ACCERLERATION*1e6f;
+				if(edata[l][k][j][i]!=undef) edata[l][k][j][i]*=-gEarth*1e6f;
 			}
 			
 		}else{
@@ -252,7 +252,7 @@ public final class PotentialVorticityInSC extends EquationInSphericalCoordinate{
 					);
 				}
 				
-				if(edata[k][j][i][l]!=undef) edata[k][j][i][l]*=-GRAVITY_ACCERLERATION*1e6f;
+				if(edata[k][j][i][l]!=undef) edata[k][j][i][l]*=-gEarth*1e6f;
 			}
 		}
 		

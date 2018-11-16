@@ -38,8 +38,6 @@ public final class CsmDescriptor extends DataDescriptor{
 	
 	private CtlDescriptor ctl=null;
 	
-	private enum IncreType{mn,hr,dy,mo,yr};
-	
 	
 	/**
      * constructor

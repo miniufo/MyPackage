@@ -208,6 +208,82 @@ public class StatisticsUtil{
 	
 	
 	/**
+     * Calculate root-mean-square error of two series
+     *
+     * @param	data1	data 1 in an array
+     * @param	data2	data 2 in an array
+     */
+	public static float cRMSE(float[] data1,float[] data2){
+		int len=data1.length;
+		
+		if(len!=data2.length) throw new IllegalArgumentException("array length not equal");
+		if(len<2) throw new IllegalArgumentException("data length too short");
+		
+		float sum=0;
+		
+		for(int i=0;i<len;i++){
+			float diff=data1[i]-data2[i];
+			sum+=diff*diff;
+		}
+		
+		sum/=len;
+		
+		return (float)sqrt(sum);
+	}
+	
+	public static double cRMSE(double[] data1,double[] data2){
+		int len=data1.length;
+		
+		if(len!=data2.length) throw new IllegalArgumentException("array length not equal");
+		if(len<2) throw new IllegalArgumentException("data length too short");
+		
+		double sum=0;
+		
+		for(int i=0;i<len;i++){
+			double diff=data1[i]-data2[i];
+			sum+=diff*diff;
+		}
+		
+		sum/=len;
+		
+		return sqrt(sum);
+	}
+	
+	
+	/**
+     * Calculate 1-norm, summing absolute differences of between two arrays.
+     *
+     * @param	data1	data 1 in an array
+     * @param	data2	data 2 in an array
+     */
+	public static float c1Norm(float[] data1,float[] data2){
+		int len=data1.length;
+		
+		if(len!=data2.length) throw new IllegalArgumentException("array length not equal");
+		if(len<2) throw new IllegalArgumentException("data length too short");
+		
+		float sum=0;
+		
+		for(int i=0;i<len;i++) sum+=Math.abs(data1[i]-data2[i]);
+		
+		return (float)sum;
+	}
+	
+	public static double c1Norm(double[] data1,double[] data2){
+		int len=data1.length;
+		
+		if(len!=data2.length) throw new IllegalArgumentException("array length not equal");
+		if(len<2) throw new IllegalArgumentException("data length too short");
+		
+		double sum=0;
+		
+		for(int i=0;i<len;i++) sum+=Math.abs(data1[i]-data2[i]);
+		
+		return sum;
+	}
+	
+	
+	/**
      * calculate anomaly
      *
      * @param	data	data in an array

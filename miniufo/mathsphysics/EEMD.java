@@ -47,7 +47,7 @@ public final class EEMD{
 		this.nmode=nmode;
 		this.Nstd=Nstd;
 		
-		dd=ArrayUtil.newMonotonousArray(len,1);
+		dd=ArrayUtil.newMonotonicArray(len,1);
 	}
 	
 	

@@ -20,9 +20,9 @@ import static java.lang.Math.cos;
 import static java.lang.Math.pow;
 import static miniufo.geophysics.atmos.ThermoDynamics.Cp;
 import static miniufo.geophysics.atmos.ThermoDynamics.Rd;
-import static miniufo.geophysics.atmos.ThermoDynamics.kp;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
-import static miniufo.diagnosis.SpatialModel.EARTH_ROTATE_SPEED;
+import static miniufo.geophysics.atmos.ThermoDynamics.kappa;
+import static miniufo.diagnosis.SpatialModel.REarth;
+import static miniufo.diagnosis.SpatialModel.omegaEarth;
 
 
 /**
@@ -324,7 +324,7 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 				/((bsin[j+1]+bsin[j])/2f)-
 				(tvdata[l][k][j][0]*bsin[j]-tvdata[l][k][j-1][0]*bsin[j-1])
 				/((bsin[j]+bsin[j-1])/2f)
-			)/(dy*dy)*Rd*(float)pow(zdef[k]/100000.0,kp)/zdef[k];
+			)/(dy*dy)*Rd*(float)pow(zdef[k]/100000.0,kappa)/zdef[k];
 			
 		}else{
 			for(int l=0;l<t;l++)
@@ -336,7 +336,7 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 				/((bsin[j+1]+bsin[j])/2f)-
 				(tvdata[k][j][0][l]*bsin[j]-tvdata[k][j-1][0][l]*bsin[j-1])
 				/((bsin[j]+bsin[j-1])/2f)
-			)/(dy*dy)*Rd*(float)pow(zdef[k]/100000.0,kp)/zdef[k];
+			)/(dy*dy)*Rd*(float)pow(zdef[k]/100000.0,kappa)/zdef[k];
 		}
 		
 		return f;
@@ -370,7 +370,7 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 			fdata[l][k][j][0]=-(
 				(twdata[l][k+1][j+1][0]-twdata[l][k-1][j+1][0])/(2f*dz)-
 				(twdata[l][k+1][j-1][0]-twdata[l][k-1][j-1][0])/(2f*dz)
-			)/(2f*dy)*Rd*(float)pow(zdef[k]/100000.0,kp)/zdef[k];
+			)/(2f*dy)*Rd*(float)pow(zdef[k]/100000.0,kappa)/zdef[k];
 			
 		}else{
 			for(int l=0;l<t;l++)
@@ -381,7 +381,7 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 			fdata[k][j][0][l]=-(
 				(twdata[k+1][j+1][0][l]-twdata[k-1][j+1][0][l])/(2f*dz)-
 				(twdata[k+1][j-1][0][l]-twdata[k-1][j-1][0][l])/(2f*dz)
-			)/(2f*dy)*Rd*(float)pow(zdef[k]/100000.0,kp)/zdef[k];
+			)/(2f*dy)*Rd*(float)pow(zdef[k]/100000.0,kappa)/zdef[k];
 		}
 		
 		return f;
@@ -587,12 +587,12 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 							-wnor[l][i]*cos(olat[l])*cos(xdef[i])
 						);
 						
-						buf[k][j]+=til3+EARTH_RADIUS*EARTH_ROTATE_SPEED*(til4+til5);  count++;
+						buf[k][j]+=til3+REarth*omegaEarth*(til4+til5);  count++;
 					}
 					
 					if(count!=0) buf[k][j]/=count;
 					
-					til2=-EARTH_ROTATE_SPEED*cs[l]*rs[j]*bsin[j]*(float)(cos(olat[l])*cos(cd[l]))/2f;
+					til2=-omegaEarth*cs[l]*rs[j]*bsin[j]*(float)(cos(olat[l])*cos(cd[l]))/2f;
 					buf[k][j]+=til2;
 				}
 
@@ -645,12 +645,12 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 							+vrdata[k][j][i][l]*(cos(ydef[j])*cos(olat[l])*cos(xdef[i])-bsin[j]*sin(olat[l]))
 							-wnor[l][i]*cos(olat[l])*cos(xdef[i]));
 						
-						buf[k][j]+=til3+EARTH_RADIUS*EARTH_ROTATE_SPEED*(til4+til5);  count++;
+						buf[k][j]+=til3+REarth*omegaEarth*(til4+til5);  count++;
 					}
 					
 					if(count!=0) buf[k][j]/=count;
 					
-					til2=-EARTH_ROTATE_SPEED*cs[l]*rs[j]*bsin[j]*(float)(cos(olat[l])*cos(cd[l]))/2f;
+					til2=-omegaEarth*cs[l]*rs[j]*bsin[j]*(float)(cos(olat[l])*cos(cd[l]))/2f;
 					buf[k][j]+=til2;
 				}
 
@@ -711,14 +711,14 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++)
 			if(hdata[l][k][j][0]!=undef) fdata[l][k][j][0]=
-			hdata[l][k][j][0]*Rd*(float)pow(zdef[k]/100000.0,kp)/zdef[k];
+			hdata[l][k][j][0]*Rd*(float)pow(zdef[k]/100000.0,kappa)/zdef[k];
 			
 		}else{
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++)
 			if(hdata[k][j][0][l]!=undef) fdata[k][j][0][l]=
-			hdata[k][j][0][l]*Rd*(float)pow(zdef[k]/100000.0,kp)/zdef[k];
+			hdata[k][j][0][l]*Rd*(float)pow(zdef[k]/100000.0,kappa)/zdef[k];
 		}
 		
 		return ff;
@@ -747,13 +747,13 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++) if(Qdata[l][k][j][0]!=undef)
-			fdata[l][k][j][0]=Qdata[l][k][j][0]/Cp/(float)pow(zdef[k]/100000.0,kp);
+			fdata[l][k][j][0]=Qdata[l][k][j][0]/Cp/(float)pow(zdef[k]/100000.0,kappa);
 			
 		}else{
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++) if(Qdata[k][j][0][l]!=undef)
-			fdata[k][j][0][l]=Qdata[k][j][0][l]/Cp/(float)pow(zdef[k]/100000.0,kp);
+			fdata[k][j][0][l]=Qdata[k][j][0][l]/Cp/(float)pow(zdef[k]/100000.0,kappa);
 		}
 		
 		return f;
@@ -945,12 +945,12 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 							+vrdata[l][k][j][i]*(cos(ydef[j])*cos(olat[l])*cos(xdef[i])-bsin[j]*sin(olat[l]))
 							-wnor[l][i]*cos(olat[l])*cos(xdef[i])
 						);
-						buf[k][j]+=til3+EARTH_RADIUS*EARTH_ROTATE_SPEED*(til4+til5);  count++;
+						buf[k][j]+=til3+REarth*omegaEarth*(til4+til5);  count++;
 					}
 					
 					if(count!=0) buf[k][j]/=count;
 					
-					float til2=-EARTH_ROTATE_SPEED*cs[l]*rs[j]*bsin[j]*(float)(cos(olat[l])*cos(cd[l]))/2;
+					float til2=-omegaEarth*cs[l]*rs[j]*bsin[j]*(float)(cos(olat[l])*cos(cd[l]))/2;
 					buf[k][j]+=til2;  count=0;
 				}
 				
@@ -977,12 +977,12 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 							+vrdata[k][j][i][l]*(cos(ydef[j])*cos(olat[l])*cos(xdef[i])-bsin[j]*sin(olat[l]))
 							-wnor[l][i]*cos(olat[l])*cos(xdef[i])
 						);
-						buf[k][j]+=til3+EARTH_RADIUS*EARTH_ROTATE_SPEED*(til4+til5);  count++;
+						buf[k][j]+=til3+REarth*omegaEarth*(til4+til5);  count++;
 					}
 					
 					if(count!=0) buf[k][j]/=count;
 					
-					float til2=-EARTH_ROTATE_SPEED*cs[l]*rs[j]*bsin[j]*(float)(cos(olat[l])*cos(cd[l]))/2;
+					float til2=-omegaEarth*cs[l]*rs[j]*bsin[j]*(float)(cos(olat[l])*cos(cd[l]))/2;
 					buf[k][j]+=til2;  count=0;
 				}
 				
@@ -1518,7 +1518,7 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 		float[][][][] vsdata=EP[3].getData();
 		
 		float denomZ=Math.abs(zdef[z-1]-zdef[0])/rZToY;
-		float denomY=Math.abs(ydef[y-1]-ydef[0])*EARTH_RADIUS;
+		float denomY=Math.abs(ydef[y-1]-ydef[0])*REarth;
 		
 		//System.out.println(dz);
 		//System.out.println(dy);
@@ -1592,18 +1592,18 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 			for(int l=0;l<t;l++)
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
-				sdata[l][0][j][i]=-(pdata[l][1][j][i]-pdata[l][0][j][i])/dz/SpatialModel.GRAVITY_ACCERLERATION;
-				for(int k=1,K=z-1;k<K;k++) sdata[l][k][j][i]=-(pdata[l][k+1][j][i]-pdata[l][k-1][j][i])/(2f*dz)/SpatialModel.GRAVITY_ACCERLERATION;
-				sdata[l][z-1][j][i]=-(pdata[l][z-1][j][i]-pdata[l][z-2][j][i])/dz/SpatialModel.GRAVITY_ACCERLERATION;
+				sdata[l][0][j][i]=-(pdata[l][1][j][i]-pdata[l][0][j][i])/dz/SpatialModel.gEarth;
+				for(int k=1,K=z-1;k<K;k++) sdata[l][k][j][i]=-(pdata[l][k+1][j][i]-pdata[l][k-1][j][i])/(2f*dz)/SpatialModel.gEarth;
+				sdata[l][z-1][j][i]=-(pdata[l][z-1][j][i]-pdata[l][z-2][j][i])/dz/SpatialModel.gEarth;
 			}
 			
 		}else{
 			for(int l=0;l<t;l++)
 			for(int j=0;j<y;j++)
 			for(int i=0;i<x;i++){
-				sdata[0][j][i][l]=-(pdata[1][j][i][l]-pdata[0][j][i][l])/dz/SpatialModel.GRAVITY_ACCERLERATION;
-				for(int k=1,K=z-1;k<K;k++) sdata[k][j][i][l]=-(pdata[k+1][j][i][l]-pdata[k-1][j][i][l])/(2f*dz)/SpatialModel.GRAVITY_ACCERLERATION;
-				sdata[z-1][j][i][l]=-(pdata[z-1][j][i][l]-pdata[z-2][j][i][l])/dz/SpatialModel.GRAVITY_ACCERLERATION;
+				sdata[0][j][i][l]=-(pdata[1][j][i][l]-pdata[0][j][i][l])/dz/SpatialModel.gEarth;
+				for(int k=1,K=z-1;k<K;k++) sdata[k][j][i][l]=-(pdata[k+1][j][i][l]-pdata[k-1][j][i][l])/(2f*dz)/SpatialModel.gEarth;
+				sdata[z-1][j][i][l]=-(pdata[z-1][j][i][l]-pdata[z-2][j][i][l])/dz/SpatialModel.gEarth;
 			}
 		}
 		
@@ -1763,7 +1763,7 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++){
 				if(sadata[l][k][j][0]!=undef) mcdata[l][k][j][0]=-sadata[l][k][j][0];
-				if(pmdata[l][k][j][0]!=undef) vcdata[l][k][j][0]= pmdata[l][k][j][0]/SpatialModel.GRAVITY_ACCERLERATION;
+				if(pmdata[l][k][j][0]!=undef) vcdata[l][k][j][0]= pmdata[l][k][j][0]/SpatialModel.gEarth;
 			}
 			
 		}else{
@@ -1771,7 +1771,7 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++){
 				if(sadata[k][j][0][l]!=undef) mcdata[k][j][0][l]=-sadata[k][j][0][l];
-				if(pmdata[k][j][0][l]!=undef) vcdata[k][j][0][l]= pmdata[k][j][0][l]/SpatialModel.GRAVITY_ACCERLERATION;
+				if(pmdata[k][j][0][l]!=undef) vcdata[k][j][0][l]= pmdata[k][j][0][l]/SpatialModel.gEarth;
 			}
 		}
 		
@@ -1784,7 +1784,7 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 		float[][][][] vsdata=EP[3].getData();
 		
 		float denomZ=Math.abs(zdef[z-1]-zdef[0])/rZToY;
-		float denomY=Math.abs(ydef[y-1]-ydef[0])*EARTH_RADIUS;
+		float denomY=Math.abs(ydef[y-1]-ydef[0])*REarth;
 		
 		if(sVaMa.isTFirst()){
 			for(int l=0;l<t;l++)
@@ -1839,7 +1839,7 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++){
 				if(sadata[l][k][j][0]!=undef) mcdata[l][k][j][0]=-sadata[l][k][j][0]*rs[j];
-				if(pmdata[l][k][j][0]!=undef) vcdata[l][k][j][0]= pmdata[l][k][j][0]/SpatialModel.GRAVITY_ACCERLERATION;
+				if(pmdata[l][k][j][0]!=undef) vcdata[l][k][j][0]= pmdata[l][k][j][0]/SpatialModel.gEarth;
 			}
 			
 		}else{
@@ -1847,7 +1847,7 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++){
 				if(sadata[k][j][0][l]!=undef) mcdata[k][j][0][l]=-sadata[k][j][0][l]*rs[j];
-				if(pmdata[k][j][0][l]!=undef) vcdata[k][j][0][l]= pmdata[k][j][0][l]/SpatialModel.GRAVITY_ACCERLERATION;
+				if(pmdata[k][j][0][l]!=undef) vcdata[k][j][0][l]= pmdata[k][j][0][l]/SpatialModel.gEarth;
 			}
 		}
 		
@@ -1860,7 +1860,7 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 		float[][][][] vsdata=EP[3].getData();
 		
 		float denomZ=Math.abs(zdef[z-1]-zdef[0])/rZToY;
-		float denomY=Math.abs(ydef[y-1]-ydef[0])*EARTH_RADIUS;
+		float denomY=Math.abs(ydef[y-1]-ydef[0])*REarth;
 		
 		if(sVaUa.isTFirst()){
 			for(int l=0;l<t;l++)
@@ -1920,7 +1920,7 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++){
 				if(svudata[l][k][j][0]!=undef)  mcdata[l][k][j][0]=-svudata[l][k][j][0];
-				if( pmdata[l][k][j][0]!=undef) vc1data[l][k][j][0]=  pmdata[l][k][j][0]/SpatialModel.GRAVITY_ACCERLERATION;
+				if( pmdata[l][k][j][0]!=undef) vc1data[l][k][j][0]=  pmdata[l][k][j][0]/SpatialModel.gEarth;
 				if(swudata[l][k][j][0]!=undef) vc2data[l][k][j][0]=-swudata[l][k][j][0];
 			}
 			
@@ -1929,7 +1929,7 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++){
 				if(svudata[k][j][0][l]!=undef)  mcdata[k][j][0][l]=-svudata[k][j][0][l];
-				if( pmdata[k][j][0][l]!=undef) vc1data[k][j][0][l]=  pmdata[k][j][0][l]/SpatialModel.GRAVITY_ACCERLERATION;
+				if( pmdata[k][j][0][l]!=undef) vc1data[k][j][0][l]=  pmdata[k][j][0][l]/SpatialModel.gEarth;
 				if(swudata[k][j][0][l]!=undef) vc2data[k][j][0][l]=-swudata[k][j][0][l];
 			}
 		}
@@ -1946,7 +1946,7 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 		float[][][][] vs2data=EP[5].getData();
 		
 		float denomZ=Math.abs(zdef[z-1]-zdef[0])/rZToY;
-		float denomY=Math.abs(ydef[y-1]-ydef[0])*EARTH_RADIUS;
+		float denomY=Math.abs(ydef[y-1]-ydef[0])*REarth;
 		
 		if(sVmaMma.isTFirst()){
 			for(int l=0;l<t;l++)
@@ -2008,7 +2008,7 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++){
 				if(svudata[l][k][j][0]!=undef)  mcdata[l][k][j][0]=-svudata[l][k][j][0]*rs[j];
-				if( pmdata[l][k][j][0]!=undef) vc1data[l][k][j][0]=  pmdata[l][k][j][0]/SpatialModel.GRAVITY_ACCERLERATION;
+				if( pmdata[l][k][j][0]!=undef) vc1data[l][k][j][0]=  pmdata[l][k][j][0]/SpatialModel.gEarth;
 				if(swudata[l][k][j][0]!=undef) vc2data[l][k][j][0]=-swudata[l][k][j][0]*rs[j];
 			}
 			
@@ -2017,7 +2017,7 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 			for(int k=0;k<z;k++)
 			for(int j=0;j<y;j++){
 				if(svudata[k][j][0][l]!=undef)  mcdata[k][j][0][l]=-svudata[k][j][0][l]*rs[j];
-				if( pmdata[k][j][0][l]!=undef) vc1data[k][j][0][l]=  pmdata[k][j][0][l]/SpatialModel.GRAVITY_ACCERLERATION;
+				if( pmdata[k][j][0][l]!=undef) vc1data[k][j][0][l]=  pmdata[k][j][0][l]/SpatialModel.gEarth;
 				if(swudata[k][j][0][l]!=undef) vc2data[k][j][0][l]=-swudata[k][j][0][l]*rs[j];
 			}
 		}
@@ -2034,7 +2034,7 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 		float[][][][] vs2data=EP[5].getData();
 		
 		float denomZ=Math.abs(zdef[z-1]-zdef[0])/rZToY;
-		float denomY=Math.abs(ydef[y-1]-ydef[0])*EARTH_RADIUS;
+		float denomY=Math.abs(ydef[y-1]-ydef[0])*REarth;
 		
 		if(sVmaUma.isTFirst()){
 			for(int l=0;l<t;l++)
@@ -2110,15 +2110,15 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 				for(int j=1;j<y-1;j++)
 				if(tdata[l][k][j+1][0]!=undef&&tdata[l][k][j-1][0]!=undef)
 				Bdata[l][k][j][0]=(tdata[l][k][j+1][0]-tdata[l][k][j-1][0])/(2f*dy)/bsin[j]*
-				Rd*(float)pow(zdef[k]/100000.0,kp)/zdef[k];
+				Rd*(float)pow(zdef[k]/100000.0,kappa)/zdef[k];
 				
 				if(tdata[l][k][y-1][0]!=undef&&tdata[l][k][y-2][0]!=undef)
 				Bdata[l][k][y-1][0]=2f*(tdata[l][k][y-1][0]-tdata[l][k][y-2][0])/dy/(float)sin((ydef[y-2]+ydef[y-1])/2.0)*
-				Rd*(float)pow(zdef[k]/100000.0,kp)/zdef[k]-Bdata[l][k][y-2][0];
+				Rd*(float)pow(zdef[k]/100000.0,kappa)/zdef[k]-Bdata[l][k][y-2][0];
 				
 				if(tdata[l][k][0][0]!=undef&&tdata[l][k][1][0]!=undef)
 				Bdata[l][k][0][0]=2f*(tdata[l][k][1][0]-tdata[l][k][0][0])/dy/(float)sin(ydef[1]/2)*
-				Rd*(float)pow(zdef[k]/100000.0,kp)/zdef[k]-Bdata[l][k][1][0];
+				Rd*(float)pow(zdef[k]/100000.0,kappa)/zdef[k]-Bdata[l][k][1][0];
 			}
 			
 		}else{
@@ -2127,15 +2127,15 @@ public final class EliassenModelInCC extends EquationInCylindricalCoordinate imp
 				for(int j=1;j<y-1;j++)
 				if(tdata[k][j+1][0][l]!=undef&&tdata[k][j-1][0][l]!=undef)
 				Bdata[k][j][0][l]=(tdata[k][j+1][0][l]-tdata[k][j-1][0][l])/bsin[j]/(2f*dy)*
-				Rd*(float)pow(zdef[k]/100000.0,kp)/zdef[k];
+				Rd*(float)pow(zdef[k]/100000.0,kappa)/zdef[k];
 				
 				if(tdata[k][y-1][0][l]!=undef&&tdata[k][y-2][0][l]!=undef)
 				Bdata[k][y-1][0][l]=2f*(tdata[k][y-1][0][l]-tdata[k][y-2][0][l])/(float)sin((ydef[y-2]+ydef[y-1])/2.0)/dy*
-				Rd*(float)pow(zdef[k]/100000.0,kp)/zdef[k]-Bdata[k][y-2][0][l];
+				Rd*(float)pow(zdef[k]/100000.0,kappa)/zdef[k]-Bdata[k][y-2][0][l];
 				
 				if(tdata[k][0][0][l]!=undef&&tdata[k][1][0][l]!=undef)
 				Bdata[k][0][0][l]=2f*(tdata[k][1][0][l]-tdata[k][0][0][l])/dy/(float)sin(ydef[1]/2)*
-				Rd*(float)pow(zdef[k]/100000.0,kp)/zdef[k]-Bdata[k][1][0][l];
+				Rd*(float)pow(zdef[k]/100000.0,kappa)/zdef[k]-Bdata[k][1][0][l];
 			}
 		}
 		

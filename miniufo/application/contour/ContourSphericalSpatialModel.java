@@ -13,7 +13,7 @@ import miniufo.descriptor.DataDescriptor;
 import miniufo.diagnosis.SphericalSpatialModel;
 import miniufo.diagnosis.Variable;
 import miniufo.mathsphysics.MathsPhysicsUtil;
-import static miniufo.diagnosis.SpatialModel.EARTH_RADIUS;
+import static miniufo.diagnosis.SpatialModel.REarth;
 
 
 /**
@@ -50,7 +50,7 @@ public final class ContourSphericalSpatialModel extends ContourSpatialModel{
 		
 		sinN =Math.sin(Math.toRadians(dd.getYDef().getLast ()));
 		sinS =Math.sin(Math.toRadians(dd.getYDef().getFirst()));
-		areaT=Math.toRadians(rngX)*(sinN-sinS)*EARTH_RADIUS*EARTH_RADIUS;
+		areaT=Math.toRadians(rngX)*(sinN-sinS)*REarth*REarth;
 	}
 	
 	
@@ -105,17 +105,17 @@ public final class ContourSphericalSpatialModel extends ContourSpatialModel{
 		case Fixed:
 			if(idy==0){ // south pole
 				lat1=ydef[idy];
-				//lat2=ydef[idy]+dlat[idy]/2.0;
-				lat2=ydef[idy]+dlat[idy];
+				lat2=ydef[idy]+dlat[idy]/2.0;
+				//lat2=ydef[idy]+dlat[idy];
 			}else if(idy==ydef.length-1){ // north pole
-				lat1=ydef[idy];
-				//lat1=ydef[idy]-dlat[idy-1]/2.0;
+				//lat1=ydef[idy];
+				lat1=ydef[idy]-dlat[idy-1]/2.0;
 				lat2=ydef[idy];
 			}else{
-				//lat1=ydef[idy]-dlat[idy-1]/2.0;
-				//lat2=ydef[idy]+dlat[idy]/2.0;
-				lat1=ydef[idy];
-				lat2=ydef[idy]+dlat[idy];
+				lat1=ydef[idy]-dlat[idy-1]/2.0;
+				lat2=ydef[idy]+dlat[idy]/2.0;
+				//lat1=ydef[idy];
+				//lat2=ydef[idy]+dlat[idy];
 			}
 			break;
 			
@@ -135,7 +135,7 @@ public final class ContourSphericalSpatialModel extends ContourSpatialModel{
 		default: throw new IllegalArgumentException("unsupported BCx: "+BCx);
 		}
 		
-		return (4.0*Math.PI*EARTH_RADIUS*EARTH_RADIUS)*MathsPhysicsUtil.cAreaQuadByRadian(
+		return (4.0*Math.PI*REarth*REarth)*MathsPhysicsUtil.cAreaQuadByRadian(
 			Math.toRadians(lon1),Math.toRadians(lat1),
 			Math.toRadians(lon2),Math.toRadians(lat2)
 		);
@@ -152,7 +152,7 @@ public final class ContourSphericalSpatialModel extends ContourSpatialModel{
 	 */
 	protected double cEquivalentY(double area,float undef){
 		if(area==undef) return undef;
-		else return Math.toDegrees(Math.asin(sinN-area/(Math.toRadians(rngX)*EARTH_RADIUS*EARTH_RADIUS)));
+		else return Math.toDegrees(Math.asin(sinN-area/(Math.toRadians(rngX)*REarth*REarth)));
 	}
 	
 	/**

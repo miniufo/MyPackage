@@ -33,6 +33,7 @@ public final class LagrangianSampling implements Print{
 	//
 	private int attachedLen=0;
 	
+	private boolean cgrid=false;	// default is the Arakawa A-grid
 	private boolean print=true;
 	
 	private List<? extends Particle> ps=null;
@@ -52,6 +53,11 @@ public final class LagrangianSampling implements Print{
 		});
 	}
 	
+	public LagrangianSampling(List<? extends Particle> ps,boolean cgrid){
+		this(ps);
+		this.cgrid=cgrid;
+	}
+	
 	
 	/**
 	 * Sample variables described in a ctl/cts file.
@@ -69,10 +75,26 @@ public final class LagrangianSampling implements Print{
 		int tstr=dd.getTNum(ps.get(0).getTime(0     ))+1;
 		int tend=dd.getTNum(ps.get(0).getTime(tLen-1))+1;
 		
+		float xmin=dd.getXDef().getMin();
+		float ymin=dd.getYDef().getMin();
+		float xmax=dd.getXDef().getMax();
+		float ymax=dd.getYDef().getMax();
+		float xminC=xmin-dd.getDXDef()[0]/2f;
+		float yminC=ymin-dd.getDYDef()[0]/2f;
+		float xmaxC=xmax+dd.getDXDef()[0]/2f;
+		float ymaxC=ymax+dd.getDYDef()[0]/2f;
+		
+		//System.out.println("xminC: "+xminC+"  yminC: "+yminC+"  xmaxC: "+xmaxC+"  ymaxC: "+ymaxC);
+		//System.out.println("xmin : "+xmin +"  ymin : "+ymin +"  xmax : "+xmax +"  ymax : "+ymax );
+		//System.out.println("xmin : "+xmin +"  ymin : "+ymin +"  xmax-1 : "+(xmax-dd.getDXDef()[0]) +"  ymax-1 : "+(ymax-dd.getDYDef()[0]));
+		
+		//if(tstr<1||tend>dd.getTCount())
+		//throw new IllegalArgumentException("time of particle is out of the range of DataDescriptor");
+		
 		GridDataFetcher gdf=new GridDataFetcher(dd);
 		
 		for(int i=0;i<len;i++){
-			if(print) TicToc.tic("samping "+meta[i].name+" (attachedIndex: "+meta[i].index+") from t="+tstr+" to t="+tend);
+			if(print) TicToc.tic("samping "+String.format("%8s",meta[i].name)+" (attachedIndex: "+meta[i].index+") from t="+tstr+" to t="+tend);
 			
 			Variable buffer=gdf.prepareXYTBuffer(meta[i].name,1,tstr,tLen,0);
 			
@@ -80,12 +102,31 @@ public final class LagrangianSampling implements Print{
 			
 			final int ii=i;
 			LagrangianUtil.asRecordStream(ps).forEach(r->{
-				float v=gdf.fetchXYTBuffer(r.getXPos(),r.getYPos(),r.getTime(),buffer);
+				float xpos=r.getXPos();
+				float ypos=r.getYPos();
+				
+				if(cgrid){
+					if(xpos<xminC||ypos<yminC) throw new IllegalArgumentException(
+						"position ["+xpos+", "+ypos+"] is out of minimum range ["+xminC+", "+yminC+"]"
+					);
+					
+					if(xpos>xmaxC||ypos>ymaxC) throw new IllegalArgumentException(
+						"position ["+xpos+", "+ypos+"] is out of maximum range ["+xmaxC+", "+ymaxC+"]"
+					);
+					
+					// clipped position
+					if(xpos<xmin) xpos=xmin;
+					if(ypos<ymin) ypos=ymin;
+					if(xpos>xmax) xpos=xmax;
+					if(ypos>ymax) ypos=ymax;
+					//if(xpos>xmax-dd.getDXDef()[0]) xpos=xmax-dd.getDXDef()[0];
+					//if(ypos>ymax-dd.getDYDef()[0]) ypos=ymax-dd.getDYDef()[0];
+				}
+				
+				float v=gdf.fetchXYTBuffer(xpos,ypos,r.getTime(),buffer);
 				
 				r.setData(meta[ii],v);
 			});
-			
-			for(Particle p:ps) p.setAttachedMeta(meta[i]);
 			
 			if(print) TicToc.toc(TimeUnit.SECONDS);
 		}
@@ -106,6 +147,15 @@ public final class LagrangianSampling implements Print{
 		DiagnosisFactory df=DiagnosisFactory.parseFile(ctl);
 		DataDescriptor dd=df.getDataDescriptor();
 		
+		float xmin=dd.getXDef().getMin();
+		float ymin=dd.getYDef().getMin();
+		float xmax=dd.getXDef().getMax();
+		float ymax=dd.getYDef().getMax();
+		float xminC=xmin-dd.getDXDef()[0]/2f;
+		float yminC=ymin-dd.getDYDef()[0]/2f;
+		float xmaxC=xmax+dd.getDXDef()[0]/2f;
+		float ymaxC=ymax+dd.getDYDef()[0]/2f;
+		
 		GridDataFetcher gdf=new GridDataFetcher(dd);
 		
 		for(int i=0;i<len;i++){
@@ -117,12 +167,30 @@ public final class LagrangianSampling implements Print{
 			
 			final int ii=i;
 			LagrangianUtil.asRecordStream(ps).forEach(r->{
-				float v=gdf.fetchXYBuffer(r.getXPos(),r.getYPos(),buffer);
+				float xpos=r.getXPos();
+				float ypos=r.getYPos();
+				
+				if(cgrid){
+					if(xpos<xminC||ypos<yminC) throw new IllegalArgumentException(
+						"position ["+xpos+", "+ypos+"] is out of minimum range ["+xminC+", "+yminC+"]"
+					);
+					
+					if(xpos>xmaxC||ypos>ymaxC) throw new IllegalArgumentException(
+						"position ["+xpos+", "+ypos+"] is out of maximum range ["+xmaxC+", "+ymaxC+"]"
+					);
+					
+					if(xpos<xmin) xpos=xmin;
+					if(ypos<ymin) ypos=ymin;
+					if(xpos>xmax) xpos=xmax;
+					if(ypos>ymax) ypos=ymax;
+				}
+				
+				float v=gdf.fetchXYBuffer(xpos,ypos,buffer);
+				
+				if(v==Record.undef) System.out.println("at "+r.getTime()+" sampled undef for xpos:"+xpos+", ypos:"+ypos);
 				
 				r.setData(meta[ii],v);
 			});
-			
-			for(Particle p:ps) p.setAttachedMeta(meta[i]);
 			
 			if(print) TicToc.toc(TimeUnit.SECONDS);
 		}
@@ -136,7 +204,9 @@ public final class LagrangianSampling implements Print{
 	 * 
 	 * @param	out		file name for output
 	 */
-	public void toGrADSFile(String out){
+	public void toGrADSFile(String out){ toGrADSFile(ps,out);}
+	
+	public void toGrADSFile(List<? extends Particle> ps,String out){
 		Variable[] vs=ps.stream().map(p->toTimeSeriesVariable(p)).toArray(Variable[]::new);
 		
 		CtlDataWriteStream cdws=new CtlDataWriteStream(out);
@@ -188,7 +258,7 @@ public final class LagrangianSampling implements Print{
 		float[][][][] vdata=v.getData();
 		
 		for(AttachedMeta meta:p.getAttachedMeta())
-		for(int l=0;l<t;l++) vdata[meta.index][0][0][l]=p.getRecord(l).getDataValue(meta);
+		for(int l=0;l<t;l++) vdata[meta.index][0][0][l]=p.getRecord(l).getData(meta);
 		
 		return v;
 	}
@@ -196,6 +266,22 @@ public final class LagrangianSampling implements Print{
 	
 	/** test
 	public static void main(String[] args){
+		float xpos=5500;
+		float ypos=5500;
 		
+		Particle p=new Particle("100001",3);
+		for(int i=0;i<3;i++)
+		p.addRecord(new Record(20021217000000L+1000000L*i,xpos+5500*i,ypos+5500*i,3));
+		
+		List<Particle> ps=new ArrayList<>();
+		
+		ps.add(p);
+		
+		AttachedMeta meta=new AttachedMeta("tr9",2);
+		
+		LagrangianSampling spl=new LagrangianSampling(ps);
+		spl.sampleVariables("h:/dispInCC/ctrl/StatN.cts",meta);
+		
+		System.out.println(p.getRecord(0).getData(meta));
 	}*/
 }

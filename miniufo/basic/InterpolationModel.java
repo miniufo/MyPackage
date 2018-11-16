@@ -55,9 +55,12 @@ public final class InterpolationModel{
      * @param	undef	undefined value
      */
 	public static float linearInterpolation(float y0,float y1,float dis,float undef){
+		if(dis==0) return y0;
+		if(dis==1) return y1;
+		
 		if(y0!=undef){
 			if(y1!=undef) return y0+(y1-y0)*dis;
-			else return y0;
+			else return undef;
 		
 		}else{
 			if(y1!=undef) return y1;
@@ -66,9 +69,12 @@ public final class InterpolationModel{
 	}
 	
 	public static double linearInterpolation(double y0,double y1,double dis,double undef){
+		if(dis==0) return y0;
+		if(dis==1) return y1;
+		
 		if(y0!=undef){
 			if(y1!=undef) return y0+(y1-y0)*dis;
-			else return y0;
+			else return undef;
 		
 		}else{
 			if(y1!=undef) return y1;
@@ -121,11 +127,15 @@ public final class InterpolationModel{
      * @param	undef	undefined value
      */
 	public static float quadraticLagrangeInterpolation(float y0,float y1,float y2,float dis,float undef){
+		if(dis==0) return y0;
+		if(dis==1) return y1;
+		if(dis==2) return y2;
+		
 		if(y0!=undef){
 			if(y1!=undef){
 				if(y2!=undef) return quadraticLagrangeInterpolation(y0,y1,y2,dis);
 				else{
-					if(dis<=1) return linearInterpolation(y0,y1,dis);
+					if(dis<1) return linearInterpolation(y0,y1,dis);
 					else return undef;
 				}
 				
@@ -147,11 +157,15 @@ public final class InterpolationModel{
 	}
 	
 	public static double quadraticLagrangeInterpolation(double y0,double y1,double y2,double dis,double undef){
+		if(dis==0) return y0;
+		if(dis==1) return y1;
+		if(dis==2) return y2;
+		
 		if(y0!=undef){
 			if(y1!=undef){
 				if(y2!=undef) return quadraticLagrangeInterpolation(y0,y1,y2,dis);
 				else{
-					if(dis<=1) return linearInterpolation(y0,y1,dis);
+					if(dis<1) return linearInterpolation(y0,y1,dis);
 					else return undef;
 				}
 				
@@ -230,6 +244,11 @@ public final class InterpolationModel{
      * @param	undef	undefined value
      */
 	public static float cubicLagrangeInterpolation(float y0,float y1,float y2,float y3,float dis,float undef){
+		if(dis==0) return y0;
+		if(dis==1) return y1;
+		if(dis==2) return y2;
+		if(dis==3) return y3;
+		
 		if(y0!=undef){
 			if(y1!=undef){
 				if(y2!=undef){
@@ -243,7 +262,7 @@ public final class InterpolationModel{
 						return nLagrangeInterpolation(x,y,dis); // 0 1 # 3
 						
 					}else{ // 0 1 # #
-						if(dis<=1) return linearInterpolation(y0,y1,dis);
+						if(dis<1) return linearInterpolation(y0,y1,dis);
 						else return undef;
 					}
 				}
@@ -256,7 +275,7 @@ public final class InterpolationModel{
 						return nLagrangeInterpolation(x,y,dis);
 						
 					}else{ // 0 # 2 #
-						if(dis<=2) return linearInterpolation(y0,y2,dis/2f);
+						if(dis<2) return linearInterpolation(y0,y2,dis/2f);
 						else return undef;
 					}
 					
@@ -270,7 +289,7 @@ public final class InterpolationModel{
 			if(y1!=undef){
 				if(y2!=undef){
 					if(y3!=undef){	// # 1 2 3
-						if(dis>=1) return quadraticLagrangeInterpolation(y1,y2,y3,dis-1);
+						if(dis>1) return quadraticLagrangeInterpolation(y1,y2,y3,dis-1);
 						else return undef;
 						
 					}else{ // # 1 2 #
@@ -281,7 +300,7 @@ public final class InterpolationModel{
 					
 				}else{
 					if(y3!=undef){ // # 1 # 3
-						if(dis>=1) return linearInterpolation(y1,y3,(dis-1f)/2f);
+						if(dis>1) return linearInterpolation(y1,y3,(dis-1f)/2f);
 						else return undef;
 						
 					}else return undef; // # 1 # #
@@ -292,6 +311,11 @@ public final class InterpolationModel{
 	}
 	
 	public static double cubicLagrangeInterpolation(double y0,double y1,double y2,double y3,double dis,double undef){
+		if(dis==0) return y0;
+		if(dis==1) return y1;
+		if(dis==2) return y2;
+		if(dis==3) return y3;
+		
 		if(y0!=undef){
 			if(y1!=undef){
 				if(y2!=undef){
@@ -305,7 +329,7 @@ public final class InterpolationModel{
 						return nLagrangeInterpolation(x,y,dis); // 0 1 # 3
 						
 					}else{ // 0 1 # #
-						if(dis<=1) return linearInterpolation(y0,y1,dis);
+						if(dis<1) return linearInterpolation(y0,y1,dis);
 						else return undef;
 					}
 				}
@@ -318,7 +342,7 @@ public final class InterpolationModel{
 						return nLagrangeInterpolation(x,y,dis);
 						
 					}else{ // 0 # 2 #
-						if(dis<=2) return linearInterpolation(y0,y2,dis/2.0);
+						if(dis<2) return linearInterpolation(y0,y2,dis/2.0);
 						else return undef;
 					}
 					
@@ -343,7 +367,7 @@ public final class InterpolationModel{
 					
 				}else{
 					if(y3!=undef){ // # 1 # 3
-						if(dis>=1) return linearInterpolation(y1,y3,(dis-1.0)/2.0);
+						if(dis>1) return linearInterpolation(y1,y3,(dis-1.0)/2.0);
 						else return undef;
 						
 					}else return undef; // # 1 # #
@@ -359,7 +383,7 @@ public final class InterpolationModel{
      * 
      * No x-coordinates as it is assumed that x are evenly distributed.
 	 * 
-	 * Note that dis should be within [0,1] and f(0)=x1 and f(1)=x2, or else for extrapolation
+	 * Note that dis should be within [0,3] and f(0)=y0, f(1)=y1..., or else for extrapolation
 	 * 
 	 * x0 and x3 are used to approximate the first derivatives at x1 and x2 through 2nd central difference.
      *
@@ -390,7 +414,7 @@ public final class InterpolationModel{
      * 
      * No x-coordinates as it is assumed that x are evenly distributed.
 	 * 
-	 * Note that dis should be within [0,1] and f(0)=x1 and f(1)=x2, or else for extrapolation
+	 * Note that dis should be within [0,3] and f(0)=y0, f(1)=y1..., or else for extrapolation
 	 * 
 	 * x0 and x3 are used to approximate the first derivatives at x1 and x2 through 2nd central difference.
      *
@@ -402,6 +426,11 @@ public final class InterpolationModel{
      * @param	undef	undefined value
      */
 	public static float cubicPolynomialInterpolation(float y0,float y1,float y2,float y3,float dis,float undef){
+		if(dis==0) return y0;
+		if(dis==1) return y1;
+		if(dis==2) return y2;
+		if(dis==3) return y3;
+		
 		if(y0!=undef){
 			if(y1!=undef){
 				if(y2!=undef){
@@ -425,7 +454,7 @@ public final class InterpolationModel{
 						return nLagrangeInterpolation(x,y,dis+1);
 						
 					}else{ // 0 # 2 #
-						if(dis<=2) return linearInterpolation(y0,y2,(dis+1f)/2f);
+						if(dis<2) return linearInterpolation(y0,y2,(dis+1f)/2f);
 						else return undef;
 					}
 					
@@ -451,6 +480,11 @@ public final class InterpolationModel{
 	}
 	
 	public static double cubicPolynomialInterpolation(double y0,double y1,double y2,double y3,double dis,double undef){
+		if(dis==0) return y0;
+		if(dis==1) return y1;
+		if(dis==2) return y2;
+		if(dis==3) return y3;
+		
 		if(y0!=undef){
 			if(y1!=undef){
 				if(y2!=undef){
@@ -474,7 +508,7 @@ public final class InterpolationModel{
 						return nLagrangeInterpolation(x,y,dis+1.0);
 						
 					}else{ // 0 # 2 #
-						if(dis<=2) return linearInterpolation(y0,y2,(dis+1.0)/2.0);
+						if(dis<2) return linearInterpolation(y0,y2,(dis+1.0)/2.0);
 						else return undef;
 					}
 					
@@ -533,32 +567,36 @@ public final class InterpolationModel{
      * 
      * No x and y coordinates as it is assumed that they are evenly distributed.
      * 
-     * dx1 and dy1 within [0,1] for interpolation and else for extrapolation
+     * dx and dy within [0,1] for interpolation and else for extrapolation
      *
      * @param	z11		lower-left point
      * @param	z12		lower-right point
      * @param	z21		upper-left point
      * @param	z22		upper-right point
-     * @param	dx1		ratio of the distance defined as (x-x0)/(x1-x0)
-     * @param	dy1		ratio of the distance defined as (y-y0)/(y1-y0)
+     * @param	dx		ratio of the distance defined as (x-x0)/(x1-x0)
+     * @param	dy		ratio of the distance defined as (y-y0)/(y1-y0)
      * @param	undef	undefined value
      */
-	public static float bilinearInterpolation(float z11,float z12,float z21,float z22,float dx1,float dy1,float undef){
-		if(z11==undef) return undef;
-		if(z12==undef) return undef;
-		if(z21==undef) return undef;
-		if(z22==undef) return undef;
+	public static float bilinearInterpolation(float z11,float z12,float z21,float z22,float dx,float dy,float undef){
+		if(dx==0) return linearInterpolation(z11,z21,dy,undef);
+		if(dx==1) return linearInterpolation(z12,z22,dy,undef);
+		if(dy==0) return linearInterpolation(z11,z12,dx,undef);
+		if(dy==1) return linearInterpolation(z21,z22,dx,undef);
 		
-		return bilinearInterpolation(z11,z12,z21,z22,dx1,dy1);
+		if(z11==undef||z12==undef||z21==undef||z22==undef) return undef;
+		
+		return bilinearInterpolation(z11,z12,z21,z22,dx,dy);
 	}
 	
-	public static double bilinearInterpolation(double z11,double z12,double z21,double z22,double dx1,double dy1,double undef){
-		if(z11==undef) return undef;
-		if(z12==undef) return undef;
-		if(z21==undef) return undef;
-		if(z22==undef) return undef;
+	public static double bilinearInterpolation(double z11,double z12,double z21,double z22,double dx,double dy,double undef){
+		if(dx==0) return linearInterpolation(z11,z21,dy,undef);
+		if(dx==1) return linearInterpolation(z12,z22,dy,undef);
+		if(dy==0) return linearInterpolation(z11,z12,dx,undef);
+		if(dy==1) return linearInterpolation(z21,z22,dx,undef);
 		
-		return bilinearInterpolation(z11,z12,z21,z22,dx1,dy1);
+		if(z11==undef||z12==undef||z21==undef||z22==undef) return undef;
+		
+		return bilinearInterpolation(z11,z12,z21,z22,dx,dy);
 	}
 	
 	
@@ -1174,9 +1212,9 @@ public final class InterpolationModel{
      * @param	des		result after interpolation
      * @param	type	type of interpolation in enum Type
      */
-	public static void interp1D(float[] sx,float[] sy,float[] dx,float[] dy,Type t){ interp1D(sx,sy,dx,dy,t,Float.NaN);}
+	public static void interp1D(float[] sx,float[] sy,float[] dx,float[] dy,Type t,boolean extrapolation){ interp1D(sx,sy,dx,dy,t,Float.NaN,extrapolation);}
 	
-	public static void interp1D(double[] sx,double[] sy,double[] dx,double[] dy,Type t){ interp1D(sx,sy,dx,dy,t,Double.NaN);}
+	public static void interp1D(double[] sx,double[] sy,double[] dx,double[] dy,Type t,boolean extrapolation){ interp1D(sx,sy,dx,dy,t,Double.NaN,extrapolation);}
 	
 	/**
      * Interpolate a data (probably not evenly distributed) specified as sy=f(sx) into a new one.
@@ -1190,22 +1228,22 @@ public final class InterpolationModel{
      * @param	type	type of interpolation in enum Type
      * @param	undef	undefined value
      */
-	public static void interp1D(float[] sx,float[] sy,float[] dx,float[] dy,Type t,float undef){
+	public static void interp1D(float[] sx,float[] sy,float[] dx,float[] dy,Type t,float undef,boolean extrapolation){
 		switch(t){
-		case LINEAR : interp1DLinearU(sx,sy,dx,dy,undef); break;
-		case CUBIC_L: interp1DCubicLU(sx,sy,dx,dy,undef); break;
-		case CUBIC_P: interp1DCubicPU(sx,sy,dx,dy,undef); break;
-		case SPLINE : interp1DSplineU(sx,sy,dx,dy,undef); break;
+		case LINEAR : interp1DLinearU(sx,sy,dx,dy,undef,extrapolation); break;
+		case CUBIC_L: interp1DCubicLU(sx,sy,dx,dy,undef,extrapolation); break;
+		case CUBIC_P: interp1DCubicPU(sx,sy,dx,dy,undef,extrapolation); break;
+		case SPLINE : interp1DSplineU(sx,sy,dx,dy,undef              ); break;
 		default: throw new UnsupportedOperationException("unsupported interpolation type for interp1D:\t"+t);
 		}
 	}
 	
-	public static void interp1D(double[] sx,double[] sy,double[] dx,double[] dy,Type t,double undef){
+	public static void interp1D(double[] sx,double[] sy,double[] dx,double[] dy,Type t,double undef,boolean extrapolation){
 		switch(t){
-		case LINEAR : interp1DLinearU(sx,sy,dx,dy,undef); break;
-		case CUBIC_L: interp1DCubicLU(sx,sy,dx,dy,undef); break;
-		case CUBIC_P: interp1DCubicPU(sx,sy,dx,dy,undef); break;
-		case SPLINE : interp1DSplineU(sx,sy,dx,dy,undef); break;
+		case LINEAR : interp1DLinearU(sx,sy,dx,dy,undef,extrapolation); break;
+		case CUBIC_L: interp1DCubicLU(sx,sy,dx,dy,undef,extrapolation); break;
+		case CUBIC_P: interp1DCubicPU(sx,sy,dx,dy,undef,extrapolation); break;
+		case SPLINE : interp1DSplineU(sx,sy,dx,dy,undef              ); break;
 		default: throw new UnsupportedOperationException("unsupported interpolation type for interp1D:\t"+t);
 		}
 	}
@@ -1224,15 +1262,15 @@ public final class InterpolationModel{
      * 
      * @return	dy		results of the interpolation
      */
-	public static float[] interp1D(float[] sx,float[] sy,float[] dx,Type t){
+	public static float[] interp1D(float[] sx,float[] sy,float[] dx,Type t,boolean extrapolation){
 		float[] dy=new float[dx.length];
-		interp1D(sx,sy,dx,dy,t,Float.NaN);
+		interp1D(sx,sy,dx,dy,t,Float.NaN,extrapolation);
 		return dy;
 	}
 	
-	public static double[] interp1D(double[] sx,double[] sy,double[] dx,Type t){
+	public static double[] interp1D(double[] sx,double[] sy,double[] dx,Type t,boolean extrapolation){
 		double[] dy=new double[dx.length];
-		interp1D(sx,sy,dx,dy,t,Double.NaN);
+		interp1D(sx,sy,dx,dy,t,Double.NaN,extrapolation);
 		return dy;
 	}
 	
@@ -1250,28 +1288,28 @@ public final class InterpolationModel{
      * 
      * @param	dy		result after interpolation
      */
-	public static float[] interp1D(float[] sx,float[] sy,float[] dx,Type t,float undef){
+	public static float[] interp1D(float[] sx,float[] sy,float[] dx,Type t,float undef,boolean extrapolation){
 		float[] dy=new float[dx.length];
 		
 		switch(t){
-		case LINEAR : interp1DLinearU(sx,sy,dx,dy,undef); break;
-		case CUBIC_L: interp1DCubicLU(sx,sy,dx,dy,undef); break;
-		case CUBIC_P: interp1DCubicPU(sx,sy,dx,dy,undef); break;
-		case SPLINE : interp1DSplineU(sx,sy,dx,dy,undef); break;
+		case LINEAR : interp1DLinearU(sx,sy,dx,dy,undef,extrapolation); break;
+		case CUBIC_L: interp1DCubicLU(sx,sy,dx,dy,undef,extrapolation); break;
+		case CUBIC_P: interp1DCubicPU(sx,sy,dx,dy,undef,extrapolation); break;
+		case SPLINE : interp1DSplineU(sx,sy,dx,dy,undef              ); break;
 		default: throw new UnsupportedOperationException("unsupported interpolation type for interp1D:\t"+t);
 		}
 		
 		return dy;
 	}
 	
-	public static double[] interp1D(double[] sx,double[] sy,double[] dx,Type t,double undef){
+	public static double[] interp1D(double[] sx,double[] sy,double[] dx,Type t,double undef,boolean extrapolation){
 		double[] dy=new double[dx.length];
 		
 		switch(t){
-		case LINEAR : interp1DLinearU(sx,sy,dx,dy,undef); break;
-		case CUBIC_L: interp1DCubicLU(sx,sy,dx,dy,undef); break;
-		case CUBIC_P: interp1DCubicPU(sx,sy,dx,dy,undef); break;
-		case SPLINE : interp1DSplineU(sx,sy,dx,dy,undef); break;
+		case LINEAR : interp1DLinearU(sx,sy,dx,dy,undef,extrapolation); break;
+		case CUBIC_L: interp1DCubicLU(sx,sy,dx,dy,undef,extrapolation); break;
+		case CUBIC_P: interp1DCubicPU(sx,sy,dx,dy,undef,extrapolation); break;
+		case SPLINE : interp1DSplineU(sx,sy,dx,dy,undef              ); break;
 		default: throw new UnsupportedOperationException("unsupported interpolation type for interp1D:\t"+t);
 		}
 		
@@ -2170,20 +2208,44 @@ public final class InterpolationModel{
 	}
 	
 	
-	private static void interp1DLinearU(float[] sx,float[] sy,float[] dx,float[] dy,float undef){
+	private static void interp1DLinearU(float[] sx,float[] sy,float[] dx,float[] dy,float undef,boolean extrapolation){
 		int slen=sx.length;
 		
 		boolean incre=sx[slen-1]-sx[0]>0;
 		
+		if(!extrapolation)	// interpolation
 		for(int i=0,I=dx.length;i<I;i++){
 			float x=dx[i];
 			
-			if(incre){ if(x>sx[slen-1]||x<sx[0]){ dy[i]=undef; continue;}}
-			else{      if(x>sx[0]||x<sx[slen-1]){ dy[i]=undef; continue;}}
+			int idx=0;
+			if(incre){
+				if(x>sx[slen-1]||x<sx[0]){ dy[i]=undef; continue;}
+				idx=ArrayUtil.getLEIdxIncre(sx,x);
+				
+			}else{
+				if(x>sx[0]||x<sx[slen-1]){ dy[i]=undef; continue;}
+				idx=ArrayUtil.getLEIdxDecre(sx,x);
+			}
+			
+			if(x==sx[idx]){ dy[i]=sy[idx]; continue;}
+			
+			dy[i]=linearInterpolation(sy[idx],sy[idx+1],(x-sx[idx])/(sx[idx+1]-sx[idx]));
+		}
+		else	// extrapolation
+		for(int i=0,I=dx.length;i<I;i++){
+			float x=dx[i];
 			
 			int idx=0;
-			if(incre) idx=ArrayUtil.getLEIdxIncre(sx,x);
-			else      idx=ArrayUtil.getLEIdxDecre(sx,x);
+			if(incre){
+				if(x>sx[slen-1]) idx=slen-2;
+				else if(x<sx[0]) idx=0;
+				else idx=ArrayUtil.getLEIdxIncre(sx,x);
+				
+			}else{
+				if(x>sx[0]) idx=0;
+				else if(x<sx[slen-1]) idx=slen-2;
+				else idx=ArrayUtil.getLEIdxDecre(sx,x);
+			}
 			
 			if(x==sx[idx]){ dy[i]=sy[idx]; continue;}
 			
@@ -2191,20 +2253,44 @@ public final class InterpolationModel{
 		}
 	}
 	
-	private static void interp1DLinearU(double[] sx,double[] sy,double[] dx,double[] dy,double undef){
+	private static void interp1DLinearU(double[] sx,double[] sy,double[] dx,double[] dy,double undef,boolean extrapolation){
 		int slen=sx.length;
 		
 		boolean incre=sx[slen-1]-sx[0]>0;
 		
+		if(!extrapolation)	// interpolation
 		for(int i=0,I=dx.length;i<I;i++){
 			double x=dx[i];
 			
-			if(incre){ if(x>sx[slen-1]||x<sx[0]){ dy[i]=undef; continue;}}
-			else{      if(x>sx[0]||x<sx[slen-1]){ dy[i]=undef; continue;}}
+			int idx=0;
+			if(incre){
+				if(x>sx[slen-1]||x<sx[0]){ dy[i]=undef; continue;}
+				idx=ArrayUtil.getLEIdxIncre(sx,x);
+				
+			}else{
+				if(x>sx[0]||x<sx[slen-1]){ dy[i]=undef; continue;}
+				idx=ArrayUtil.getLEIdxDecre(sx,x);
+			}
+			
+			if(x==sx[idx]){ dy[i]=sy[idx]; continue;}
+			
+			dy[i]=linearInterpolation(sy[idx],sy[idx+1],(x-sx[idx])/(sx[idx+1]-sx[idx]));
+		}
+		else	// extrapolation
+		for(int i=0,I=dx.length;i<I;i++){
+			double x=dx[i];
 			
 			int idx=0;
-			if(incre) idx=ArrayUtil.getLEIdxIncre(sx,x);
-			else      idx=ArrayUtil.getLEIdxDecre(sx,x);
+			if(incre){
+				if(x>sx[slen-1]) idx=slen-2;
+				else if(x<sx[0]) idx=0;
+				else idx=ArrayUtil.getLEIdxIncre(sx,x);
+				
+			}else{
+				if(x>sx[0]) idx=0;
+				else if(x<sx[slen-1]) idx=slen-2;
+				else idx=ArrayUtil.getLEIdxDecre(sx,x);
+			}
 			
 			if(x==sx[idx]){ dy[i]=sy[idx]; continue;}
 			
@@ -2213,20 +2299,24 @@ public final class InterpolationModel{
 	}
 	
 	
-	private static void interp1DCubicLU(float[] sx,float[] sy,float[] dx,float[] dy,float undef){
+	private static void interp1DCubicLU(float[] sx,float[] sy,float[] dx,float[] dy,float undef,boolean extrapolation){
 		int slen=sx.length;
 		
 		boolean incre=sx[slen-1]-sx[0]>0;
 		
+		if(!extrapolation) // interpolation
 		for(int i=0,I=dx.length;i<I;i++){
 			float x=dx[i];
 			
-			if(incre){ if(x>sx[slen-1]||x<sx[0]){ dy[i]=undef; continue;}}
-			else{      if(x>sx[0]||x<sx[slen-1]){ dy[i]=undef; continue;}}
-			
 			int idx=0;
-			if(incre) idx=ArrayUtil.getLEIdxIncre(sx,x);
-			else      idx=ArrayUtil.getLEIdxDecre(sx,x);
+			if(incre){
+				if(x>sx[slen-1]||x<sx[0]){ dy[i]=undef; continue;}
+				idx=ArrayUtil.getLEIdxIncre(sx,x);
+				
+			}else{
+				if(x>sx[0]||x<sx[slen-1]){ dy[i]=undef; continue;}
+				idx=ArrayUtil.getLEIdxDecre(sx,x);
+			}
 			
 			if(x==sx[idx]){ dy[i]=sy[idx]; continue;}
 			
@@ -2245,22 +2335,92 @@ public final class InterpolationModel{
 				new float[]{sy[idx-1],sy[idx],sy[idx+1],sy[idx+2]},x
 			);
 		}
+		else
+		for(int i=0,I=dx.length;i<I;i++){
+			float x=dx[i];
+			
+			int idx=0;
+			if(incre){
+				if(x>sx[slen-1]) idx=slen-2;
+				else if(x<sx[0]) idx=0;
+				else idx=ArrayUtil.getLEIdxIncre(sx,x);
+				
+			}else{
+				if(x>sx[0]) idx=0;
+				else if(x<sx[slen-1]) idx=slen-2;
+				else idx=ArrayUtil.getLEIdxDecre(sx,x);
+			}
+			
+			if(x==sx[idx]){ dy[i]=sy[idx]; continue;}
+			
+			if(idx==0){ dy[i]=nLagrangeInterpolation(
+				new float[]{sx[0],sx[1],sx[2],sx[3]},
+				new float[]{sy[0],sy[1],sy[2],sy[3]},x
+			); continue;}
+			
+			if(idx==slen-2){ dy[i]=nLagrangeInterpolation(
+				new float[]{sx[slen-4],sx[slen-3],sx[idx],sx[slen-1]},
+				new float[]{sy[slen-4],sy[slen-3],sy[idx],sy[slen-1]},x
+			); continue;}
+			
+			dy[i]=nLagrangeInterpolation(
+				new float[]{sx[idx-1],sx[idx],sx[idx+1],sx[idx+2]},
+				new float[]{sy[idx-1],sy[idx],sy[idx+1],sy[idx+2]},x
+			);
+		}
+		
 	}
 	
-	private static void interp1DCubicLU(double[] sx,double[] sy,double[] dx,double[] dy,double undef){
+	private static void interp1DCubicLU(double[] sx,double[] sy,double[] dx,double[] dy,double undef,boolean extrapolation){
 		int slen=sx.length;
 		
 		boolean incre=sx[slen-1]-sx[0]>0;
 		
+		if(!extrapolation)	// interpolation
 		for(int i=0,I=dx.length;i<I;i++){
 			double x=dx[i];
 			
-			if(incre){ if(x>sx[slen-1]||x<sx[0]){ dy[i]=undef; continue;}}
-			else{      if(x>sx[0]||x<sx[slen-1]){ dy[i]=undef; continue;}}
+			int idx=0;
+			if(incre){
+				if(x>sx[slen-1]||x<sx[0]){ dy[i]=undef; continue;}
+				idx=ArrayUtil.getLEIdxIncre(sx,x);
+				
+			}else{
+				if(x>sx[0]||x<sx[slen-1]){ dy[i]=undef; continue;}
+				idx=ArrayUtil.getLEIdxDecre(sx,x);
+			}
+			if(x==sx[idx]){ dy[i]=sy[idx]; continue;}
+			
+			if(idx==0){ dy[i]=nLagrangeInterpolation(
+				new double[]{sx[0],sx[1],sx[2],sx[3]},
+				new double[]{sy[0],sy[1],sy[2],sy[3]},x
+			); continue;}
+			
+			if(idx==slen-2){ dy[i]=nLagrangeInterpolation(
+				new double[]{sx[slen-4],sx[slen-3],sx[idx],sx[slen-1]},
+				new double[]{sy[slen-4],sy[slen-3],sy[idx],sy[slen-1]},x
+			); continue;}
+			
+			dy[i]=nLagrangeInterpolation(
+				new double[]{sx[idx-1],sx[idx],sx[idx+1],sx[idx+2]},
+				new double[]{sy[idx-1],sy[idx],sy[idx+1],sy[idx+2]},x
+			);
+		}
+		else	// extrapolation
+		for(int i=0,I=dx.length;i<I;i++){
+			double x=dx[i];
 			
 			int idx=0;
-			if(incre) idx=ArrayUtil.getLEIdxIncre(sx,x);
-			else      idx=ArrayUtil.getLEIdxDecre(sx,x);
+			if(incre){
+				if(x>sx[slen-1]) idx=slen-2;
+				else if(x<sx[0]) idx=0;
+				else idx=ArrayUtil.getLEIdxIncre(sx,x);
+				
+			}else{
+				if(x>sx[0]) idx=0;
+				else if(x<sx[slen-1]) idx=slen-2;
+				else idx=ArrayUtil.getLEIdxDecre(sx,x);
+			}
 			
 			if(x==sx[idx]){ dy[i]=sy[idx]; continue;}
 			
@@ -2282,20 +2442,24 @@ public final class InterpolationModel{
 	}
 	
 	
-	private static void interp1DCubicPU(float[] sx,float[] sy,float[] dx,float[] dy,float undef){
+	private static void interp1DCubicPU(float[] sx,float[] sy,float[] dx,float[] dy,float undef,boolean extrapolation){
 		int slen=sx.length;
 		
 		boolean incre=sx[slen-1]-sx[0]>0;
 		
+		if(!extrapolation) // interpolation
 		for(int i=0,I=dx.length;i<I;i++){
 			float x=dx[i];
 			
-			if(incre){ if(x>sx[slen-1]||x<sx[0]){ dy[i]=undef; continue;}}
-			else{      if(x>sx[0]||x<sx[slen-1]){ dy[i]=undef; continue;}}
-			
 			int idx=0;
-			if(incre) idx=ArrayUtil.getLEIdxIncre(sx,x);
-			else      idx=ArrayUtil.getLEIdxDecre(sx,x);
+			if(incre){
+				if(x>sx[slen-1]||x<sx[0]){ dy[i]=undef; continue;}
+				idx=ArrayUtil.getLEIdxIncre(sx,x);
+				
+			}else{
+				if(x>sx[0]||x<sx[slen-1]){ dy[i]=undef; continue;}
+				idx=ArrayUtil.getLEIdxDecre(sx,x);
+			}
 			
 			if(x==sx[idx]){ dy[i]=sy[idx]; continue;}
 			
@@ -2314,22 +2478,59 @@ public final class InterpolationModel{
 				sy[idx-1],sy[idx],sy[idx+1],sy[idx+2],x
 			);
 		}
+		else	// extrapolation
+		for(int i=0,I=dx.length;i<I;i++){
+			float x=dx[i];
+			
+			int idx=0;
+			if(incre){
+				if(x>sx[slen-1]) idx=slen-2;
+				else if(x<sx[0]) idx=0;
+				else idx=ArrayUtil.getLEIdxIncre(sx,x);
+				
+			}else{
+				if(x>sx[0]) idx=0;
+				else if(x<sx[slen-1]) idx=slen-2;
+				else idx=ArrayUtil.getLEIdxDecre(sx,x);
+			}
+			
+			if(x==sx[idx]){ dy[i]=sy[idx]; continue;}
+			
+			if(idx==0){ dy[i]=cubicPolynomialInterpolation(
+				sx[0],sx[0],sx[1],sx[2],
+				sy[0],sy[0],sy[1],sy[2],x
+			); continue;}
+				
+				if(idx==slen-2){ dy[i]=cubicPolynomialInterpolation(
+				sx[slen-3],sx[idx],sx[slen-1],sx[slen-1],
+				sy[slen-3],sy[idx],sy[slen-1],sy[slen-1],x
+			); continue;}
+			
+			dy[i]=cubicPolynomialInterpolation(
+				sx[idx-1],sx[idx],sx[idx+1],sx[idx+2],
+				sy[idx-1],sy[idx],sy[idx+1],sy[idx+2],x
+			);
+		}
 	}
 	
-	private static void interp1DCubicPU(double[] sx,double[] sy,double[] dx,double[] dy,double undef){
+	private static void interp1DCubicPU(double[] sx,double[] sy,double[] dx,double[] dy,double undef,boolean extrapolation){
 		int slen=sx.length;
 		
 		boolean incre=sx[slen-1]-sx[0]>0;
 		
+		if(!extrapolation)	// interpolation
 		for(int i=0,I=dx.length;i<I;i++){
 			double x=dx[i];
 			
-			if(incre){ if(x>sx[slen-1]||x<sx[0]){ dy[i]=undef; continue;}}
-			else{      if(x>sx[0]||x<sx[slen-1]){ dy[i]=undef; continue;}}
-			
 			int idx=0;
-			if(incre) idx=ArrayUtil.getLEIdxIncre(sx,x);
-			else      idx=ArrayUtil.getLEIdxDecre(sx,x);
+			if(incre){
+				if(x>sx[slen-1]||x<sx[0]){ dy[i]=undef; continue;}
+				idx=ArrayUtil.getLEIdxIncre(sx,x);
+				
+			}else{
+				if(x>sx[0]||x<sx[slen-1]){ dy[i]=undef; continue;}
+				idx=ArrayUtil.getLEIdxDecre(sx,x);
+			}
 			
 			if(x==sx[idx]){ dy[i]=sy[idx]; continue;}
 			
@@ -2339,6 +2540,39 @@ public final class InterpolationModel{
 			); continue;}
 			
 			if(idx==slen-2){ dy[i]=cubicPolynomialInterpolation(
+				sx[slen-3],sx[idx],sx[slen-1],sx[slen-1],
+				sy[slen-3],sy[idx],sy[slen-1],sy[slen-1],x
+			); continue;}
+			
+			dy[i]=cubicPolynomialInterpolation(
+				sx[idx-1],sx[idx],sx[idx+1],sx[idx+2],
+				sy[idx-1],sy[idx],sy[idx+1],sy[idx+2],x
+			);
+		}
+		else	// extrapolation
+		for(int i=0,I=dx.length;i<I;i++){
+			double x=dx[i];
+			
+			int idx=0;
+			if(incre){
+				if(x>sx[slen-1]) idx=slen-2;
+				else if(x<sx[0]) idx=0;
+				else idx=ArrayUtil.getLEIdxIncre(sx,x);
+				
+			}else{
+				if(x>sx[0]) idx=0;
+				else if(x<sx[slen-1]) idx=slen-2;
+				else idx=ArrayUtil.getLEIdxDecre(sx,x);
+			}
+			
+			if(x==sx[idx]){ dy[i]=sy[idx]; continue;}
+			
+			if(idx==0){ dy[i]=cubicPolynomialInterpolation(
+				sx[0],sx[0],sx[1],sx[2],
+				sy[0],sy[0],sy[1],sy[2],x
+			); continue;}
+				
+				if(idx==slen-2){ dy[i]=cubicPolynomialInterpolation(
 				sx[slen-3],sx[idx],sx[slen-1],sx[slen-1],
 				sy[slen-3],sy[idx],sy[slen-1],sy[slen-1],x
 			); continue;}
@@ -2393,26 +2627,26 @@ public final class InterpolationModel{
 	
 	/** test
 	public static void main(String[] arg){
-		int len=401;
-		float[] sx=new float[]{1,3,3.6f,4,8};
-		float[] sy=new float[]{2,1,0,3,6};
+		float z21=4,z22=2;
+		float z11=0,z12=1;
 		
-		float[] dx=new float[len];
+		int xc=20;
+		int yc=20;
 		
-		for(int i=0;i<len;i++) dx[i]=3+i/400f;
+		float[] xpos=ArrayUtil.newMonotonousArray(xc,1f/xc);
+		float[] ypos=ArrayUtil.newMonotonousArray(yc,1f/yc);
 		
-		float[] des1=new float[len];
-		float[] des2=new float[len];
-		float[] des3=new float[len];
-		float[] des4=new float[len];
+		float[][] re=new float[yc][xc];
 		
-		interp1D(sx,sy,dx,des1,Type.LINEAR);
-		interp1D(sx,sy,dx,des2,Type.CUBIC_L);
-		interp1D(sx,sy,dx,des3,Type.CUBIC_P);
-		interp1D(sx,sy,dx,des4,Type.SPLINE);
-		
-		for(int i=0;i<len;i++){
-			System.out.println(des1[i]+"\t"+des2[i]+"\t"+des3[i]+"\t"+des4[i]);
+		for(int j=0;j<yc;j++){
+			for(int i=0;i<xc;i++)
+			re[j][i]=bilinearInterpolation(z11,z12,z21,z22,xpos[i],ypos[j]);
+			
+			StringBuilder sb=new StringBuilder();
+			
+			for(int i=0;i<xc;i++) sb.append(String.format("%10.5f",re[j][i]));
+			
+			System.out.println(sb);
 		}
 	}*/
 }

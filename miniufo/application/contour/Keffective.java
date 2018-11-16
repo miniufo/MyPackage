@@ -65,7 +65,7 @@ public abstract class Keffective{
 		if(v.isTFirst()){
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++){
-				double[] areas=cntrs[k][l].getAreas();
+				double[] areas=cntrs[k][l].getMappedAreas();
 				 float[] vdata= v.getData()[l][k][0];
 				 float[] gdata=grdA.getData()[l][k][0];
 				 
@@ -88,7 +88,7 @@ public abstract class Keffective{
 		}else{
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++){
-				double[]  areas=cntrs[k][l].getAreas();
+				double[]  areas=cntrs[k][l].getMappedAreas();
 				float[][] vdata= v.getData()[k][0];
 				float[][] ldata=grdA.getData()[k][0];
 				
@@ -128,7 +128,7 @@ public abstract class Keffective{
 		if(areas.isTFirst()){
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++){
-				double[] areas=cntrs[k][l].getAreas();
+				double[] areas=cntrs[k][l].getMappedAreas();
 				double[] conts=cntrs[k][l].getValues();
 				 float[] gdata=grdA.getData()[l][k][0];
 				 
@@ -151,7 +151,7 @@ public abstract class Keffective{
 		}else{
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++){
-				double[]  areas=cntrs[k][l].getAreas();
+				double[]  areas=cntrs[k][l].getMappedAreas();
 				double[]  conts=cntrs[k][l].getValues();
 				float[][] ldata=grdA.getData()[k][0];
 				
@@ -212,7 +212,7 @@ public abstract class Keffective{
 				float[] ldata=dqdye.getData()[l][k][0];
 				
 				double[] vals=cntrs[k][l].getValues();
-				double[] ydef=cntrs[k][l].getEquivalentYs().clone();
+				double[] ydef=cntrs[k][l].getMappedEquivalentYs().clone();
 				
 				for(int j=0,J=ydef.length;j<J;j++) ydef[j]=ydefTransform(ydef[j]);
 				
@@ -237,7 +237,7 @@ public abstract class Keffective{
 				float[][] ldata=dqdye.getData()[k][0];
 				
 				double[] vals=cntrs[k][l].getValues();
-				double[] ydef=cntrs[k][l].getEquivalentYs().clone();
+				double[] ydef=cntrs[k][l].getMappedEquivalentYs().clone();
 				
 				for(int j=0,J=ydef.length;j<J;j++) ydef[j]=ydefTransform(ydef[j]);
 				

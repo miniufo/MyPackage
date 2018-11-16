@@ -50,7 +50,7 @@ public final class PolynomialFitter extends Fitter{
 		tmp  =new double[npoly][1];
 	}
 	
-	public PolynomialFitter(int l,int len){ this(l,ArrayUtil.newMonotonousArray(len,1));}
+	public PolynomialFitter(int l,int len){ this(l,ArrayUtil.newMonotonicArray(len,1));}
 	
 	
 	/*** getor and setor ***/

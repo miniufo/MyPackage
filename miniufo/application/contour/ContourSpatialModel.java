@@ -6,6 +6,7 @@
  */
 package miniufo.application.contour;
 
+import java.util.Arrays;
 import miniufo.application.GeoFluidApplication.BoundaryCondition;
 import miniufo.basic.ArrayUtil;
 import miniufo.basic.InterpolationModel;
@@ -35,7 +36,7 @@ public abstract class ContourSpatialModel{
 	protected float[] dxdefS=null;	// delta-xdef scaled by resRatio
 	protected float[] dydefS=null;	// delta-ydef scaled by resRatio
 	
-	protected Contours[][] cntrs=null;	// contours information
+	protected Contours[][] cntrs=null;	// contours information, [z][t]
 	
 	protected Variable tracer   =null;	// a given tracer (X-Y coordinates)
 	protected Variable grdxy2   =null;	// squares of tracer gradient (X-Y coordinates)
@@ -78,7 +79,13 @@ public abstract class ContourSpatialModel{
 		this.grdxy2=cSquaredTracerGradient();
 		
 		// to compute the area within each contour and check
-		integrateWithinContour1(adjCtr);
+		integrateWithinContour1(null,null,adjCtr,null);
+		
+		//System.out.println("single time");
+		//System.out.println(cntrs[0][0].getValues().length+"  "+Arrays.toString(cntrs[0][0].getValues()));
+		//System.out.println(cntrs[0][0].getMappedAreas().length+"  "+Arrays.toString(cntrs[0][0].getMappedAreas()));
+		//System.out.println(cntrs[0][0].getMappedEquivalentYs().length+"  "+Arrays.toString(cntrs[0][0].getMappedEquivalentYs()));
+		//System.out.println("\n");
 		
 		this.areas=toAreaVariable();
 		this.tr   =toTracerVariable();
@@ -107,7 +114,7 @@ public abstract class ContourSpatialModel{
 		this.grdxy2=cSquaredTracerGradient();
 		
 		// to compute the area within each contour and check
-		integrateWithinContour1(adjCtr);
+		integrateWithinContour1(null,null,adjCtr,null);
 		
 		this.areas=toAreaVariable();
 		this.tr   =toTracerVariable();
@@ -124,8 +131,7 @@ public abstract class ContourSpatialModel{
      * @param	trace		a given tracer variable
      * @param	cVals		contour values
      * @param	resRatio	resolution ratio (>=1) for on-the-fly interpolation
-     */
-	public double[] computeEquivalentYs(Variable tracer,double[] cVals,int resRation,boolean increSToN){
+	public double[] computeEquivalentYs1(Variable tracer,double[] cVals,int resRation,boolean increSToN){
 		if(tracer.getTCount()!=1) throw new IllegalArgumentException("tcount should be 1 only");
 		if(tracer.getZCount()!=1) throw new IllegalArgumentException("zcount should be 1 only");
 		
@@ -136,6 +142,7 @@ public abstract class ContourSpatialModel{
 		// to compute the area within each contour
 		return cEquivalentYs(integrateWithinContour1(cVals,increSToN,0,0),tracer.getUndef());
 	}
+     */
 	
 	
 	public Variable mapVarInContourCoordToPhysicalCoord(Variable vcc){
@@ -215,7 +222,7 @@ public abstract class ContourSpatialModel{
 		
 		for(int c=0,C=cts.getContourNumber();c<C;c++)
 		System.out.println(String.format("%12.6f %12.7f %12.5g",
-			cts.getEquivalentYs()[c],cts.getAreas()[c]/areaT,cts.getValues()[c]
+			cts.getMappedEquivalentYs()[c],cts.getMappedAreas()[c]/areaT,cts.getValues()[c]
 		));
 	}
 	
@@ -233,14 +240,57 @@ public abstract class ContourSpatialModel{
 	public Variable interpolatedToYs(Variable v,int ycount,Type type){
 		float[] ydef=dd.getYDef().getSamples();
 		
-		double interval=rngY/(ycount-1);
-		double[] dy=new double[ycount]; // destination y grids
+		float interval=(float)(rngY/(ycount-1));
+		float[] dy=new float[ycount]; // destination y grids
 		
 		for(int j=0;j<ycount;j++) dy[j]=ydef[0]+interval*j;
 		
 		if(dy[ycount-1]>ydef[ydef.length-1]) dy[ycount-1]=ydef[ydef.length-1];
 		
-		return interpolatedToYs(v,dy,type);
+		Variable re=interpolatedToYs(v,dy,type);
+		
+		/* modified the endpoints so that they are maximum/minimum values rather than undefined value
+		if(re.isTFirst()){
+			for(int l=0,t=re.getTCount();l<t;l++)
+			for(int k=0,z=re.getZCount();k<z;k++){
+				float[][] rdata=re.getData()[l][k];
+				float[][] vdata= v.getData()[l][k];
+				
+				float[] extrema=ArrayUtil.getExtrema(vdata);
+				
+				if(cntrs[k][l].increaseSToN()){
+					rdata[       0][0]=extrema[0];
+					rdata[ycount-1][0]=extrema[1];
+				}else{
+					rdata[       0][0]=extrema[1];
+					rdata[ycount-1][0]=extrema[0];
+				}
+			}
+			
+		}else{
+			for(int k=0,z=re.getZCount();k<z;k++){
+				float[][][] rdata=re.getData()[k];
+				float[][][] vdata= v.getData()[k];
+				
+				for(int l=0,t=re.getTCount();l<t;l++){
+					float[] buffer =new float[ycount];
+					
+					for(int j=0;j<ycount;j++) buffer[j]=vdata[j][0][l];
+					
+					float[] extrema=ArrayUtil.getExtrema(buffer);
+					
+					if(cntrs[k][l].increaseSToN()){
+						rdata[       0][0][l]=extrema[0];
+						rdata[ycount-1][0][l]=extrema[1];
+					}else{
+						rdata[       0][0][l]=extrema[1];
+						rdata[ycount-1][0][l]=extrema[0];
+					}
+				}
+			}
+		}*/
+		
+		return re;
 	}
 	
 	/**
@@ -252,7 +302,7 @@ public abstract class ContourSpatialModel{
      * @param	dy		destination Ys to be interpolated to
      * @param	type	type of interpolation
      */
-	public Variable interpolatedToYs(Variable v,double[] dy,Type type){
+	public Variable interpolatedToYs(Variable v,float[] dy,Type type){
 		int ycount=dy.length;
 		int t=v.getTCount(),z=v.getZCount();
 		int C=v.getXCount(),y=v.getYCount();
@@ -271,35 +321,43 @@ public abstract class ContourSpatialModel{
 		if(v.isTFirst()){
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++){
-				double[] sy=cntrs[k][l].getEquivalentYs();	// source y grids
-				double[] sf=new double[sy.length];			// source functional value from y grids sf = f(sy)
+				float[] sy=toFloat(cntrs[k][l].getMappedEquivalentYs());	// source y grids
+				float[] sf=new float[C];	// source functional value from y grids sf = f(sy)
 				
 				for(int c=0;c<C;c++) sf[c]=v.getData()[l][k][0][c];
 				
-				double[][] re=getValid(sy,sf,undef);
+				float[][] re=getValid(sy,sf,undef);
 				
-				double[] df=InterpolationModel.interp1D(re[0],re[1],dy,type,undef);
+				float[] df=InterpolationModel.interp1D(re[0],re[1],dy,type,undef,true);
+				
+				if(re[1][C-1]!=df[df.length-1]){
+					System.out.println(re[0][C-1]+" "+dy[dy.length-1]+" "+re[1][C-1]+" "+df[df.length-1]);
+					System.out.println(Arrays.toString(sy));
+					System.out.println(Arrays.toString(re[0]));
+					System.out.println(Arrays.toString(dy));
+					System.exit(0);
+				}
 				
 				float[][] ndata=nv.getData()[l][k];
 				
-				for(int j=0;j<ycount;j++) ndata[j][0]=(float)df[j];
+				for(int j=0;j<ycount;j++) ndata[j][0]=df[j];
 			}
 			
 		}else{
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++){
-				double[] sy=cntrs[k][l].getEquivalentYs();	// source y grids
-				double[] sf   =new double[C];				// source functional value from y grids sf = f(sy)
+				float[] sy=toFloat(cntrs[k][l].getMappedEquivalentYs());	// source y grids
+				float[] sf=new float[C];	// source functional value from y grids sf = f(sy)
 				
 				for(int c=0;c<C;c++) sf[c]=v.getData()[k][0][c][l];
 				
-				double[][] re=getValid(sy,sf,undef);
+				float[][] re=getValid(sy,sf,undef);
 				
-				double[] df=InterpolationModel.interp1D(re[0],re[1],dy,type,undef);
+				float[] df=InterpolationModel.interp1D(re[0],re[1],dy,type,undef,true);
 				
 				float[][][] ndata=nv.getData()[k];
 				
-				for(int j=0;j<ycount;j++) ndata[j][0][l]=(float)df[j];
+				for(int j=0;j<ycount;j++) ndata[j][0][l]=df[j];
 			}
 		}
 		
@@ -310,128 +368,38 @@ public abstract class ContourSpatialModel{
 	}
 	
 	/**
-     * Areal-integrator that performed over areas enclosed by specific contours:
-     * re = integral(v dS) within each contour
-     *
-     * @param	v	a given integrand variable
+     * Areal-integrator that performed over areas enclosed by specific contours.
+     *   with 1   as integrand:   area      = integral   (1)   dS within each contour
+     *   with rho as integrand:   mass      = integral  (rho)  dS within each contour
+     *   with PV  as integrand: circulation = integral(PV*rho) dS within each contour
+     * 
+     * @param	v			integrand variable
+     * @param	selfAdjust	whether to automatically adjust contour interval each time
+     * 						if false, then adjust interval when non-monotonic area-contour occurs
+     * @param	storeVar	a String variable name that result could be stored in Contours.
      */
-	public Variable integrateWithinContour(Variable v){
-		if(!v.isLike(tracer))
-		throw new IllegalArgumentException("dimensions not same for:\n"+v+"\n"+tracer);
+	public Variable integrateWithinContour(Variable v,boolean selfAdjust,String storeVar){
+		Variable re=new Variable(
+			v.getName()+"ct",v.isTFirst(),
+			new Range(v.getTCount(),v.getZCount(),1,cntrs[0][0].getContourNumber())
+		);
 		
-		if(tracer.getRange().getYRange()[0]!=1||tracer.getRange().getXRange()[0]!=1)
-		throw new IllegalArgumentException("using tracer over the entire domain");
-		
-		float undef=v.getUndef();
-		
-		int t=tracer.getTCount();
-		int z=tracer.getZCount();
-		int y=ydefS.length;
-		int x=xdefS.length;
-		
-		Type xType=Type.LINEAR;
-		Type yType=Type.LINEAR;
-		
-		if(BCx==BoundaryCondition.Periodic) xType=Type.PERIODIC_LINEAR;
-		if(BCy==BoundaryCondition.Periodic) yType=Type.PERIODIC_LINEAR;
-		
-		Variable re=new Variable(v.getName()+"ct",v.isTFirst(),new Range(t,z,1,cntrs[0][0].getContourNumber()));
 		re.setCommentAndUnit("integration of "+v.getName()+" within contours ("+v.getUnit()+" m^2)");
-		re.setUndef(undef);
+		re.setUndef(v.getUndef());
 		
-		if(v.isTFirst()){
-			for(int l=0;l<t;l++)
-			for(int k=0;k<z;k++){
-				int C=cntrs[k][l].getContourNumber();
-				
-				double[] cts =cntrs[k][l].getValues();
-				double[] rbuf=new double[C];
-				
-				float[][] vbuff=     v.getData()[l][k];
-				float[][] tbuff=tracer.getData()[l][k];
-				float[][] vdata=InterpolationModel.interp2D(vbuff,x,y,xType,yType,undef);
-				float[][] tdata=InterpolationModel.interp2D(tbuff,x,y,xType,yType,undef);
-				float[] extreme=ArrayUtil.getExtrema(tdata);
-				
-				if(cntrs[k][l].increaseSToN()){
-					for(int j=0;j<y;j++)
-					for(int i=0;i<x;i++) if(tdata[j][i]!=undef&&vdata[j][i]!=undef){
-						//double dS=computeDS(xstart-1+i,ystart-1+j);
-						double dS=computeDS(i,j);
-						
-						if(tdata[j][i]>=cts[0]) rbuf[0]+=vdata[j][i]*dS;
-						for(int c=1;c<C;c++) if(tdata[j][i]>cts[c]) rbuf[c]+=vdata[j][i]*dS;
-					}
-				}else{
-					for(int j=0;j<y;j++)
-					for(int i=0;i<x;i++) if(tdata[j][i]!=undef&&vdata[j][i]!=undef){
-						//double dS=computeDS(xstart-1+i,ystart-1+j);
-						double dS=computeDS(i,j);
-						
-						if(tdata[j][i]<=cts[0]) rbuf[0]+=vdata[j][i]*dS;
-						for(int c=1;c<C;c++) if(tdata[j][i]<cts[c]) rbuf[c]+=vdata[j][i]*dS;
-					}
-				}
-				
-				checkDataAtEnds(rbuf,cts,undef,extreme);
-				
-				float[] rdata=re.getData()[l][k][0];
-				for(int c=0;c<C;c++) rdata[c]=(float)(rbuf[c]);
-			}
-			
-		}else{
-			for(int l=0;l<t;l++)
-			for(int k=0;k<z;k++){
-				int C=cntrs[k][l].getContourNumber();
-				
-				double[]  cts=cntrs[k][l].getValues();
-				double[] rbuf=new double[C];
-				
-				float[][] vbuff=new float[tracer.getYCount()][tracer.getXCount()];
-				float[][] tbuff=new float[tracer.getYCount()][tracer.getXCount()];
-				
-				for(int j=0,J=tracer.getYCount();j<J;j++)
-				for(int i=0,I=tracer.getXCount();i<I;i++){
-					vbuff[j][i]=     v.getData()[k][j][i][l];
-					tbuff[j][i]=tracer.getData()[k][j][i][l];
-				}
-				
-				float[][] vdata=InterpolationModel.interp2D(vbuff,x,y,xType,yType,undef);
-				float[][] tdata=InterpolationModel.interp2D(tbuff,x,y,xType,yType,undef);
-				float[] extreme=ArrayUtil.getExtrema(tdata);
-				
-				if(cntrs[k][l].increaseSToN()){
-					for(int j=0;j<y;j++)
-					for(int i=0;i<x;i++) if(tdata[j][i]!=undef&&vdata[j][i]!=undef){
-						//double dS=computeDS(xstart-1+i,ystart-1+j);
-						double dS=computeDS(i,j);
-						
-						if(tdata[j][i]>=cts[0]) rbuf[0]+=vdata[j][i]*dS;
-						for(int c=1;c<C;c++) if(tdata[j][i]>cts[c]) rbuf[c]+=vdata[j][i]*dS;
-					}
-				}else{
-					for(int j=0;j<y;j++)
-					for(int i=0;i<x;i++) if(tdata[j][i]!=undef&&vdata[j][i]!=undef){
-						//double dS=computeDS(xstart-1+i,ystart-1+j);
-						double dS=computeDS(i,j);
-						
-						if(tdata[j][i]<=cts[0]) rbuf[0]+=vdata[j][i]*dS;
-						for(int c=1;c<C;c++) if(tdata[j][i]<cts[c]) rbuf[c]+=vdata[j][i]*dS;
-					}
-				}
-				
-				checkDataAtEnds(rbuf,cts,undef,extreme);
-				
-				float[][] rdata=re.getData()[k][0];
-				for(int c=0;c<C;c++) rdata[c][l]=(float)(rbuf[c]);
-			}
-		}
+		integrateWithinContour1(v,re,selfAdjust,storeVar);
 		
 		re.getRange().setTRange(v.getRange());
 		re.getRange().setZRange(v.getRange());
 		
 		return re;
 	}
+	
+	public Variable integrateWithinContour(Variable v){ return integrateWithinContour(v,false,"");}
+	
+	public Variable cContourEnclosedMass(Variable rho){ return integrateWithinContour(rho,false,"M");}
+	
+	public Variable cContourEnclosedCirculation(Variable zeta){ return integrateWithinContour(zeta,false,"C");}
 	
 	
 	/*** getor and setor ***/
@@ -495,15 +463,26 @@ public abstract class ContourSpatialModel{
 	}
 	
 	/**
-     * Areal-integrator that performed over areas enclosed by specific contours
-     * with 1 as integrand: area = integral(1 dS) within each contour
+     * Areal-integrator that performed over areas enclosed by specific contours.
+     *   with  1   as integrand:   area      = integral (1)   dS within each contour
+     *   with  rho as integrand:   mass      = integral(rho)  dS within each contour
+     *   with zeta as integrand: circulation = integral(zeta) dS within each contour
      * 
+     * @param	v			integrand variable
+     * @param	re			result of integration that could be stored if not null
      * @param	selfAdjust	whether to automatically adjust contour interval each time
      * 						if false, then adjust interval when non-monotonic area-contour occurs
+     * @param	storeVar	a String variable name that result could be stored in Contours.
      */
-	protected void integrateWithinContour1(boolean selfAdjust){
+	protected void integrateWithinContour1(Variable v,Variable re,boolean selfAdjust,String storeVar){
+		if(v!=null&&!v.isLike(tracer))
+		throw new IllegalArgumentException("dimensions not same for:\n"+v+"\n"+tracer);
+		
 		if(tracer.getRange().getYRange()[0]!=1||tracer.getRange().getXRange()[0]!=1)
 		throw new IllegalArgumentException("using tracer over the entire domain");
+		
+		int y=ydefS.length;
+		int x=xdefS.length;
 		
 		float undef=tracer.getUndef();
 		
@@ -516,21 +495,67 @@ public abstract class ContourSpatialModel{
 		if(tracer.isTFirst()){
 			for(int l=0,L=tracer.getTCount();l<L;l++)
 			for(int k=0,K=tracer.getZCount();k<K;k++){
+				float[][] vbuff=(v==null?null:v.getData()[l][k]);
+				float[][] vdata=(v==null?null:InterpolationModel.interp2D(vbuff,x,y,xType,yType,undef));
 				float[][] tbuff=tracer.getData()[l][k];
-				float[][] tdata=InterpolationModel.interp2D(tbuff,xdefS.length,ydefS.length,xType,yType,undef);
+				float[][] tdata=InterpolationModel.interp2D(tbuff,x,y,xType,yType,undef);
+				float[] extreme=ArrayUtil.getExtrema(tdata,undef);
 				
-				String info=mappingArea(cntrs[k][l],tdata);
+				double[] integral=contourIntegral(cntrs[k][l],tdata,vdata,storeVar);
 				
-				if(info!=null||selfAdjust){
-					if(!selfAdjust) System.out.println("adjusting");
-					cntrs[k][l]=adjustContours(cntrs[k][l],undef);
+				checkDataAtEnds(integral,cntrs[k][l].getValues(),undef,extreme);
+				
+				if(vdata==null){	// area
+					checkArea(integral,undef);
+					String info=checkMonotonicity(integral,cntrs[k][l].getValues(),undef,extreme,storeVar);
 					
-					info=mappingArea(cntrs[k][l],tdata);
+					cntrs[k][l].setAreas(integral);
+					cntrs[k][l].setYEs(cEquivalentYs(integral,undef));
 					
-					if(info!=null) throw new IllegalArgumentException(
-						"at ttag ("+l+") and ztag ("+k+") "+
-						"still found non-monotonic contour-area relation after adjustment\n"+info
-					);
+					if(info!=null||selfAdjust){
+						if(!selfAdjust) System.out.println("adjusting");
+						
+						cntrs[k][l]=adjustContours(cntrs[k][l],undef);
+						integral=contourIntegral(cntrs[k][l],tdata,vdata,storeVar);
+						
+						checkDataAtEnds(integral,cntrs[k][l].getValues(),undef,extreme);
+						checkArea(integral,undef);
+						info=checkMonotonicity(integral,cntrs[k][l].getValues(),undef,extreme,storeVar);
+						
+						if(info!=null) throw new IllegalArgumentException(
+							"at ttag ("+l+") and ztag ("+k+") "+
+							"still found non-monotonic contour-area relation after adjustment\n"+info
+						);
+						
+						cntrs[k][l].setAreas(integral);
+						cntrs[k][l].setYEs(cEquivalentYs(integral,undef));
+					}
+					
+				}else{
+					switch(storeVar){
+					case "M":{
+						String info=checkMonotonicity(integral,cntrs[k][l].getValues(),undef,extreme,"M");
+						
+						if(info!=null) throw new IllegalArgumentException(
+							"at ttag ("+l+") and ztag ("+k+") found non-monotonic contour-Mass relation\n"+info
+						);
+						
+						cntrs[k][l].setMass(integral); break;
+					}
+					case "C":{
+						String info=checkMonotonicity(integral,cntrs[k][l].getValues(),undef,extreme,"C");
+						
+						if(info!=null) throw new IllegalArgumentException(
+							"at ttag ("+l+") and ztag ("+k+") found non-monotonic contour-circulation relation\n"+info
+						);
+						
+						cntrs[k][l].setCirculation(integral); break;
+					}}
+				}
+				
+				if(re!=null){
+					float[] rdata=re.getData()[l][k][0];
+					for(int c=0,C=cntrs[k][l].getContourNumber();c<C;c++) rdata[c]=(float)(integral[c]);
 				}
 			}
 			
@@ -538,24 +563,74 @@ public abstract class ContourSpatialModel{
 			for(int l=0,L=tracer.getTCount();l<L;l++)
 			for(int k=0,K=tracer.getZCount();k<K;k++){
 				float[][] tbuff=new float[tracer.getYCount()][tracer.getXCount()];
+				float[][] vbuff=(v==null?null:new float[tracer.getYCount()][tracer.getXCount()]);
 				
 				for(int j=0,J=tracer.getYCount();j<J;j++)
-				for(int i=0,I=tracer.getXCount();i<I;i++) tbuff[j][i]=tracer.getData()[k][j][i][l];
+				for(int i=0,I=tracer.getXCount();i<I;i++){
+					if(v!=null)
+					vbuff[j][i]=     v.getData()[k][j][i][l];
+					tbuff[j][i]=tracer.getData()[k][j][i][l];
+				}
 				
-				float[][] tdata=InterpolationModel.interp2D(tbuff,xdefS.length,ydefS.length,xType,yType,undef);
+				float[][] vdata=(v==null?null:InterpolationModel.interp2D(vbuff,x,x,xType,yType,undef));
+				float[][] tdata=InterpolationModel.interp2D(tbuff,x,y,xType,yType,undef);
+				float[] extreme=ArrayUtil.getExtrema(tdata,undef);
 				
-				String info=mappingArea(cntrs[k][l],tdata);
+				double[] integral=contourIntegral(cntrs[k][l],tdata,vdata,storeVar);
 				
-				if(info!=null||selfAdjust){
-					if(!selfAdjust) System.out.println("adjusting");
-					cntrs[k][l]=adjustContours(cntrs[k][l],undef);
+				checkDataAtEnds(integral,cntrs[k][l].getValues(),undef,extreme);
+				
+				if(vdata==null){	// area
+					checkArea(integral,undef);
+					String info=checkMonotonicity(integral,cntrs[k][l].getValues(),undef,extreme,storeVar);
 					
-					info=mappingArea(cntrs[k][l],tdata);
+					cntrs[k][l].setAreas(integral);
+					cntrs[k][l].setYEs(cEquivalentYs(integral,undef));
 					
-					if(info!=null) throw new IllegalArgumentException(
-						"at ttag ("+l+") and ztag ("+k+") "+
-						"still found non-monotonic contour-area relation after adjustment\n"+info
-					);
+					if(info!=null||selfAdjust){
+						if(!selfAdjust) System.out.println("adjusting");
+						
+						cntrs[k][l]=adjustContours(cntrs[k][l],undef);
+						integral=contourIntegral(cntrs[k][l],tdata,vdata,storeVar);
+						
+						checkDataAtEnds(integral,cntrs[k][l].getValues(),undef,extreme);
+						checkArea(integral,undef);
+						info=checkMonotonicity(integral,cntrs[k][l].getValues(),undef,extreme,storeVar);
+						
+						if(info!=null) throw new IllegalArgumentException(
+							"at ttag ("+l+") and ztag ("+k+") "+
+							"still found non-monotonic contour-area relation after adjustment\n"+info
+						);
+						
+						cntrs[k][l].setAreas(integral);
+						cntrs[k][l].setYEs(cEquivalentYs(integral,undef));
+					}
+					
+				}else{
+					switch(storeVar){
+					case "M":{
+						String info=checkMonotonicity(integral,cntrs[k][l].getValues(),undef,extreme,"M");
+						
+						if(info!=null) throw new IllegalArgumentException(
+							"at ttag ("+l+") and ztag ("+k+") found non-monotonic contour-Mass relation\n"+info
+						);
+						
+						cntrs[k][l].setMass(integral); break;
+					}
+					case "C":{
+						String info=checkMonotonicity(integral,cntrs[k][l].getValues(),undef,extreme,"C");
+						
+						if(info!=null) throw new IllegalArgumentException(
+							"at ttag ("+l+") and ztag ("+k+") found non-monotonic contour-circulation relation\n"+info
+						);
+						
+						cntrs[k][l].setCirculation(integral); break;
+					}}
+				}
+				
+				if(re!=null){
+					float[][] rdata=re.getData()[k][0];
+					for(int c=0,C=cntrs[k][l].getContourNumber();c<C;c++) rdata[c][l]=(float)(integral[c]);
 				}
 			}
 		}
@@ -569,7 +644,6 @@ public abstract class ContourSpatialModel{
      * @param	increSToN	contours increase from south to north
      * @param	ttag		t-index for a 2D tracer field
      * @param	ztag		z-index for a 2D tracer field
-     */
 	protected double[] integrateWithinContour1(double[] cVals,boolean increSToN,int ttag,int ztag){
 		if(tracer.getRange().getYRange()[0]!=1||tracer.getRange().getXRange()[0]!=1)
 		throw new IllegalArgumentException("using tracer over the entire domain");
@@ -599,6 +673,7 @@ public abstract class ContourSpatialModel{
 			return mappingArea(cVals,tdata,increSToN);
 		}
 	}
+     */
 	
 	
 	/**
@@ -630,12 +705,13 @@ public abstract class ContourSpatialModel{
 	}
 	
 	/**
-     * Mapping each contour monotonically to a area.
+     * The kernel of integration of a variable over each tracer contour.
      * 
      * @param	ct		contours
-     * @param	tdata	2D x-y field after possible interpolation
+     * @param	tdata	2D x-y field tracer   after possible interpolation
+     * @param	vdata	2D x-y field variable after possible interpolation
      */
-	private String mappingArea(Contours ct,float[][] tdata){
+	private double[] contourIntegral(Contours ct,float[][] tdata,float[][] vdata,String storeVar){
 		int C=ct.getContourNumber();
 		int x=xdefS.length;
 		int y=ydefS.length;
@@ -645,36 +721,51 @@ public abstract class ContourSpatialModel{
 		double[] cts =ct.getValues();
 		double[] rbuf=new double[C];
 		
-		float[] extreme=ArrayUtil.getExtrema(tdata,undef);
-		
-		if(ct.increaseSToN()){
-			for(int j=0;j<y;j++)
-			for(int i=0;i<x;i++) if(tdata[j][i]!=undef){
-				//double dS=computeDS(xstart-1+i,ystart-1+j);
-				double dS=computeDS(i,j);
+		if(vdata==null){
+			if(ct.increaseSToN()){
+				for(int j=0;j<y;j++)
+				for(int i=0;i<x;i++) if(tdata[j][i]!=undef){
+					//double dS=computeDS(xstart-1+i,ystart-1+j);
+					double dS=computeDS(i,j);
+					
+					if(tdata[j][i]>=cts[0]) rbuf[0]+=dS;
+					for(int c=1;c<C;c++) if(tdata[j][i]>cts[c]) rbuf[c]+=dS;
+				}
 				
-				if(tdata[j][i]>=cts[0]) rbuf[0]+=dS;
-				for(int c=1;c<C;c++) if(tdata[j][i]>cts[c]) rbuf[c]+=dS;
+			}else{
+				for(int j=0;j<y;j++)
+				for(int i=0;i<x;i++) if(tdata[j][i]!=undef){
+					//double dS=computeDS(xstart-1+i,ystart-1+j);
+					double dS=computeDS(i,j);
+					
+					if(tdata[j][i]<=cts[0]) rbuf[0]+=dS;
+					for(int c=1;c<C;c++) if(tdata[j][i]<cts[c]) rbuf[c]+=dS;
+				}
 			}
-			
 		}else{
-			for(int j=0;j<y;j++)
-			for(int i=0;i<x;i++) if(tdata[j][i]!=undef){
-				//double dS=computeDS(xstart-1+i,ystart-1+j);
-				double dS=computeDS(i,j);
+			if(ct.increaseSToN()){
+				for(int j=0;j<y;j++)
+				for(int i=0;i<x;i++) if(tdata[j][i]!=undef){
+					//double dS=computeDS(xstart-1+i,ystart-1+j);
+					double dS=computeDS(i,j);
+					
+					if(tdata[j][i]>=cts[0]) rbuf[0]+=vdata[j][i]*dS;
+					for(int c=1;c<C;c++) if(tdata[j][i]>cts[c]) rbuf[c]+=vdata[j][i]*dS;
+				}
 				
-				if(tdata[j][i]<=cts[0]) rbuf[0]+=dS;
-				for(int c=1;c<C;c++) if(tdata[j][i]<cts[c]) rbuf[c]+=dS;
+			}else{
+				for(int j=0;j<y;j++)
+				for(int i=0;i<x;i++) if(tdata[j][i]!=undef){
+					//double dS=computeDS(xstart-1+i,ystart-1+j);
+					double dS=computeDS(i,j);
+					
+					if(tdata[j][i]<=cts[0]) rbuf[0]+=vdata[j][i]*dS;
+					for(int c=1;c<C;c++) if(tdata[j][i]<cts[c]) rbuf[c]+=vdata[j][i]*dS;
+				}
 			}
 		}
 		
-		checkDataAtEnds(rbuf,cts,undef,extreme);
-		String info=checkArea(rbuf,cts,undef,extreme);
-		
-		ct.setAreas(rbuf);
-		ct.setYEs(cEquivalentYs(rbuf,undef));
-		
-		return info;
+		return rbuf;
 	}
 	
 	/**
@@ -682,7 +773,6 @@ public abstract class ContourSpatialModel{
      * 
      * @param	cVal	contour value
      * @param	tdata	2D x-y field after possible interpolation
-     */
 	private double[] mappingArea(double[] cVals,float[][] tdata,boolean increSToN){
 		int x=xdefS.length;
 		int y=ydefS.length;
@@ -719,6 +809,7 @@ public abstract class ContourSpatialModel{
 		
 		return areas;
 	}
+     */
 	
 	
 	/**
@@ -728,6 +819,34 @@ public abstract class ContourSpatialModel{
 	 * @param	sy		source y
 	 * @param	undef	undefined value
 	 */
+	private float[][] getValid(float[] sx,float[] sy,float undef){
+		if(sx.length!=sy.length)
+		throw new IllegalArgumentException("lengths of sx and sy are not equal");
+		
+		int len=sx.length,elen=1;
+		
+		float last=undef;
+		for(int i=0;i<len;i++) if(sx[i]!=undef){ last=sx[i]; break;}
+		
+		if(last==undef) throw new IllegalArgumentException("no valid data");
+		
+		for(int i=0;i<len;i++) if(sx[i]!=undef&&sx[i]!=last){ elen++; last=sx[i];}
+		
+		if(elen<1) throw new IllegalArgumentException("no valid data");
+		
+		float[][] re=new float[2][elen];
+		
+		last=undef;
+		for(int i=0,ii=0;i<len;i++) if(sx[i]!=undef&&sx[i]!=last){
+			re[0][ii]=sx[i];
+			re[1][ii]=sy[i];
+			last=sx[i];
+			ii++;
+		}
+		
+		return re;
+	}
+	
 	private double[][] getValid(double[] sx,double[] sy,float undef){
 		if(sx.length!=sy.length)
 		throw new IllegalArgumentException("lengths of sx and sy are not equal");
@@ -756,29 +875,52 @@ public abstract class ContourSpatialModel{
 		return re;
 	}
 	
+	
 	/**
-     * Ensure that the areas are monotonic.
+	 * Convert an array of type double to type float.
+	 * 
+	 * @param	a	an array of type double
+	 */
+	private float[] toFloat(double[] a){
+		int len=a.length;
+		
+		float[] re=new float[len];
+		
+		for(int i=0;i<len;i++) re[i]=(float)a[i];
+		
+		return re;
+	}
+	
+	
+	/**
+     * Ensure that the areas do not have undefined value.
      */
-	private String checkArea(double[] areas,double[] values,float undef,float[] extreme){
+	private void checkArea(double[] areas,float undef){
 		// get the first valid area (may close to the total area)
 		int idx=0;
 		for(int c=0,C=areas.length;c<C;c++) if(areas[c]!=undef){ idx=c; break;}
 		
 		if(areas[idx]>=areaT) areas[idx]=areaT;
 		else{
-			double dlat=cEquivalentY(areas[idx],undef)-dd.getYDef().getFirst();
-			if(dlat/ArrayUtil.getMin(dd.getDYDef())<5e-4) areas[idx]=areaT;
+			double dY=cEquivalentY(areas[idx],undef)-dd.getYDef().getFirst();
+			if(dY/ArrayUtil.getMin(dd.getDYDef())<5e-3) areas[idx]=areaT;
+			else throw new IllegalArgumentException("first defined area ("+areas[idx]+") do not equal total area ("+areaT+")");
 		}
 		
-		for(int c=1,C=areas.length;c<C;c++) if(areas[c]!=undef&&areas[c]==areas[c-1])
-		return 
-			"areas of "+tracer.getName()+" ["+extreme[0]+", "+extreme[1]+"] "+
-			"enclosed by contours ("+values[c-1]+","+values[c]+") are not monotonic ("+areas[c]+"=="+areas[c-1]+"),\n"+
-			"please try reducing the number of contours ("+C+")";
+		// get the last valid area (may close to 0)
+		for(int c=areas.length-1;c>=0;c--) if(areas[c]!=undef){ idx=c; break;}
 		
-		return null;
+		if(areas[idx]<=0) areas[idx]=0;
+		else{
+			double dY=cEquivalentY(areas[idx],undef)-dd.getYDef().getLast();
+			if(dY/ArrayUtil.getMin(dd.getDYDef())<5e-3) areas[idx]=0;
+			else throw new IllegalArgumentException("last defined area ("+areas[idx]+") do not equal 0");
+		}
 	}
 	
+	/**
+     * Ensure that the data at endpoints are within valid range.
+     */
 	private void checkDataAtEnds(double[] data,double[] values,float undef,float[] extreme){
 		double incre=(extreme[1]-extreme[0])/(values.length-1.0);
 		
@@ -786,6 +928,19 @@ public abstract class ContourSpatialModel{
 			if(values[c]<extreme[0]&&Math.abs(values[c]-extreme[0])/incre>2e-3) data[c]=undef;
 			if(values[c]>extreme[1]&&Math.abs(values[c]-extreme[1])/incre>2e-3) data[c]=undef;
 		}
+	}
+	
+	/**
+     * Ensure that the data are monotonic w.r.t. contours.
+     */
+	private String checkMonotonicity(double[] data,double[] values,float undef,float[] extreme,String storeVar){
+		for(int c=1,C=data.length;c<C;c++) if(data[c]!=undef&&data[c]==data[c-1])
+		return 
+			storeVar+" for "+tracer.getName()+" ["+extreme[0]+", "+extreme[1]+"] "+
+			"enclosed by contours ("+values[c-1]+","+values[c]+") are not monotonic ("+data[c]+"=="+data[c-1]+"),\n"+
+			"please try reducing the number of contours ("+C+")";
+		
+		return null;
 	}
 	
 	
@@ -851,7 +1006,7 @@ public abstract class ContourSpatialModel{
 		double max=cs.getMaxValue();
 		
 		double[] values=cs.getValues();
-		double[] areas =cs.getAreas();
+		double[] areas =cs.getMappedAreas();
 		
 		double[][] valid=getValid(values,areas,undef);
 		
@@ -907,7 +1062,7 @@ public abstract class ContourSpatialModel{
 		for(int i=0,I=newAs.length-1;i<I;i++) newAs[i]=areaT-i*inc;
 		newAs[newAs.length-1]=0; // ensure no roundoff error
 		
-		double[] newCs=InterpolationModel.interp1D(areas,values,newAs,Type.LINEAR);
+		double[] newCs=InterpolationModel.interp1D(areas,values,newAs,Type.LINEAR,false);
 		
 		Contours ncs=new Contours(newCs);
 		ncs.setAreas(newAs);
@@ -935,7 +1090,7 @@ public abstract class ContourSpatialModel{
 		if(tracer.isTFirst()){
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++){
-				double[] areas=cntrs[k][l].getAreas();
+				double[] areas=cntrs[k][l].getMappedAreas();
 				 float[] adata=area.getData()[l][k][0];
 				
 				for(int c=0;c<C;c++) adata[c]=(float)(areas[c]);
@@ -944,7 +1099,7 @@ public abstract class ContourSpatialModel{
 		}else{
 			for(int l=0;l<t;l++)
 			for(int k=0;k<z;k++){
-				double[] areas=cntrs[k][l].getAreas();
+				double[] areas=cntrs[k][l].getMappedAreas();
 				float[][] adata=area.getData()[k][0];
 				
 				for(int c=0;c<C;c++) adata[c][l]=(float)(areas[c]);
